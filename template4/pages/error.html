@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ไม่พบหน้า (404) | SMMS ระบบแจ้งซ่อม</title>
+<!-- =========================================================================
+  Template 4 : error.html  (404, no sidebar)
+
+  Same page for other errors: change the code, eyebrow, title and lead, e.g.
+    403  "ไม่มีสิทธิ์เข้าถึงหน้านี้"  -> ask the system admin for access
+    500  "ระบบขัดข้องชั่วคราว"       -> try again in a few minutes, show a ref. no.
+    503  "ปิดปรับปรุงระบบ"          -> show the time the system is back
+  The middle digit sits in the red highlight block (.t4-hl).
+========================================================================== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/t4-ui.css">
+<script src="../assets/t4-ui.js"></script>
+</head>
+<body class="t4-body">
+<a class="t4-skip" href="#t4-main">ข้ามไปยังเนื้อหา</a>
+
+<header class="t4-header">
+  <a class="t4-brand" href="dashboard.html" aria-label="SMMS ระบบแจ้งซ่อม หน้าแรก">
+    <span class="t4-brand__mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M10.03 4.66L10.78 2.07L13.22 2.07L13.97 4.66A7.6 7.6 0 0 1 15.8 5.42L18.16 4.12L19.88 5.84L18.58 8.2A7.6 7.6 0 0 1 19.34 10.03L21.93 10.78L21.93 13.22L19.34 13.97A7.6 7.6 0 0 1 18.58 15.8L19.88 18.16L18.16 19.88L15.8 18.58A7.6 7.6 0 0 1 13.97 19.34L13.22 21.93L10.78 21.93L10.03 19.34A7.6 7.6 0 0 1 8.2 18.58L5.84 19.88L4.12 18.16L5.42 15.8A7.6 7.6 0 0 1 4.66 13.97L2.07 13.22L2.07 10.78L4.66 10.03A7.6 7.6 0 0 1 5.42 8.2L4.12 5.84L5.84 4.12L8.2 5.42A7.6 7.6 0 0 1 10.03 4.66z"/><circle cx="12" cy="12" r="5.2" fill="var(--t4-accent)"/><path d="M9.5 12.2l1.8 1.8 3.3-3.6" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="t4-brand__name">SMMS<small>ระบบแจ้งซ่อม</small></span>
+  </a>
+  <div class="t4-header__actions">
+    <button type="button" class="t4-icon-btn" data-t4-theme-toggle aria-label="เปลี่ยนโหมดสี"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-sun"></use></svg></button>
+  </div>
+</header>
+
+<main class="t4-error" id="t4-main" tabindex="-1">
+  <div class="t4-error__box">
+    <p class="t4-error__code t4-num" aria-hidden="true">4<span class="t4-hl">0</span>4</p>
+    <span class="t4-eyebrow t4-eyebrow--accent">ข้อผิดพลาด 404</span>
+    <h1 class="t4-error__title">ไม่พบหน้าที่คุณต้องการ</h1>
+    <p class="t4-error__lead">ลิงก์อาจพิมพ์ผิด หรือหน้านี้ถูกย้ายไปแล้ว ลองค้นหาเลขที่ใบแจ้งซ่อม หรือกลับไปหน้าแรก</p>
+    <form class="t4-search" role="search" action="list.html">
+      <svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-search"></use></svg>
+      <label class="t4-sr-only" for="t4-err-q">ค้นหา</label>
+      <input type="search" id="t4-err-q" name="q" placeholder="เช่น SR-202505-0098" autocomplete="off">
+      <button type="submit" class="t4-btn t4-btn--sm">ค้นหา</button>
+    </form>
+    <div class="t4-hero__actions">
+      <a class="t4-btn" href="dashboard.html"><svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-home"></use></svg>กลับหน้าแรก</a>
+      <button type="button" class="t4-btn t4-btn--ghost" onclick="history.back()"><svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-arrow-left"></use></svg>ย้อนกลับ</button>
+    </div>
+    <div class="t4-error__links">
+      <span class="t4-hint">หรือไปที่</span>
+      <a class="t4-chip" href="list.html"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-list"></use></svg>รายการแจ้งซ่อม</a>
+      <a class="t4-chip" href="form.html"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-plus"></use></svg>แจ้งซ่อมใหม่</a>
+      <a class="t4-chip" href="#" data-t4-demo="คู่มือการใช้งาน (ยังไม่รวมในตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-help"></use></svg>คู่มือการใช้งาน</a>
+    </div>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>จัดการข้อมูลงานบริการ | Service Hub</title>
+<!-- =========================================================================
+  Template 2 : list.html (APP SHELL + list archetype: data grid)
+
+  Layout follows the post-login "จัดการข้อมูลงานบริการ" page of the source
+  (agency-coordinator view). Shell copied unchanged from dashboard.html; only
+  the <title> and the aria-current tab ("งานบริการ") differ.
+  Rows, counts, names and dates are SAMPLE data - the server renders the real ones.
+
+  CONTENT
+    div.t2-page-head--top      h1 + scope line (.t2-scope) | counters (.t2-stat-chip),
+                               export + add buttons
+    section.t2-card--flush
+      form.t2-toolbar--tinted  search, 4 selects, "incomplete only" toggle
+                               (data-t2-toggle), range text + prev/next
+      div.t2-table-wrap--scroll  scroll box (max 70vh) with a sticky header
+        table.t2-table--grid   one line per row, column rules
+          tr.t2-tone-*         4px status marker on the first cell
+          td.t2-tone-*         tinted cell (status cell; green = mapping columns
+                               Topic / Sub-Topic / Service set by the central office)
+          .t2-badge--solid     status label in the row's tone
+  Filters submit with GET to the same page; the toggle should map to a field
+  (e.g. incomplete=1) in a real system. The task name links to the edit form.
+========================================================================== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../assets/t2-ui.css">
+<script src="../assets/t2-ui.js"></script>
+</head>
+<body class="t2-body t2-grid-bg">
+<a class="t2-skip-link" href="#t2-main">ข้ามไปยังเนื้อหาหลัก</a>
+
+<div class="t2-app">
+
+  <!-- ===== APP HEADER (shared layout) ===== -->
+  <header class="t2-appbar">
+    <div class="t2-container t2-container--fluid">
+      <div class="t2-appbar__row">
+        <a class="t2-brand t2-brand--app" href="dashboard.html">
+          <img class="t2-brand__logo" src="../assets/logo.svg" alt="" width="44" height="44">
+          <span class="t2-brand__text">
+            <span class="t2-brand__name">Service Hub</span>
+            <span class="t2-brand__org">ระบบคลังข้อมูลงานบริการ</span>
+          </span>
+        </a>
+        <div class="t2-appbar__actions">
+          <span class="t2-user">
+            <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-shield-check"></use></svg>
+            <span class="t2-user__name">นายสมชาย ใจดี</span>
+            <span class="t2-user__role">ผู้ประสานหลัก (ผู้ดูแลประจำหน่วยงาน)</span>
+          </span>
+          <button type="button" class="t2-btn t2-btn--ghost t2-btn--icon t2-btn--md" aria-label="การแจ้งเตือน" title="การแจ้งเตือน">
+            <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-bell"></use></svg>
+          </button>
+          <button type="button" class="t2-btn t2-btn--ghost t2-btn--icon t2-btn--md t2-theme-toggle" data-t2-theme-toggle aria-pressed="false" aria-label="โหมดมืด" title="สลับโหมดสว่าง / มืด">
+            <svg class="t2-ic t2-ic--sun" aria-hidden="true"><use href="#t2-i-sun"></use></svg>
+            <svg class="t2-ic t2-ic--moon" aria-hidden="true"><use href="#t2-i-moon"></use></svg>
+          </button>
+          <a class="t2-btn t2-btn--info t2-btn--md" href="login.html" aria-label="ออกจากระบบ">
+            <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-log-out"></use></svg><span class="t2-hide-mobile">ออกจากระบบ</span></a>
+        </div>
+      </div>
+    </div>
+    <nav class="t2-appnav" aria-label="เมนูหลัก">
+      <div class="t2-container t2-container--fluid">
+        <ul class="t2-appnav__list">
+          <li><a class="t2-appnav__link" href="dashboard.html"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-layout-dashboard"></use></svg>Dashboard</a></li>
+          <li><a class="t2-appnav__link" href="#"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-user"></use></svg>ข้อมูลของฉัน</a></li>
+          <li><a class="t2-appnav__link" href="list.html" aria-current="page"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-file-text"></use></svg>งานบริการ</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main class="t2-main" id="t2-main">
+    <div class="t2-container t2-container--fluid t2-stack t2-stack--lg">
+
+      <!-- Page head: title + scope | counters + actions -->
+      <div class="t2-page-head t2-page-head--top">
+        <div class="t2-page-head__main">
+          <h1 class="t2-page-head__title t2-page-head__title--sm">จัดการข้อมูลงานบริการ</h1>
+          <p class="t2-scope"><span class="t2-scope__chip">ขอบเขต: สำนักงานตัวอย่าง</span><span>คุณเห็นเฉพาะงานบริการในหน่วยงานของคุณ</span></p>
+        </div>
+        <div class="t2-page-head__actions">
+          <span class="t2-stat-chip"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-file-pen"></use></svg>ทั้งหมด <b class="t2-stat-chip__value">48</b></span>
+          <span class="t2-stat-chip"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-search"></use></svg>ที่กรอง <b class="t2-stat-chip__value">48</b></span>
+          <span class="t2-stat-chip"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-layers"></use></svg>หัวข้อ <b class="t2-stat-chip__value">1</b></span>
+          <span class="t2-stat-chip"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-list-tree"></use></svg>หัวข้อย่อย <b class="t2-stat-chip__value">4</b></span>
+          <span class="t2-stat-chip"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-file-text"></use></svg>งานบริการ <b class="t2-stat-chip__value">9</b></span>
+          <span class="t2-stat-chip"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-circle-check"></use></svg>รออนุมัติ <b class="t2-stat-chip__value">1</b></span>
+          <a class="t2-btn t2-btn--outline t2-btn--md" href="#"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-download"></use></svg>ส่งออก Excel (48)</a>
+          <a class="t2-btn t2-btn--primary t2-btn--md" href="form.html"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-plus"></use></svg>เพิ่มงานบริการ</a>
+        </div>
+      </div>
+
+      <section class="t2-card t2-card--flush" aria-labelledby="list-title">
+        <h2 class="t2-sr-only" id="list-title">ตารางงานบริการ</h2>
+
+        <form class="t2-toolbar t2-toolbar--tinted t2-toolbar--roomy" role="search" aria-label="ค้นหาและกรองงานบริการ" action="list.html" method="get">
+          <label class="t2-search">
+            <span class="t2-sr-only">ค้นหา</span>
+            <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-search"></use></svg>
+            <input class="t2-input t2-input--lg" type="search" name="q" placeholder="ค้นหา ลำดับ / ชื่องาน / งานบริการ / หัวข้อ / ผู้ประสาน / ผู้กรอก">
+          </label>
+          <select class="t2-select t2-select--lg" name="confirm" aria-label="สถานะยืนยัน">
+            <option value="">ทุกสถานะยืนยัน</option>
+            <option>รอยืนยัน Task</option>
+            <option>ยืนยันแล้ว</option>
+            <option>ขอแก้ไขชื่อ</option>
+            <option>รออนุมัติ</option>
+          </select>
+          <select class="t2-select t2-select--lg" name="topic" aria-label="หัวข้อ (Topic)">
+            <option value="">ทุกหัวข้อ (Topic)</option>
+            <option>การลงทุนและการประกอบธุรกิจ</option>
+            <option>แรงงานและการจ้างงาน</option>
+            <option>ภาษีและการเงิน</option>
+          </select>
+          <select class="t2-select t2-select--lg" name="link" aria-label="กลุ่มเชื่อมโยง">
+            <option value="">ทุกกลุ่มเชื่อมโยง</option>
+            <option>แอปทางรัฐ</option>
+            <option>Biz Portal</option>
+            <option>NSW</option>
+            <option>ไม่เชื่อมโยง</option>
+          </select>
+          <select class="t2-select t2-select--lg" name="eservice" aria-label="สถานะ e-Service">
+            <option value="">ทุกสถานะ e-service</option>
+            <option>ครบทุกขั้นตอน</option>
+            <option>บางขั้นตอน</option>
+            <option>ยังไม่เป็น e-Service</option>
+          </select>
+          <button type="button" class="t2-btn t2-btn--outline t2-btn--md t2-btn--strong" data-t2-toggle aria-pressed="false">
+            <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-circle-alert"></use></svg>ข้อมูลยังไม่ครบ</button>
+          <div class="t2-toolbar__end">
+            <span>แสดง 1–12 จาก 48</span>
+            <button type="button" class="t2-btn t2-btn--secondary t2-btn--icon t2-btn--md" disabled aria-label="หน้าก่อนหน้า"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-chevron-left"></use></svg></button>
+            <a class="t2-btn t2-btn--info t2-btn--icon t2-btn--md" href="list.html?page=2" aria-label="หน้าถัดไป"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-chevron-right"></use></svg></a>
+          </div>
+        </form>
+
+        <div class="t2-table-wrap t2-table-wrap--scroll">
+          <table class="t2-table t2-table--grid">
+            <thead>
+              <tr>
+                <th scope="col">ลำดับ</th>
+                <th scope="col">สถานะยืนยัน Task</th>
+                <th scope="col">รายชื่อกระทรวง</th>
+                <th scope="col">รายชื่อหน่วยงาน</th>
+                <th scope="col">ประเภทหน่วยงาน</th>
+                <th scope="col">หัวข้อ (Topic)</th>
+                <th scope="col">หัวข้อย่อย (Sub-Topic)</th>
+                <th scope="col">งานบริการ (Service)</th>
+                <th scope="col">ชื่องาน (Task)</th>
+                <th scope="col">สถานะ e-Service</th>
+                <th scope="col">กลุ่มเชื่อมโยง</th>
+                <th scope="col">ผู้ประสาน</th>
+                <th scope="col">ผู้กรอก</th>
+                <th scope="col">แก้ไขล่าสุด</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="t2-tone-orange">
+                <td class="t2-table__index">1201</td>
+                <td class="t2-tone-orange"><span class="t2-badge t2-badge--solid">รอยืนยัน Task</span></td>
+                <td>สำนักนายกรัฐมนตรี</td><td>สำนักงานตัวอย่าง</td><td>ส่วนราชการระดับกรมหรือเทียบเท่า</td>
+                <td class="t2-tone-green">การลงทุนและการประกอบธุรกิจ</td><td class="t2-tone-green">การส่งเสริมการลงทุน</td><td class="t2-tone-green">ขอรับการส่งเสริมการลงทุน</td>
+                <td><a class="t2-link" href="form.html">ยื่นคำขอรับการส่งเสริมการลงทุน</a></td>
+                <td><span class="t2-badge t2-badge--primary">ครบทุกขั้นตอน</span></td>
+                <td>Biz Portal</td><td>สมชาย ใจดี</td><td>วิภา ศรีสุข</td><td>27 ต.ค. 2569</td>
+              </tr>
+              <tr class="t2-tone-orange">
+                <td class="t2-table__index">1202</td>
+                <td class="t2-tone-orange"><span class="t2-badge t2-badge--solid">รอยืนยัน Task</span></td>
+                <td>สำนักนายกรัฐมนตรี</td><td>สำนักงานตัวอย่าง</td><td>ส่วนราชการระดับกรมหรือเทียบเท่า</td>
+                <td class="t2-tone-green">การลงทุนและการประกอบธุรกิจ</td><td class="t2-tone-green">การส่งเสริมการลงทุน</td><td class="t2-tone-green">ขอรับการส่งเสริมการลงทุน</td>
+                <td><a class="t2-link" href="form.html">ขอแก้ไขโครงการที่ได้รับการส่งเสริม</a></td>
+                <td><span class="t2-badge t2-badge--primary">ครบทุกขั้นตอน</span></td>
+                <td>Biz Portal</td><td>สมชาย ใจดี</td><td>วิภา ศรีสุข</td><td>27 ต.ค. 2569</td>
+              </tr>
+              <tr class="t2-tone-orange">
+                <td class="t2-table__index">1203</td>
+                <td class="t2-tone-orange"><span class="t2-badge t2-badge--solid">รอยืนยัน Task</span></td>
+                <td>สำนักนายกรัฐมนตรี</td><td>สำนักงานตัวอย่าง</td><td>ส่วนราชการระดับกรมหรือเทียบเท่า</td>
+                <td class="t2-tone-green">การลงทุนและการประกอบธุรกิจ</td><td class="t2-tone-green">การส่งเสริมการลงทุน</td><td class="t2-tone-green">ขอรับการส่งเสริมการลงทุน</td>
+                <td><a class="t2-link" href="form.html">ขอเปิดดำเนินการตามโครงการ</a></td>
+                <td><span class="t2-badge t2-badge--info">บางขั้นตอน</span></td>
+                <td>Biz Portal</td><td>สมชาย ใจดี</td><td>วิภา ศรีสุข</td><td>26 ต.ค. 2569</td>
+              </tr>
+              <tr class="t2-tone-green">
+                <td class="t2-table__index">1204</td>
+                <td class="t2-tone-green"><span class="t2-badge t2-badge--solid">ยืนยันแล้ว</span></td>
+                <td>สำนักนายกรัฐมนตรี</td><td>สำนักงานตัวอย่าง</td><td>ส่วนราชการระดับกรมหรือเทียบเท่า</td>
+                <td class="t2-tone-green">การลงทุนและการประกอบธุรกิจ</td><td class="t2-tone-green">การส่งเสริมการลงทุน</td><td class="t2-tone-green">ใช้สิทธิประโยชน์ทางภาษีอากร</td>
+                <td><a class="t2-link" href="form.html">ขอใช้สิทธิยกเว้นอากรขาเข้าเครื่องจักร</a></td>
+                <td><span class="t2-badge t2-badge--primary">ครบทุกขั้นตอน</span></td>
+                <td>NSW</td><td>สมชาย ใจดี</td><td>ธนพล แก้วมณี</td><td>26 ต.ค. 2569</td>
+              </tr>
+              <tr class="t2-tone-orange">
+                <td class="t2-table__index">1205</td>
+                <td class="t2-tone-orange"><span class="t2-badge t2-badge--solid">รอยืนยัน Task</span></td>
+                <td>สำนักนายกรัฐมนตรี</td><td>สำนักงานตัวอย่าง</td><td>ส่วนราชการระดับกรมหรือเทียบเท่า</td>
+                <td class="t2-tone-green">การลงทุนและการประกอบธุรกิจ</td><td class="t2-tone-green">การส่งเสริมการลงทุน</td><td class="t2-tone-green">ใช้สิทธิประโยชน์ทางภาษีอากร</td>
+                <td><a class="t2-link" href="form.html">ขอใช้สิทธิยกเว้นอากรวัตถุดิบเพื่อการส่งออก</a></td>
+                <td><span class="t2-badge t2-badge--primary">ครบทุกขั้นตอน</span></td>
+                <td>NSW</td><td>สมชาย ใจดี</td><td>ธนพล แก้วมณี</td><td>25 ต.ค. 2569</td>
+              </tr>
+              <tr class="t2-tone-orange">
+                <td class="t2-table__index">1206</td>
+                <td class="t2-tone-orange"><span class="t2-badge t2-badge--solid">รอยืนยัน Task</span></td>
+                <td>สำนักนายกรัฐมนตรี</td><td>สำนักงานตัวอย่าง</td><td>ส่วนราชการระดับกรมหรือเทียบเท่า</td>
+                <td class="t2-tone-green">การลงทุนและการประกอบธุรกิจ</td><td class="t2-tone-green">การนำเข้าและส่งออก</td><td class="t2-tone-green">อนุญาตนำเข้าเครื่องจักร</td>
+                <td><a class="t2-link" href="form.html">ขออนุญาตนำเข้าเครื่องจักรเพื่อใช้ในโครงการ</a></td>
+                <td><span class="t2-badge t2-badge--info">บางขั้นตอน</span></td>
+                <td>NSW</td><td>สมชาย ใจดี</td><td>ธนพล แก้วมณี</td><td>25 ต.ค. 2569</td>
+              </tr>
+              <tr class="t2-tone-red">
+                <td class="t2-table__index">1207</td>
+                <td class="t2-tone-red"><span class="t2-badge t2-badge--solid">ขอแก้ไขชื่อ</span></td>
+                <td>สำนักนายกรัฐมนตรี</td><td>สำนักงานตัวอย่าง</td><td>ส่วนราชการระดับกรมหรือเทียบเท่า</td>
+                <td class="t2-tone-green">การลงทุนและการประกอบธุรกิจ</td><td class="t2-tone-green">การนำเข้าและส่งออก</td><td class="t2-tone-green">อนุญาตนำเข้าเครื่องจักร</td>
+                <td><a class="t2-link" href="form.html">ขอขยายระยะเวลานำเข้าเครื่องจักร</a></td>
+                <td><span class="t2-badge t2-badge--info">บางขั้นตอน</span></td>
+                <td>NSW</td><td>สมชาย ใจดี</td><td>ธนพล แก้วมณี</td><td>24 ต.ค. 2569</td>
+              </tr>
+              <tr class="t2-tone-orange">
+                <td class="t2-table__index">1208</td>
+                <td class="t2-tone-orange"><span class="t2-badge t2-badge--solid">รอยืนยัน Task</span></td>
+                <td>สำนักนายกรัฐมนตรี</td><td>สำนักงานตัวอย่าง</td><td>ส่วนราชการระดับกรมหรือเทียบเท่า</td>
+                <td class="t2-tone-green">การลงทุนและการประกอบธุรกิจ</td><td class="t2-tone-green">การนำเข้าและส่งออก</td><td class="t2-tone-green">จำหน่ายและโอนเครื่องจักร</td>
+                <td><a class="t2-link" href="form.html">ขอโอนเครื่องจักรให้ผู้ได้รับการส่งเสริมรายอื่น</a></td>
+                <td><span class="t2-badge t2-badge--outline">ยังไม่เป็น e-Service</span></td>
+                <td class="t2-muted">ไม่เชื่อมโยง</td><td>สมชาย ใจดี</td><td>อรวรรณ ทองดี</td><td>24 ต.ค. 2569</td>
+              </tr>
+              <tr class="t2-tone-blue">
+                <td class="t2-table__index">1209</td>
+                <td class="t2-tone-blue"><span class="t2-badge t2-badge--solid">รออนุมัติ</span></td>
+                <td>สำนักนายกรัฐมนตรี</td><td>สำนักงานตัวอย่าง</td><td>ส่วนราชการระดับกรมหรือเทียบเท่า</td>
+                <td class="t2-tone-green">การลงทุนและการประกอบธุรกิจ</td><td class="t2-tone-green">ใบอนุญาตประกอบกิจการ</td><td class="t2-tone-green">ขออนุญาตให้คนต่างด้าวทำงาน</td>
+                <td><a class="t2-link" href="form.html">ขอนำคนต่างด้าวเข้ามาทำงานในตำแหน่งผู้ชำนาญการ</a></td>
+                <td><span class="t2-badge t2-badge--primary">ครบทุกขั้นตอน</span></td>
+                <td>แอปทางรัฐ</td><td>สมชาย ใจดี</td><td>อรวรรณ ทองดี</td><td>23 ต.ค. 2569</td>
+              </tr>
+              <tr class="t2-tone-green">
+                <td class="t2-table__index">1210</td>
+                <td class="t2-tone-green"><span class="t2-badge t2-badge--solid">ยืนยันแล้ว</span></td>
+                <td>สำนักนายกรัฐมนตรี</td><td>สำนักงานตัวอย่าง</td><td>ส่วนราชการระดับกรมหรือเทียบเท่า</td>
+                <td class="t2-tone-green">การลงทุนและการประกอบธุรกิจ</td><td class="t2-tone-green">ใบอนุญาตประกอบกิจการ</td><td class="t2-tone-green">ขออนุญาตให้คนต่างด้าวทำงาน</td>
+                <td><a class="t2-link" href="form.html">ขอต่ออายุการอนุญาตให้คนต่างด้าวทำงาน</a></td>
+                <td><span class="t2-badge t2-badge--primary">ครบทุกขั้นตอน</span></td>
+                <td>แอปทางรัฐ</td><td>สมชาย ใจดี</td><td>อรวรรณ ทองดี</td><td>23 ต.ค. 2569</td>
+              </tr>
+              <tr class="t2-tone-orange">
+                <td class="t2-table__index">1211</td>
+                <td class="t2-tone-orange"><span class="t2-badge t2-badge--solid">รอยืนยัน Task</span></td>
+                <td>สำนักนายกรัฐมนตรี</td><td>สำนักงานตัวอย่าง</td><td>ส่วนราชการระดับกรมหรือเทียบเท่า</td>
+                <td class="t2-tone-green">การลงทุนและการประกอบธุรกิจ</td><td class="t2-tone-green">วิสาหกิจขนาดกลางและขนาดย่อม</td><td class="t2-tone-green">ขอรับการส่งเสริมสำหรับ SME</td>
+                <td><a class="t2-link" href="form.html">ยื่นคำขอรับการส่งเสริมสำหรับ SME</a></td>
+                <td><span class="t2-badge t2-badge--info">บางขั้นตอน</span></td>
+                <td>Biz Portal</td><td>สมชาย ใจดี</td><td>กิตติ พรหมมา</td><td>22 ต.ค. 2569</td>
+              </tr>
+              <tr class="t2-tone-orange">
+                <td class="t2-table__index">1212</td>
+                <td class="t2-tone-orange"><span class="t2-badge t2-badge--solid">รอยืนยัน Task</span></td>
+                <td>สำนักนายกรัฐมนตรี</td><td>สำนักงานตัวอย่าง</td><td>ส่วนราชการระดับกรมหรือเทียบเท่า</td>
+                <td class="t2-tone-green">การลงทุนและการประกอบธุรกิจ</td><td class="t2-tone-green">วิสาหกิจขนาดกลางและขนาดย่อม</td><td class="t2-tone-green">ขอรับการส่งเสริมสำหรับ SME</td>
+                <td><a class="t2-link" href="form.html">ขอรับคำปรึกษาก่อนยื่นคำขอ</a></td>
+                <td><span class="t2-badge t2-badge--outline">ยังไม่เป็น e-Service</span></td>
+                <td class="t2-muted">ไม่เชื่อมโยง</td><td>สมชาย ใจดี</td><td>กิตติ พรหมมา</td><td>22 ต.ค. 2569</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="t2-app-footer">
+    <div class="t2-container t2-container--fluid t2-app-footer__row">
+      <span>© 2569 สำนักงานตัวอย่าง · Service Hub v1.0</span>
+      <span>ข้อมูล ณ 27 ต.ค. 2569 10:30 น.</span>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

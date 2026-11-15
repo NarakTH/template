@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>คลังคอมโพเนนต์ (UI Kit) | SMMS แจ้งซ่อม</title>
+<!-- =========================================================================
+  DS UI Kit : starter.html (canonical page shell)
+
+  Every page of the kit, and every page of a system restyled with the kit,
+  copies its shell from this file. Per page, change ONLY:
+    1. the <title>
+    2. which .ds-nav__item carries aria-current="page" (see SIDEBAR below)
+    3. the content inside <main class="ds-content"> (breadcrumb, h2, panels)
+  The shell has no page-specific CSS or JS. All styling lives in
+  ../assets/ds-ui.css, all behaviour in ../assets/ds-ui.js (window.DS).
+
+  Splitting the shell into shared includes (full recipes: AI-UI-GUIDE.md)
+    Plain PHP
+      partials/header.php = from the DOCTYPE down to and including the
+                            opening main tag (head, skip link, sidebar, topbar)
+      partials/footer.php = from the closing main tag to the end (footer,
+                            closing wrappers, body, html)
+      A page sets $pageTitle and $active, includes header.php, prints its
+      own content, then includes footer.php.
+    Laravel Blade
+      resources/views/components/layouts/app.blade.php holds this whole file;
+      the page content is the component slot (it replaces the placeholder
+      page head + panel inside main); the regions marked SIDEBAR, TOPBAR and
+      FOOTER become partials/sidebar.blade.php, partials/header.blade.php and
+      partials/footer.blade.php. The <title> comes from a title prop.
+
+  These comments intentionally contain no PHP tags and no live Blade
+  directives, so the file stays inert when copied into a .php or .blade.php
+  file. The one Blade snippet (logout form, TOPBAR user menu) is wrapped in
+  a Blade comment, so Blade strips it instead of running it.
+  Asset paths: kit pages use ../assets/ ; other systems on this IIS host
+  link the shared copy at /template/assets/ds-ui.css and ds-ui.js.
+========================================================================== -->
+<!-- Kanit web font: the kit standard font (same request as the original).
+     The preconnects only speed it up. No color-scheme meta on purpose:
+     native widgets stay light in both themes, like the original. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap">
+<link rel="stylesheet" href="../assets/ds-ui.css">
+<!-- ds-ui.js stays in <head> WITHOUT defer/async: it applies the saved theme
+     (html[data-theme], localStorage "ds-theme") before first paint, then on
+     DOMContentLoaded injects the icon sprite and wires sidebar, tooltips,
+     dialogs, tabs and the theme toggle. -->
+<script src="../assets/ds-ui.js"></script>
+<style>
+/* gallery-only — ไม่ใช่ส่วนหนึ่งของ design system
+   ---------------------------------------------------------------------------
+   Used ONLY by components.html: the gx- classes (TOC, swatches, type scale,
+   icon grid, code blocks) and the dashed [data-demo] box around each live
+   demo. Never copy these rules or gx- classes into a system; every demo
+   inside a [data-demo] box uses real ds- classes only. Colors = --ds-* tokens. */
+.gx-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--ds-gap);align-items:start}
+.gx-sections{display:flex;flex-direction:column;gap:var(--ds-gap);min-width:0}
+.gx-sections > .ds-panel{scroll-margin-top:76px}
+.gx-toc ol{display:flex;flex-wrap:wrap;gap:6px 8px;margin:0;padding:0;list-style:none}
+.gx-toc a{display:inline-block;padding:3px 10px;border:1px solid var(--ds-line);border-radius:var(--ds-r-pill);background:var(--ds-surface);color:var(--ds-link);font-size:var(--ds-fs-sm);text-decoration:none}
+.gx-toc a:hover{background:var(--ds-surface-2)}
+.gx-toc a:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+@media (min-width:1281px){
+  .gx-layout{grid-template-columns:minmax(0,1fr) 210px}
+  .gx-toc{order:2;position:sticky;top:76px;max-height:calc(100vh - 88px);overflow:auto}
+  .gx-toc ol{flex-direction:column;gap:2px}
+  .gx-toc a{display:block;padding:4px 8px;border:0;border-radius:var(--ds-r-sm);background:none}
+}
+.gx-h{margin:14px 0 6px;font-size:var(--ds-fs-sm);font-weight:500;color:var(--ds-ink-2)}
+.gx-h:first-child{margin-top:0}
+.gx-h code,.gx-note code{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;font-size:.95em;color:var(--ds-ink)}
+.gx-note{margin:0 0 8px;font-size:var(--ds-fs-sm);color:var(--ds-ink-3)}
+[data-demo]{display:flex;flex-wrap:wrap;align-items:center;gap:var(--ds-gap);min-width:0;padding:14px;border:1px dashed var(--ds-line);border-radius:var(--ds-r-md);background:var(--ds-bg)}
+[data-demo="block"]{display:block}
+.gx-code{margin-top:6px}
+.gx-code > summary{width:max-content;max-width:100%;padding:2px 0;color:var(--ds-link);font-size:var(--ds-fs-sm);cursor:pointer}
+.gx-code > summary:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px;border-radius:2px}
+.gx-code__bar{display:flex;justify-content:flex-end;margin:6px 0}
+.gx-code pre{margin:0;max-height:380px;overflow:auto;padding:12px 14px;border:1px solid var(--ds-line);border-radius:var(--ds-r-md);background:var(--ds-surface-2);color:var(--ds-ink);font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;white-space:pre;tab-size:2}
+.gx-code pre:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+.gx-swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.gx-swatch{min-width:0;overflow:hidden;border:1px solid var(--ds-line);border-radius:var(--ds-r-md);background:var(--ds-surface)}
+.gx-swatch__chip{display:grid;place-items:center;height:54px;border-bottom:1px solid var(--ds-line);font-size:var(--ds-fs-sm);font-weight:500}
+.gx-swatch__name,.gx-swatch__val{display:block;padding:0 8px;font:11px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}
+.gx-swatch__name{padding-top:6px;color:var(--ds-ink)}
+.gx-swatch__val{padding-bottom:6px;color:var(--ds-ink-3)}
+.gx-type__row{display:grid;grid-template-columns:170px minmax(0,1fr);gap:4px 14px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--ds-line)}
+.gx-type__meta{font:11px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--ds-ink-3)}
+.gx-type__meta b{color:var(--ds-ink);font-weight:500}
+.gx-type__sample{min-width:0;overflow-wrap:anywhere;line-height:1.3}
+.gx-icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px}
+.gx-icon{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;padding:10px 4px 8px;border:1px solid var(--ds-line);border-radius:var(--ds-r-md);background:var(--ds-surface);color:var(--ds-ink);font:11px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;cursor:pointer}
+.gx-icon:hover{background:var(--ds-surface-2);color:var(--ds-link)}
+.gx-icon:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+.gx-end{justify-content:flex-end}                 /* dropdown demos: menus open right-aligned under the trigger */
+.gx-links{display:flex;flex-wrap:wrap;gap:8px}
+/* nav group demo: stand-in navy sidebar background (the real group lives in the sidebar) */
+.gx-navy[data-demo]{max-width:320px;padding:8px 0;border:0;background:var(--ds-grad-sidebar);color:var(--ds-on-navy)}
+.gx-navy :focus-visible{outline-color:var(--ds-on-color)}
+@media (max-width:620px){
+  .gx-type__row{grid-template-columns:minmax(0,1fr)}
+  [data-demo]{padding:10px}
+}
+</style>
+</head>
+<!-- class="ds-body" is part of the shell: margin 0 + page background
+     (needed by browsers without :has(), e.g. Firefox ESR 115). -->
+<body class="ds-body">
+
+<!-- ===== SKIP LINK (shared layout: start of header.php / app.blade.php) =====
+     First focusable element on every page; jumps past sidebar and topbar to
+     main#ds-main. Visible only while focused. -->
+<a class="ds-skip-link" href="#ds-main">ข้ามไปยังเนื้อหาหลัก</a>
+
+<!-- ===== APP SHELL (shared layout) =====
+     ds-app = 2-column grid (225px sidebar + main column). It opens in
+     header.php and closes in footer.php (Blade: both ends in the layout). -->
+<div class="ds-app">
+
+  <!-- ===== SIDEBAR (shared layout: partials/sidebar) =====
+       Plain PHP: part of header.php (or partials/sidebar.php included by it).
+       Blade: resources/views/partials/sidebar.blade.php.
+       At 900px and below it becomes off-canvas; ds-ui.js toggles .is-open
+       from the topbar menu button (aria-controls="ds-sidebar"), so keep
+       id="ds-sidebar" unchanged. -->
+  <aside class="ds-sidebar" id="ds-sidebar" aria-label="แถบด้านข้าง">
+
+    <!-- Brand: gear + check mark (cleaned: the invisible junk path and the
+         "26.500"-style number artifacts are removed; colours come from
+         tokens). Replace the mark, name and tagline per system. -->
+    <div class="ds-sidebar__brand">
+      <svg class="ds-sidebar__logo" width="50" height="50" viewBox="0 0 48 48" aria-hidden="true">
+        <path style="fill:var(--ds-logo)" d="M20.5 2h7l1.1 5.4 3.2 1.3 4.6-3 5 4.9-3.1 4.6 1.3 3.2L45 19.5v7l-5.4 1.1-1.3 3.2 3.1 4.6-5 5-4.6-3.1-3.2 1.3L27.5 44h-7l-1.1-5.4-3.2-1.3-4.6 3.1-5-5 3.1-4.6-1.3-3.2L3 26.5v-7l5.4-1.1 1.3-3.2-3.1-4.6 5-4.9 4.6 3 3.2-1.3z"/>
+        <circle style="fill:var(--ds-navy-950)" cx="24" cy="23" r="10.5"/>
+        <path style="stroke:var(--ds-on-color)" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M18.5 23.5l4 4 7.5-8.5"/>
+      </svg>
+      <div>
+        <b class="ds-sidebar__name">SMMS</b>
+        <small class="ds-sidebar__tagline">Smart Maintenance &amp;<br>Asset Service Management</small>
+      </div>
+    </div>
+
+    <!-- Main navigation: real links between pages (no JS routing).
+         aria-current="page" goes on exactly ONE item, the one for the page
+         being shown: dashboard.html = แดชบอร์ดภาพรวม, form.html = แจ้งซ่อมใหม่,
+         list.html = รายการแจ้งซ่อม, detail.html = งานของฉัน,
+         components.html = คลังคอมโพเนนต์ (UI Kit).
+         This page: คลังคอมโพเนนต์ (UI Kit) carries aria-current="page".
+         Example: <a class="ds-nav__item" href="list.html" aria-current="page">
+           Plain PHP: each page sets $active (e.g. 'list') before including
+             header.php; every item prints aria-current="page" only when
+             $active equals its own key.
+           Blade: in partials/sidebar.blade.php print the attribute when
+             request()->routeIs('repairs.*') (the item's route pattern) is true.
+         href="#" = page not built in this kit; point it at the real URL.
+         ds-nav__count = optional server-rendered counter (here: overdue
+         requests); leave the span out when the count is 0.
+         ds-nav__sep = divider between menu groups; ds-nav__label (optional)
+         = small group heading.
+         ds-nav__group = collapsible sub-menu: a button.ds-nav__toggle (it IS
+         a ds-nav__item, so it looks like one; aria-controls = the id of its
+         ds-nav__sub) + div.ds-nav__sub holding ds-nav__item ds-nav__subitem
+         links. Sub items have no icon (they only show in the full sidebar;
+         the 72px icon rail hides them, and a click on the toggle there
+         first expands the sidebar, then opens the group).
+         Current sub page: put aria-current="page" on the SUB item only (never
+         on the toggle). ds-ui.js then opens that group on load and adds
+         class has-current to its toggle. To avoid a closed-then-open flash,
+         the server can render the open state itself on the same condition:
+         aria-expanded="true" + class has-current on the toggle and NO hidden
+         attribute on the ds-nav__sub.
+           Plain PHP: each settings page sets $active (e.g. 'settings.users');
+             the group is open when $active starts with 'settings.'.
+           Blade: open the group when request()->routeIs('settings.*') is
+             true; each sub item gets aria-current="page" when
+             request()->routeIs('settings.users') (its own route) is true.
+         Other groups: copy the block with a new id (ds-nav-reports, ...). -->
+    <nav class="ds-nav" aria-label="เมนูหลัก">
+      <a class="ds-nav__item" href="dashboard.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-home"></use></svg>แดชบอร์ดภาพรวม</a>
+      <a class="ds-nav__item" href="form.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-user"></use></svg>แจ้งซ่อมใหม่</a>
+      <a class="ds-nav__item" href="list.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-doc"></use></svg>รายการแจ้งซ่อม <span class="ds-nav__count ds-num">9<span class="ds-sr-only"> รายการเกินกำหนด</span></span></a>
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-printer"></use></svg>ครุภัณฑ์ / สินทรัพย์</a>
+      <a class="ds-nav__item" href="detail.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-task"></use></svg>งานของฉัน</a>
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-cal"></use></svg>ปฏิทินงาน</a>
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-doc"></use></svg>รายงาน</a>
+      <hr class="ds-nav__sep">
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-db"></use></svg>ข้อมูลหลัก</a>
+      <div class="ds-nav__group">
+        <button type="button" class="ds-nav__item ds-nav__toggle" aria-expanded="false" aria-controls="ds-nav-settings"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-gear"></use></svg>ตั้งค่า<svg class="ds-ic ds-ic--sm ds-nav__caret" aria-hidden="true"><use href="#ds-i-chevron-down"></use></svg></button>
+        <div class="ds-nav__sub" id="ds-nav-settings" hidden>
+          <a class="ds-nav__item ds-nav__subitem" href="#">ตั้งค่าบริษัท</a>
+          <a class="ds-nav__item ds-nav__subitem" href="#">ตั้งค่าระบบ</a>
+          <a class="ds-nav__item ds-nav__subitem" href="#">ผู้ใช้งานและสิทธิ์</a>
+          <a class="ds-nav__item ds-nav__subitem" href="#">บันทึกการใช้งาน</a>
+        </div>
+      </div>
+      <a class="ds-nav__item" href="components.html" aria-current="page"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-image"></use></svg>คลังคอมโพเนนต์ (UI Kit)</a>
+    </nav>
+
+    <!-- Sidebar quote: decorative slogan pinned to the bottom of the sidebar.
+         Keep, replace or remove per system. -->
+    <div class="ds-sidebar__quote"><p>“ดูแลทุกสินทรัพย์<br>ให้พร้อมใช้งาน<small>เพื่อองค์กรที่เดินหน้าได้ไกลกว่า”</small></p><em>Maintain Today<br>for a Better Tomorrow</em></div>
+  </aside>
+  <!-- ===== /SIDEBAR ===== -->
+
+  <!-- ===== MAIN COLUMN (shared layout) =====
+       ds-main stacks topbar, content and footer. Opens in header.php and
+       closes in footer.php (Blade: both ends in the layout). -->
+  <div class="ds-main">
+
+    <!-- ===== TOPBAR (shared layout: partials/header) =====
+         Plain PHP: part of header.php (or partials/topbar.php included by it).
+         Blade: resources/views/partials/header.blade.php.
+         Fixed order: menu button (visible only at 900px and below), logo,
+         system title (h1), search, theme toggle, notifications, user.
+         Name / role / initial / counts come from the session and the server. -->
+    <header class="ds-topbar">
+      <!-- Hamburger: ds-ui.js opens/closes the off-canvas sidebar and keeps
+           aria-expanded in sync; Esc and an outside click close it. -->
+      <button type="button" class="ds-icon-btn ds-menu-btn" data-ds-sidebar-toggle aria-controls="ds-sidebar" aria-expanded="false" aria-label="เปิดเมนู"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-menu"></use></svg></button>
+      <span class="ds-topbar__logo"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-gear"></use></svg>SMMS</span>
+      <!-- The page's single h1 = the system name. The page's own title is the
+           h2 in ds-page-head. -->
+      <h1 class="ds-topbar__title">ระบบบริหารจัดการงานแจ้งซ่อมและบำรุงรักษาพัสดุครุภัณฑ์องค์กร</h1>
+      <!-- Search button: shown at 620px and below only (one compact topbar
+           row); ds-ui.js opens the search field as a full-width row under
+           the topbar. Keep it right BEFORE the ds-search. -->
+      <button type="button" class="ds-icon-btn ds-search-btn" data-ds-search-toggle aria-controls="ds-search" aria-expanded="false" aria-label="ค้นหา"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-search"></use></svg></button>
+      <!-- Global search. To submit it, swap the label for
+           form class="ds-search" role="search" action="list.html" (GET);
+           the input already has name="q". -->
+      <label class="ds-search" id="ds-search"><input type="search" name="q" placeholder="ค้นหาใบแจ้งซ่อม, ครุภัณฑ์, สถานที่, ผู้แจ้ง..." aria-label="ค้นหา" autocomplete="off"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-search"></use></svg></label>
+      <!-- Theme toggle: ds-ui.js flips html[data-theme], saves it and swaps
+           the sun/moon icon. No other markup needed. -->
+      <button type="button" class="ds-icon-btn" data-ds-theme-toggle aria-label="สลับโหมดสว่าง/มืด" data-ds-tip="สลับโหมดสว่าง / มืด"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-sun"></use></svg></button>
+      <!-- Notifications popover (ds-dropdown). ds-ui.js opens the element
+           named by aria-controls, keeps aria-expanded in sync and closes it
+           on outside click / Esc / Tab out; only one dropdown is open at a
+           time. Server-rendered: the dot = unread count (leave the span out
+           when 0 and drop the count from aria-label), newest items first,
+           unread items get class is-unread. "อ่านทั้งหมดแล้ว"
+           (data-ds-notif-readall) clears is-unread + the dot in the page and
+           emits 'ds:notif-readall'; production listens for it and POSTs the
+           "mark all read" request. Icon colours: --ds-red = overdue,
+           --ds-orange = warning, --ds-blue = info, --ds-green = done. -->
+      <div class="ds-dropdown">
+        <button type="button" class="ds-icon-btn" data-ds-dropdown aria-controls="ds-notif-panel" aria-expanded="false"
+                aria-haspopup="true" aria-label="การแจ้งเตือน (ยังไม่อ่าน 3 รายการ)">
+          <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-bell"></use></svg><span class="ds-icon-btn__dot ds-num" aria-hidden="true">3</span>
+        </button>
+        <div class="ds-popover" id="ds-notif-panel" hidden>
+          <div class="ds-popover__head">
+            <h2 class="ds-popover__title">การแจ้งเตือน</h2>
+            <button type="button" class="ds-link-btn" data-ds-notif-readall>อ่านทั้งหมดแล้ว</button>
+          </div>
+          <ul class="ds-notes ds-popover__body">
+            <li class="ds-notes__item is-unread">
+              <span class="ds-notes__icon" style="background:var(--ds-red)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-bell"></use></svg></span>
+              <span><a class="ds-notes__link" href="list.html">มีงานค้างเกินกำหนด 9 รายการ</a><small class="ds-notes__time ds-num">15/05/2568 09:00</small></span>
+            </li>
+            <li class="ds-notes__item is-unread">
+              <span class="ds-notes__icon" style="background:var(--ds-orange)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-wrench"></use></svg></span>
+              <span><a class="ds-notes__link" href="detail.html">SR-202505-0152 เครื่องปรับอากาศ ชั้น 3 รออะไหล่ (คอมเพรสเซอร์)</a><small class="ds-notes__time ds-num">15/05/2568 08:42</small></span>
+            </li>
+            <li class="ds-notes__item is-unread">
+              <span class="ds-notes__icon" style="background:var(--ds-blue)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-doc"></use></svg></span>
+              <span><a class="ds-notes__link" href="list.html?status=pending">มีใบแจ้งซ่อมใหม่ 4 รายการ รอมอบหมายช่าง</a><small class="ds-notes__time ds-num">14/05/2568 16:30</small></span>
+            </li>
+            <li class="ds-notes__item">
+              <span class="ds-notes__icon" style="background:var(--ds-green)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-check"></use></svg></span>
+              <span><a class="ds-notes__link" href="list.html?status=done">ปิดงาน SR-202505-0147 แล้ว รอผู้แจ้งประเมินความพึงพอใจ</a><small class="ds-notes__time ds-num">13/05/2568 14:05</small></span>
+            </li>
+            <li class="ds-notes__item">
+              <span class="ds-notes__icon" style="background:var(--ds-blue)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-cal"></use></svg></span>
+              <span><a class="ds-notes__link" href="dashboard.html">ครุภัณฑ์ 6 รายการถึงรอบบำรุงรักษา (PM) ภายในสัปดาห์นี้</a><small class="ds-notes__time ds-num">12/05/2568 10:15</small></span>
+            </li>
+          </ul>
+          <div class="ds-popover__foot"><a class="ds-link-btn" href="#">ดูการแจ้งเตือนทั้งหมด →</a></div>
+        </div>
+      </div>
+      <!-- User menu (ds-dropdown, role="menu"): avatar initial + name and
+           role from the session; ds-user__meta is visually hidden at 900px
+           and below (still read by screen readers). Arrow keys / Home / End
+           move between menu items; opening with the keyboard focuses the
+           first item.
+           Logout: production MUST be a POST form with a CSRF token (never a
+           GET link). Replace the logout link below with the snippet inside
+           this Blade comment (it is stripped by Blade, so it never runs here):
+           {{-- <form method="POST" action="{{ route('logout') }}" role="none">
+                  @csrf
+                  <button type="submit" class="ds-menu__item ds-menu__item--danger" role="menuitem">
+                    <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-logout"></use></svg>ออกจากระบบ</button>
+                </form> --}}
+           Plain PHP: the same form with action="logout.php" and a hidden
+           input name="_token" holding the session's CSRF token. -->
+      <div class="ds-dropdown">
+        <button type="button" class="ds-user" data-ds-dropdown aria-controls="ds-user-menu" aria-expanded="false" aria-haspopup="menu">
+          <span class="ds-avatar" aria-hidden="true">ส</span>
+          <span class="ds-user__meta"><b>สมชาย ใจดี</b><small>ผู้จัดการ (SUPERVISOR)</small></span>
+          <svg class="ds-ic ds-ic--sm ds-user__caret" aria-hidden="true"><use href="#ds-i-chevron-down"></use></svg>
+        </button>
+        <div class="ds-menu" id="ds-user-menu" role="menu" aria-label="เมนูผู้ใช้" hidden>
+          <div class="ds-menu__header" role="none"><b>สมชาย ใจดี</b><small>somchai.j@example.go.th</small></div>
+          <a class="ds-menu__item" role="menuitem" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-user"></use></svg>ข้อมูลส่วนตัว</a>
+          <a class="ds-menu__item" role="menuitem" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-lock"></use></svg>เปลี่ยนรหัสผ่าน</a>
+          <hr class="ds-menu__sep">
+          <!-- production: logout must be a POST form with CSRF (Laravel). Template uses a link to login.html -->
+          <a class="ds-menu__item ds-menu__item--danger" role="menuitem" href="login.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-logout"></use></svg>ออกจากระบบ</a>
+        </div>
+      </div>
+    </header>
+    <!-- ===== /TOPBAR ===== -->
+
+    <!-- ===== PAGE CONTENT (per page; everything above is the shared header) =====
+         Plain PHP: header.php ends with the opening main tag below; the page
+         prints its content; footer.php starts at the closing main tag.
+         Blade: this main element stays in the layout and the page content is
+         the component slot, which replaces the placeholder page head + panel.
+         id="ds-main" (ds- prefixed, never a bare "main") is the skip-link
+         target; tabindex="-1" lets it take focus. -->
+    <main class="ds-content" id="ds-main" tabindex="-1">
+
+      <!-- ===== PAGE HEAD ===== -->
+      <div class="ds-page-head">
+        <div class="ds-page-head__main">
+          <nav class="ds-breadcrumb" aria-label="เส้นทางนำทาง">
+            <ol>
+              <li><a href="dashboard.html">หน้าหลัก</a></li>
+              <li aria-current="page">คลังคอมโพเนนต์ (UI Kit)</li>
+            </ol>
+          </nav>
+          <h2 class="ds-page-head__title">คลังคอมโพเนนต์ (UI Kit)</h2>
+          <p class="ds-page-head__sub">ตัวอย่างจริงของทุกคอมโพเนนต์ใน ds-ui.css / ds-ui.js — กด “ดูโค้ด HTML” ใต้ตัวอย่างเพื่อคัดลอกโค้ด (โค้ดสร้างจากตัวอย่างบนหน้านี้โดยตรง จึงตรงกันเสมอ)</p>
+        </div>
+        <div class="ds-page-head__actions">
+          <a class="ds-btn ds-btn--ghost" href="starter.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-file-text"></use></svg>หน้าเริ่มต้น (starter)</a>
+          <button type="button" class="ds-btn" data-cx-theme><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-moon"></use></svg>สลับโหมดสว่าง / มืด</button>
+        </div>
+      </div>
+
+      <!-- ===== GALLERY LAYOUT (gallery-only: gx-layout = sections + sticky TOC on wide screens) ===== -->
+      <div class="gx-layout">
+
+        <!-- ===== TABLE OF CONTENTS ===== -->
+        <nav class="ds-panel gx-toc" aria-labelledby="cx-toc-t">
+          <h3 class="ds-panel__title" id="cx-toc-t">สารบัญ</h3>
+          <ol>
+            <li><a href="#cx-colors">1. สี</a></li>
+            <li><a href="#cx-type">2. ตัวอักษร</a></li>
+            <li><a href="#cx-icons">3. ไอคอน</a></li>
+            <li><a href="#cx-buttons">4. ปุ่ม</a></li>
+            <li><a href="#cx-forms">5. ฟอร์ม</a></li>
+            <li><a href="#cx-status">6. สถานะ</a></li>
+            <li><a href="#cx-alerts">7. แจ้งเตือน</a></li>
+            <li><a href="#cx-nav">8. แท็บ &amp; เส้นทาง</a></li>
+            <li><a href="#cx-kpi">9. KPI &amp; แผง</a></li>
+            <li><a href="#cx-charts">10. กราฟ</a></li>
+            <li><a href="#cx-table">11. ตาราง</a></li>
+            <li><a href="#cx-lists">12. รายการ</a></li>
+            <li><a href="#cx-states">13. สถานะว่าง / โหลด</a></li>
+            <li><a href="#cx-overlays">14. หน้าต่าง &amp; การแจ้งผล</a></li>
+            <li><a href="#cx-grids">15. กริด</a></li>
+            <li><a href="#cx-dropdown">16. เมนูผู้ใช้ (dropdown)</a></li>
+            <li><a href="#cx-notif">17. การแจ้งเตือน (popover)</a></li>
+            <li><a href="#cx-navgroup">18. เมนูย่อยแถบข้าง</a></li>
+            <li><a href="#cx-combo">19. ช่องเลือกแบบค้นหา</a></li>
+            <li><a href="#cx-special">20. หน้าพิเศษ</a></li>
+          </ol>
+        </nav>
+
+        <div class="gx-sections">
+
+          <!-- ===== 1 COLORS (swatches built by the page script from the token list) ===== -->
+          <section class="ds-panel" id="cx-colors" aria-labelledby="cx-colors-t">
+            <div class="ds-panel__head">
+              <h3 class="ds-panel__title" id="cx-colors-t">1. สี (color tokens)</h3>
+              <div class="ds-panel__tools"><span class="ds-muted">ค่าอ่านสดจาก getComputedStyle — สลับธีมแล้วค่าเปลี่ยนตาม</span></div>
+            </div>
+            <p class="gx-note">ใช้สีผ่านตัวแปรเท่านั้น เช่น <code>color:var(--ds-ink-2)</code> · สีตามข้อมูลส่งผ่าน inline เช่น <code>style="background:var(--ds-green)"</code></p>
+            <div id="cxSwatches"></div>
+          </section>
+
+          <!-- ===== 2 TYPOGRAPHY (rows built by the page script from --ds-fs-* / --ds-fw-*) ===== -->
+          <section class="ds-panel" id="cx-type" aria-labelledby="cx-type-t">
+            <div class="ds-panel__head">
+              <h3 class="ds-panel__title" id="cx-type-t">2. ตัวอักษร (type scale)</h3>
+              <div class="ds-panel__tools"><span class="ds-muted">ฟอนต์ Kanit · เนื้อหา 14px / 1.5 น้ำหนัก 300</span></div>
+            </div>
+            <p class="gx-h">ขนาด (--ds-fs-*)</p>
+            <div id="cxTypeSizes"></div>
+            <p class="gx-h">น้ำหนัก (--ds-fw-*)</p>
+            <div id="cxTypeWeights"></div>
+            <p class="gx-h">ยูทิลิตี้ตัวอักษร</p>
+            <div data-demo>
+              <span class="ds-num">1,234.50</span>
+              <span class="ds-muted">ข้อความรอง (ds-muted)</span>
+              <span class="ds-text-good">▲ +12% (ds-text-good)</span>
+              <span class="ds-text-bad">▼ −4% (ds-text-bad)</span>
+              <span class="ds-nowrap">ไม่ตัดบรรทัด (ds-nowrap)</span>
+              <span class="ds-sr-only">อ่านได้เฉพาะโปรแกรมอ่านหน้าจอ (ds-sr-only)</span>
+            </div>
+          </section>
+
+          <!-- ===== 3 ICONS (grid built by the page script from DS.iconNames) ===== -->
+          <section class="ds-panel" id="cx-icons" aria-labelledby="cx-icons-t">
+            <div class="ds-panel__head">
+              <h3 class="ds-panel__title" id="cx-icons-t">3. ไอคอน <span class="ds-badge ds-badge--neutral ds-num" id="cxIconCount">0</span></h3>
+              <div class="ds-panel__tools"><span class="ds-muted">คลิกไอคอนเพื่อคัดลอกโค้ด</span></div>
+            </div>
+            <p class="gx-h">ขนาด: ds-ic--sm 16px · ds-ic 22px · ds-ic--lg 30px (สีตาม currentColor)</p>
+            <div data-demo>
+              <svg class="ds-ic ds-ic--sm" aria-hidden="true"><use href="#ds-i-wrench"></use></svg>
+              <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-wrench"></use></svg>
+              <svg class="ds-ic ds-ic--lg" aria-hidden="true"><use href="#ds-i-wrench"></use></svg>
+              <!-- JS: el.insertAdjacentHTML('beforeend', DS.icon('wrench', 'ds-ic--sm')) -->
+            </div>
+            <p class="gx-h">ไอคอนทั้งหมด (id ใน sprite = ds-i-ชื่อ)</p>
+            <div class="gx-icons" id="cxIcons"></div>
+          </section>
+
+          <!-- ===== 4 BUTTONS ===== -->
+          <section class="ds-panel" id="cx-buttons" aria-labelledby="cx-buttons-t">
+            <h3 class="ds-panel__title" id="cx-buttons-t">4. ปุ่ม</h3>
+            <p class="gx-h">รูปแบบ (ds-btn, --ghost, --success, --danger, สีตามข้อมูล, disabled)</p>
+            <div data-demo>
+              <button type="button" class="ds-btn">บันทึก</button>
+              <a class="ds-btn" href="form.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-plus"></use></svg>แจ้งซ่อมใหม่</a>
+              <button type="button" class="ds-btn ds-btn--ghost">ยกเลิก</button>
+              <button type="button" class="ds-btn ds-btn--success"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-check"></use></svg>ปิดงาน</button>
+              <button type="button" class="ds-btn ds-btn--danger"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-trash"></use></svg>ลบรายการ</button>
+              <button type="button" class="ds-btn" style="--ds-btn-bg:var(--ds-purple)">มอบหมายช่าง</button>
+              <button type="button" class="ds-btn" disabled>ปิดใช้งาน</button>
+              <button type="button" class="ds-btn ds-btn--ghost" disabled>ปิดใช้งาน</button>
+            </div>
+            <p class="gx-h">ขนาดใหญ่ (--lg = สูง 39px เท่าช่องกรอก) และเต็มความกว้าง (--block)</p>
+            <div data-demo>
+              <button type="button" class="ds-btn ds-btn--lg"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-search"></use></svg>ค้นหา</button>
+              <button type="button" class="ds-btn ds-btn--ghost ds-btn--lg">ล้างตัวกรอง</button>
+              <button type="submit" class="ds-btn ds-btn--lg ds-btn--block">เข้าสู่ระบบ</button>
+            </div>
+            <p class="gx-h">ปุ่มไอคอน, ปุ่มแถบบน, ปุ่มลิงก์ และปุ่มกำลังทำงาน</p>
+            <div data-demo>
+              <button type="button" class="ds-btn ds-btn--ghost ds-btn--icon" aria-label="แก้ไข" data-ds-tip="แก้ไข"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-edit"></use></svg></button>
+              <button type="button" class="ds-btn ds-btn--icon" aria-label="ดาวน์โหลด" data-ds-tip="ดาวน์โหลด"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-download"></use></svg></button>
+              <button type="button" class="ds-btn ds-btn--danger ds-btn--icon" aria-label="ลบ" data-ds-tip="ลบ"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-trash"></use></svg></button>
+              <button type="button" class="ds-btn ds-btn--lg ds-btn--icon" aria-label="รีเฟรช" data-ds-tip="รีเฟรช"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-refresh"></use></svg></button>
+              <button type="button" class="ds-icon-btn" aria-label="การแจ้งเตือน (ยังไม่อ่าน 5 รายการ)" data-ds-tip="การแจ้งเตือน"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-bell"></use></svg><span class="ds-icon-btn__dot ds-num" aria-hidden="true">5</span></button>
+              <a class="ds-link-btn" href="list.html">ดูทั้งหมด <span aria-hidden="true">→</span></a>
+              <button type="button" class="ds-link-btn">ล้างตัวกรอง</button>
+              <button type="button" class="ds-btn" disabled><span class="ds-spinner" aria-hidden="true"></span> กำลังบันทึก…</button>
+            </div>
+          </section>
+
+          <!-- ===== 5 FORMS ===== -->
+          <section class="ds-panel" id="cx-forms" aria-labelledby="cx-forms-t">
+            <h3 class="ds-panel__title" id="cx-forms-t">5. ฟอร์ม</h3>
+            <p class="gx-h">ds-form (2 คอลัมน์ → 1 คอลัมน์ที่ ≤620px) พร้อมทุกสถานะ: ปกติ, โฟกัส, ผิดพลาด, ปิดใช้งาน, อ่านอย่างเดียว</p>
+            <div data-demo="block">
+              <form class="ds-form" action="#" method="post" novalidate>
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxTitle">เรื่อง / อาการ <span class="ds-field__req" aria-hidden="true">*</span></label>
+                  <input class="ds-input" id="cxTitle" name="title" required aria-describedby="cxTitleHint" placeholder="เช่น เครื่องพิมพ์ชั้น 2 กระดาษติด">
+                  <p class="ds-field__hint" id="cxTitleHint">คลิกหรือกด Tab เข้าช่องนี้เพื่อดูกรอบโฟกัส</p>
+                </div>
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxCat">ประเภทครุภัณฑ์</label>
+                  <select class="ds-select" id="cxCat" name="cat">
+                    <option>คอมพิวเตอร์ / Notebook</option>
+                    <option>เครื่องปรับอากาศ</option>
+                    <option>เครื่องพิมพ์</option>
+                    <option>เฟอร์นิเจอร์</option>
+                    <option>ระบบไฟฟ้า</option>
+                    <option>อื่น ๆ</option>
+                  </select>
+                </div>
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxAsset">เลขครุภัณฑ์ <span class="ds-field__req" aria-hidden="true">*</span></label>
+                  <input class="ds-input" id="cxAsset" name="asset" value="AC-3F" required aria-invalid="true" aria-describedby="cxAssetErr">
+                  <p class="ds-field__error" id="cxAssetErr">รูปแบบเลขครุภัณฑ์ไม่ถูกต้อง (เช่น AC-3F-012)</p>
+                </div>
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxDept">หน่วยงาน</label>
+                  <select class="ds-select" id="cxDept" name="dept" disabled aria-describedby="cxDeptHint">
+                    <option>ฝ่ายไอที</option>
+                  </select>
+                  <p class="ds-field__hint" id="cxDeptHint">ปิดใช้งาน (disabled) — กำหนดจากบัญชีผู้ใช้</p>
+                </div>
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxNo">เลขที่แจ้งซ่อม</label>
+                  <input class="ds-input ds-num" id="cxNo" name="no" value="SR-202505-0153" readonly aria-describedby="cxNoHint">
+                  <p class="ds-field__hint" id="cxNoHint">อ่านอย่างเดียว (readonly) — ระบบออกเลขให้</p>
+                </div>
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxBy">ผู้แจ้ง</label>
+                  <input class="ds-input" id="cxBy" name="by" value="สมชาย ใจดี" disabled>
+                </div>
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxCost">ค่าซ่อมโดยประมาณ</label>
+                  <div class="ds-input-group">
+                    <span class="ds-input-group__addon">฿</span>
+                    <input class="ds-input ds-num" id="cxCost" name="cost" type="number" min="0" step="0.01" placeholder="0.00">
+                    <span class="ds-input-group__addon">บาท</span>
+                  </div>
+                </div>
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxFind">ค้นหาครุภัณฑ์</label>
+                  <div class="ds-input-group">
+                    <input class="ds-input" id="cxFind" name="asset_q" type="search" placeholder="รหัสหรือชื่อครุภัณฑ์">
+                    <button class="ds-btn" type="button"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-search"></use></svg>ค้นหา</button>
+                  </div>
+                </div>
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxDate">วันที่ต้องการให้เสร็จ</label>
+                  <input class="ds-input" id="cxDate" name="due" type="date" value="2025-05-20">
+                </div>
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxPhone">เบอร์ติดต่อ</label>
+                  <input class="ds-input" id="cxPhone" name="phone" type="tel" inputmode="tel" placeholder="0x-xxx-xxxx">
+                </div>
+                <fieldset class="ds-field">
+                  <legend class="ds-field__label" id="cxPrioLbl">ความเร่งด่วน</legend>
+                  <div class="ds-choice-group" role="radiogroup" aria-labelledby="cxPrioLbl">
+                    <label class="ds-check"><input type="radio" name="prio" value="normal" checked> ปกติ</label>
+                    <label class="ds-check"><input type="radio" name="prio" value="urgent"> ด่วน</label>
+                    <label class="ds-check"><input type="radio" name="prio" value="critical"> ด่วนมาก</label>
+                  </div>
+                </fieldset>
+                <fieldset class="ds-field">
+                  <legend class="ds-field__label">ตัวเลือกเพิ่มเติม</legend>
+                  <div class="ds-choice-group" aria-orientation="vertical">
+                    <label class="ds-check"><input type="checkbox" name="notify" checked> แจ้งผลทางอีเมล</label>
+                    <label class="ds-check"><input type="checkbox" name="onsite"> ต้องให้ช่างเข้าหน้างาน</label>
+                    <label class="ds-check"><input type="checkbox" name="spare" disabled> ขอยืมเครื่องสำรอง (ปิดใช้งาน)</label>
+                  </div>
+                </fieldset>
+                <div class="ds-field ds-field--full">
+                  <label class="ds-field__label" for="cxDetail">รายละเอียด <span class="ds-field__req" aria-hidden="true">*</span></label>
+                  <textarea class="ds-textarea" id="cxDetail" name="detail" rows="3" required aria-invalid="true" aria-describedby="cxDetailErr"></textarea>
+                  <p class="ds-field__error" id="cxDetailErr">กรุณากรอกรายละเอียด</p>
+                </div>
+                <div class="ds-field ds-field--full">
+                  <span class="ds-field__label">แนบรูปภาพ / เอกสาร</span>
+                  <label class="ds-file">
+                    <input class="ds-file__input" type="file" name="files[]" multiple accept=".pdf,.jpg,.png">
+                    <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-upload"></use></svg>
+                    <span class="ds-file__title">ลากไฟล์มาวางที่นี่ หรือ <span class="ds-file__link">เลือกไฟล์</span></span>
+                    <span class="ds-file__hint">PDF, JPG, PNG ขนาดไม่เกิน 10 MB</span>
+                  </label>
+                </div>
+              </form>
+            </div>
+
+            <p class="gx-h">ขนาดเล็ก (ds-select--sm / ds-input--sm) — ใช้ในแถบเครื่องมือของพาเนล</p>
+            <div data-demo>
+              <select class="ds-select ds-select--sm" aria-label="ช่วงเวลา"><option>เดือนนี้</option><option>ไตรมาสนี้</option><option>ปีนี้</option></select>
+              <input class="ds-input ds-input--sm" type="search" aria-label="ค้นหาในตาราง" placeholder="ค้นหา...">
+            </div>
+
+            <p class="gx-h">แถบตัวกรอง (ds-filters) — ใช้ ds-btn--lg ให้สูงเท่าช่องกรอก</p>
+            <div data-demo="block">
+              <form class="ds-filters" role="search" aria-label="ตัวกรองรายการแจ้งซ่อม" action="#">
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxFq">คำค้น</label>
+                  <input class="ds-input" id="cxFq" name="q" type="search" placeholder="เลขที่ / เรื่อง / ผู้แจ้ง">
+                </div>
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxFst">สถานะ</label>
+                  <select class="ds-select" id="cxFst" name="status">
+                    <option value="">ทั้งหมด</option>
+                    <option value="pending">รอดำเนินการ</option>
+                    <option value="progress">กำลังดำเนินการ</option>
+                    <option value="done">เสร็จสิ้น</option>
+                    <option value="cancel">ยกเลิก</option>
+                  </select>
+                </div>
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxFdept">หน่วยงาน</label>
+                  <select class="ds-select" id="cxFdept" name="dept">
+                    <option value="">ทั้งหมด</option>
+                    <option>สำนักงานกลาง</option>
+                    <option>ฝ่ายไอที</option>
+                    <option>ฝ่ายบัญชี</option>
+                    <option>ฝ่ายบุคคล</option>
+                    <option>ฝ่ายการตลาด</option>
+                  </select>
+                </div>
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxFfrom">ตั้งแต่วันที่</label>
+                  <input class="ds-input" id="cxFfrom" name="from" type="date">
+                </div>
+                <div class="ds-filters__actions">
+                  <button class="ds-btn ds-btn--ghost ds-btn--lg" type="reset">ล้างตัวกรอง</button>
+                  <button class="ds-btn ds-btn--lg" type="submit"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-filter"></use></svg>ค้นหา</button>
+                </div>
+              </form>
+            </div>
+
+            <p class="gx-h">ส่วนของฟอร์ม (ds-form-section) + แถบปุ่มติดล่าง (ds-form-actions)</p>
+            <div data-demo="block">
+              <form class="ds-stack" action="#" method="post">
+                <section class="ds-form-section" aria-labelledby="cxSecReq">
+                  <div class="ds-form-section__head">
+                    <span class="ds-form-section__num" aria-hidden="true">1</span>
+                    <h3 class="ds-form-section__title" id="cxSecReq">ข้อมูลผู้แจ้ง</h3>
+                    <p class="ds-form-section__desc">ใช้ติดต่อกลับเมื่อดำเนินการเสร็จ</p>
+                  </div>
+                  <div class="ds-form">
+                    <label class="ds-field"><span class="ds-field__label">ชื่อผู้แจ้ง</span><input class="ds-input" name="by" value="สมชาย ใจดี"></label>
+                    <label class="ds-field"><span class="ds-field__label">อีเมล</span><input class="ds-input" name="email" type="email" placeholder="name@example.com"></label>
+                  </div>
+                </section>
+                <div class="ds-form-actions">
+                  <p class="ds-form-actions__info"><span class="ds-field__req">*</span> จำเป็นต้องกรอก</p>
+                  <a class="ds-btn ds-btn--ghost ds-btn--lg" href="list.html">ยกเลิก</a>
+                  <button class="ds-btn ds-btn--lg" type="submit"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-save"></use></svg>บันทึกใบแจ้งซ่อม</button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <!-- ===== 6 STATUS (pills + badges) ===== -->
+          <section class="ds-panel" id="cx-status" aria-labelledby="cx-status-t">
+            <h3 class="ds-panel__title" id="cx-status-t">6. สถานะ</h3>
+            <p class="gx-h">ds-pill — สถานะงานแจ้งซ่อม (pending / progress / done / cancel) + info / neutral</p>
+            <div data-demo>
+              <span class="ds-pill ds-pill--pending">รอดำเนินการ</span>
+              <span class="ds-pill ds-pill--progress">กำลังดำเนินการ</span>
+              <span class="ds-pill ds-pill--done">เสร็จสิ้น</span>
+              <span class="ds-pill ds-pill--cancel">ยกเลิก</span>
+              <span class="ds-pill ds-pill--info">รออะไหล่</span>
+              <span class="ds-pill ds-pill--neutral">ฉบับร่าง</span>
+            </div>
+            <p class="gx-h">ds-badge — ตัวนับข้างหัวข้อ (แดง = ต้องติดตาม, --neutral = ข้อมูลทั่วไป)</p>
+            <div data-demo>
+              <h3 class="ds-panel__title">งานที่ต้องติดตามวันนี้ <span class="ds-badge ds-num">17</span></h3>
+              <span class="ds-badge ds-num">3</span>
+              <span class="ds-badge ds-badge--neutral ds-num">128</span>
+            </div>
+          </section>
+
+          <!-- ===== 7 ALERTS ===== -->
+          <section class="ds-panel" id="cx-alerts" aria-labelledby="cx-alerts-t">
+            <h3 class="ds-panel__title" id="cx-alerts-t">7. แจ้งเตือน (ds-alert)</h3>
+            <div data-demo="block">
+              <div class="ds-stack">
+                <div class="ds-alert ds-alert--info" role="status">
+                  <svg class="ds-ic ds-alert__icon" aria-hidden="true"><use href="#ds-i-info"></use></svg>
+                  <div class="ds-alert__body">
+                    <p class="ds-alert__title">ปิดปรับปรุงระบบ 20/05/2568 เวลา 18:00–20:00 น.</p>
+                    ระหว่างนี้ยังดูรายการได้ แต่ไม่สามารถสร้างใบแจ้งซ่อมใหม่
+                  </div>
+                </div>
+                <div class="ds-alert ds-alert--success" role="status">
+                  <svg class="ds-ic ds-alert__icon" aria-hidden="true"><use href="#ds-i-check-circle"></use></svg>
+                  <div class="ds-alert__body">
+                    <p class="ds-alert__title">บันทึกใบแจ้งซ่อม SR-202505-0153 แล้ว</p>
+                    ระบบส่งอีเมลแจ้งหัวหน้าช่างเรียบร้อย
+                  </div>
+                </div>
+                <div class="ds-alert ds-alert--warning" role="alert">
+                  <svg class="ds-ic ds-alert__icon" aria-hidden="true"><use href="#ds-i-alert-triangle"></use></svg>
+                  <div class="ds-alert__body">
+                    <p class="ds-alert__title">มีงานค้างเกินกำหนด 9 รายการ</p>
+                    กรุณาตรวจสอบและมอบหมายช่างผู้รับผิดชอบ <a href="list.html">ดูรายการ</a>
+                  </div>
+                </div>
+                <div class="ds-alert ds-alert--danger" role="alert">
+                  <svg class="ds-ic ds-alert__icon" aria-hidden="true"><use href="#ds-i-x-circle"></use></svg>
+                  <div class="ds-alert__body">
+                    <p class="ds-alert__title">บันทึกไม่สำเร็จ</p>
+                    กรุณาแก้ไขช่องที่มีเครื่องหมายผิดพลาด แล้วลองอีกครั้ง
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== 8 TABS, BREADCRUMB, PAGE HEAD ===== -->
+          <section class="ds-panel" id="cx-nav" aria-labelledby="cx-nav-t">
+            <h3 class="ds-panel__title" id="cx-nav-t">8. แท็บ &amp; เส้นทาง</h3>
+            <p class="gx-h">ds-tabs — ds-ui.js ผูกคลิก / ปุ่มลูกศร / Home / End ให้อัตโนมัติ</p>
+            <div data-demo="block">
+              <div class="ds-tabs" role="tablist" aria-label="รายละเอียดใบแจ้งซ่อม">
+                <button class="ds-tabs__tab" type="button" role="tab" id="cxTabInfo" aria-controls="cxTpInfo" aria-selected="true">ข้อมูลทั่วไป</button>
+                <button class="ds-tabs__tab" type="button" role="tab" id="cxTabLog" aria-controls="cxTpLog" aria-selected="false" tabindex="-1">ประวัติการดำเนินการ <span class="ds-tabs__count">4</span></button>
+                <button class="ds-tabs__tab" type="button" role="tab" id="cxTabFile" aria-controls="cxTpFile" aria-selected="false" tabindex="-1">ไฟล์แนบ <span class="ds-tabs__count">2</span></button>
+              </div>
+              <div class="ds-tabs__panel" role="tabpanel" id="cxTpInfo" aria-labelledby="cxTabInfo" tabindex="0">SR-202505-0153 · เครื่องปรับอากาศ ชั้น 3 ไม่เย็น · สำนักงานกลาง</div>
+              <div class="ds-tabs__panel" role="tabpanel" id="cxTpLog" aria-labelledby="cxTabLog" tabindex="0" hidden>15/05/2568 09:12 น. รับเรื่อง → มอบหมายช่างวิทยา ทองแก้ว</div>
+              <div class="ds-tabs__panel" role="tabpanel" id="cxTpFile" aria-labelledby="cxTabFile" tabindex="0" hidden>รูปหน้างาน.jpg · ใบเสนอราคา.pdf</div>
+            </div>
+            <p class="gx-h">แท็บแบบลิงก์ (เรนเดอร์จากเซิร์ฟเวอร์ ไม่ใช้ JS)</p>
+            <div data-demo="block">
+              <nav class="ds-tabs" aria-label="มุมมองรายการ">
+                <a class="ds-tabs__tab" href="?tab=all" aria-current="page">ทั้งหมด <span class="ds-tabs__count">128</span></a>
+                <a class="ds-tabs__tab" href="?tab=mine">งานของฉัน <span class="ds-tabs__count">6</span></a>
+                <a class="ds-tabs__tab" href="?tab=overdue">เกินกำหนด <span class="ds-tabs__count">9</span></a>
+              </nav>
+            </div>
+            <p class="gx-h">ds-breadcrumb — รายการสุดท้ายคือหน้าปัจจุบัน (aria-current)</p>
+            <div data-demo>
+              <nav class="ds-breadcrumb" aria-label="เส้นทางนำทาง">
+                <ol>
+                  <li><a href="dashboard.html">หน้าหลัก</a></li>
+                  <li><a href="list.html">รายการแจ้งซ่อม</a></li>
+                  <li aria-current="page">SR-202505-0153</li>
+                </ol>
+              </nav>
+            </div>
+            <p class="gx-h">ds-page-head — breadcrumb + หัวข้อหน้า (h2) + คำอธิบาย + ปุ่มระดับหน้า</p>
+            <div data-demo="block">
+              <div class="ds-page-head">
+                <div class="ds-page-head__main">
+                  <nav class="ds-breadcrumb" aria-label="เส้นทางนำทาง">
+                    <ol>
+                      <li><a href="dashboard.html">หน้าหลัก</a></li>
+                      <li aria-current="page">รายการแจ้งซ่อม</li>
+                    </ol>
+                  </nav>
+                  <h2 class="ds-page-head__title">รายการแจ้งซ่อม</h2>
+                  <p class="ds-page-head__sub">ใบแจ้งซ่อมทั้งหมด 128 รายการ · อัปเดตล่าสุด 15/05/2568 10:24 น.</p>
+                </div>
+                <div class="ds-page-head__actions">
+                  <button type="button" class="ds-btn ds-btn--ghost"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-download"></use></svg>ส่งออก</button>
+                  <a class="ds-btn" href="form.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-plus"></use></svg>แจ้งซ่อมใหม่</a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== 9 KPI & PANEL ===== -->
+          <section class="ds-panel" id="cx-kpi" aria-labelledby="cx-kpi-t">
+            <h3 class="ds-panel__title" id="cx-kpi-t">9. KPI &amp; แผง</h3>
+            <p class="gx-h">ds-kpis + ds-kpi — ds-kpis ปกติ = 5 คอลัมน์สำหรับ 5 การ์ด; ds-kpis--auto = กี่การ์ดก็ได้ (ตัวอย่างนี้ 3 การ์ด)</p>
+            <div data-demo="block">
+              <section class="ds-kpis ds-kpis--auto" aria-label="ตัวชี้วัดหลัก">
+                <div class="ds-kpi">
+                  <span class="ds-kpi__icon" style="background:var(--ds-blue)"><svg class="ds-ic ds-ic--lg" aria-hidden="true"><use href="#ds-i-wrench"></use></svg></span>
+                  <div>
+                    <div class="ds-kpi__label" lang="en">Total Requests</div>
+                    <div class="ds-kpi__row">
+                      <span class="ds-kpi__value ds-num">128</span>
+                      <span class="ds-kpi__delta ds-kpi__delta--good">▲ +12%<span class="ds-sr-only"> (ดีขึ้น)</span></span>
+                    </div>
+                  </div>
+                  <div class="ds-kpi__foot"><span>คำขอแจ้งซ่อมทั้งหมด</span><span>จากเดือนที่แล้ว</span></div>
+                </div>
+                <div class="ds-kpi">
+                  <span class="ds-kpi__icon" style="background:var(--ds-green)"><svg class="ds-ic ds-ic--lg" aria-hidden="true"><use href="#ds-i-check"></use></svg></span>
+                  <div>
+                    <div class="ds-kpi__label" lang="en">Completed</div>
+                    <div class="ds-kpi__row">
+                      <span class="ds-kpi__value ds-num">81</span>
+                      <span class="ds-kpi__delta ds-kpi__delta--neutral">0%<span class="ds-sr-only"> (คงที่)</span></span>
+                    </div>
+                  </div>
+                  <div class="ds-kpi__foot"><span>ปิดงานแล้ว</span><span>จากเดือนที่แล้ว</span></div>
+                </div>
+                <a class="ds-kpi" href="list.html">
+                  <span class="ds-kpi__icon" style="background:var(--ds-red)"><svg class="ds-ic ds-ic--lg" aria-hidden="true"><use href="#ds-i-alert"></use></svg></span>
+                  <div>
+                    <div class="ds-kpi__label" lang="en">Overdue</div>
+                    <div class="ds-kpi__row">
+                      <span class="ds-kpi__value ds-num">9</span>
+                      <span class="ds-kpi__delta ds-kpi__delta--bad">▲ +2<span class="ds-sr-only"> (แย่ลง)</span></span>
+                    </div>
+                  </div>
+                  <div class="ds-kpi__foot"><span>งานเกินกำหนด</span><span>คลิกเพื่อดูรายการ</span></div>
+                </a>
+              </section>
+            </div>
+            <p class="gx-h">ds-panel — แถวหัว: หัวข้อ (h3) ซ้าย, เครื่องมือขวา</p>
+            <div data-demo="block">
+              <section class="ds-panel" aria-labelledby="cxPanelT">
+                <div class="ds-panel__head">
+                  <h3 class="ds-panel__title" id="cxPanelT">งานที่ต้องติดตามวันนี้ <span class="ds-badge ds-num">17</span></h3>
+                  <div class="ds-panel__tools">
+                    <select class="ds-select ds-select--sm" aria-label="ช่วงเวลา"><option>เดือนนี้</option><option>ไตรมาสนี้</option><option>ปีนี้</option></select>
+                    <a class="ds-link-btn" href="list.html">ดูทั้งหมด <span aria-hidden="true">→</span></a>
+                  </div>
+                </div>
+                <p>เนื้อหาของพาเนล: ตาราง กราฟ รายการ หรือฟอร์ม</p>
+              </section>
+            </div>
+          </section>
+
+          <!-- ===== 10 CHARTS (filled by DS.charts in the page script) ===== -->
+          <section class="ds-panel" id="cx-charts" aria-labelledby="cx-charts-t">
+            <h3 class="ds-panel__title" id="cx-charts-t">10. กราฟ</h3>
+            <p class="gx-h">DS.charts.donut / pie / bars / legend — items = [{label, value, color:'--ds-blue'}]</p>
+            <div data-demo="block">
+              <div class="ds-grid ds-grid--3">
+                <section class="ds-panel" aria-labelledby="cxDonutT">
+                  <h3 class="ds-panel__title" id="cxDonutT">สัดส่วนสถานะงานแจ้งซ่อม</h3>
+                  <div class="ds-chart">
+                    <svg class="ds-chart__svg" id="cxDonut" viewBox="0 0 180 180" role="img" aria-label="สัดส่วนสถานะงานแจ้งซ่อม" aria-describedby="cxDonutLg"></svg>
+                    <ul class="ds-legend" id="cxDonutLg"></ul>
+                  </div>
+                  <!-- DS.charts.donut('#cxDonut', items, {legend:'#cxDonutLg', center:128, centerLabel:'รายการ'}) -->
+                </section>
+                <section class="ds-panel" aria-labelledby="cxPieT">
+                  <h3 class="ds-panel__title" id="cxPieT">งานตามหน่วยงาน</h3>
+                  <div class="ds-chart">
+                    <svg class="ds-chart__svg" id="cxPie" viewBox="0 0 180 180" role="img" aria-label="สัดส่วนงานตามหน่วยงาน" aria-describedby="cxPieLg"></svg>
+                    <ul class="ds-legend ds-legend--tight" id="cxPieLg"></ul>
+                  </div>
+                  <!-- DS.charts.pie('#cxPie', items, {legend:'#cxPieLg'}) -->
+                </section>
+                <section class="ds-panel" aria-labelledby="cxBarsT">
+                  <h3 class="ds-panel__title" id="cxBarsT">งานตามประเภทครุภัณฑ์</h3>
+                  <div class="ds-bars" id="cxBars"></div>
+                  <!-- DS.charts.bars('#cxBars', items) -->
+                </section>
+              </div>
+            </div>
+            <p class="gx-h">ds-progress — สีผ่าน --ds-accent, ความกว้างผ่าน width:% (หรือ &lt;progress&gt; แบบ native)</p>
+            <div data-demo="block">
+              <div class="ds-stack">
+                <div class="ds-progress" role="progressbar" aria-label="ความคืบหน้างานซ่อม SR-202505-0152" aria-valuemin="0" aria-valuemax="100" aria-valuenow="62"><span class="ds-progress__fill" style="width:62%"></span></div>
+                <div class="ds-progress" style="--ds-accent:var(--ds-green)" role="progressbar" aria-label="งานเสร็จตามกำหนด" aria-valuemin="0" aria-valuemax="100" aria-valuenow="85"><span class="ds-progress__fill" style="width:85%"></span></div>
+                <progress class="ds-progress" style="--ds-accent:var(--ds-orange)" value="30" max="100" aria-label="ใช้งบซ่อมบำรุงแล้ว">30%</progress>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== 11 TABLE + PAGER + EMPTY ROW ===== -->
+          <section class="ds-panel" id="cx-table" aria-labelledby="cx-table-t">
+            <h3 class="ds-panel__title" id="cx-table-t">11. ตาราง</h3>
+            <p class="gx-h">ds-table (+ --hover, --stack = การ์ดต่อแถวบนมือถือ ใช้ data-label ทุก td) ใน ds-table-wrap: เลือกแถว, หัวคอลัมน์เรียงได้, สถานะ, ปุ่มจัดการ + ds-pager</p>
+            <div data-demo="block">
+              <div class="ds-table-wrap" role="region" aria-labelledby="cxTblCap" tabindex="0">
+                <table class="ds-table ds-table--hover ds-table--stack" id="cxTable">
+                  <caption class="ds-sr-only" id="cxTblCap">รายการแจ้งซ่อมล่าสุด</caption>
+                  <thead>
+                    <tr>
+                      <th class="ds-table__check"><input type="checkbox" aria-label="เลือกทั้งหมด"></th>
+                      <th aria-sort="descending"><button class="ds-table__sort" type="button">เลขที่แจ้งซ่อม</button></th>
+                      <th>เรื่อง / อาการ</th>
+                      <th>ประเภท</th>
+                      <th>หน่วยงาน</th>
+                      <th aria-sort="none"><button class="ds-table__sort" type="button">วันที่แจ้ง</button></th>
+                      <th>สถานะ</th>
+                      <th class="ds-table__actions">การดำเนินการ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="ds-table__check"><input type="checkbox" aria-label="เลือก SR-202505-0153"></td>
+                      <td data-label="เลขที่แจ้งซ่อม"><a class="ds-id-link ds-num" href="detail.html?id=SR-202505-0153">SR-202505-0153</a></td>
+                      <td data-label="เรื่อง / อาการ">เครื่องปรับอากาศ ชั้น 3 ไม่เย็น</td>
+                      <td data-label="ประเภท">เครื่องปรับอากาศ</td>
+                      <td data-label="หน่วยงาน">สำนักงานกลาง</td>
+                      <td class="ds-num ds-nowrap" data-label="วันที่แจ้ง">15/05/2568</td>
+                      <td data-label="สถานะ"><span class="ds-pill ds-pill--pending">รอดำเนินการ</span></td>
+                      <td class="ds-table__actions">
+                        <a class="ds-btn ds-btn--ghost ds-btn--icon" href="detail.html?id=SR-202505-0153" aria-label="ดู SR-202505-0153" data-ds-tip="ดูรายละเอียด"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-eye"></use></svg></a>
+                        <button class="ds-btn ds-btn--danger ds-btn--icon" type="button" aria-label="ลบ SR-202505-0153" data-ds-tip="ลบ" data-ds-confirm="ลบใบแจ้งซ่อม SR-202505-0153 ?" data-ds-confirm-ok="ลบ" data-ds-confirm-danger><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-trash"></use></svg></button>
+                      </td>
+                    </tr>
+                    <tr class="is-selected">
+                      <td class="ds-table__check"><input type="checkbox" aria-label="เลือก SR-202505-0152" checked></td>
+                      <td data-label="เลขที่แจ้งซ่อม"><a class="ds-id-link ds-num" href="detail.html?id=SR-202505-0152">SR-202505-0152</a></td>
+                      <td data-label="เรื่อง / อาการ">Notebook จอดับ เปิดไม่ติด</td>
+                      <td data-label="ประเภท">คอมพิวเตอร์ / Notebook</td>
+                      <td data-label="หน่วยงาน">ฝ่ายไอที</td>
+                      <td class="ds-num ds-nowrap" data-label="วันที่แจ้ง">14/05/2568</td>
+                      <td data-label="สถานะ"><span class="ds-pill ds-pill--progress">กำลังดำเนินการ</span></td>
+                      <td class="ds-table__actions"><a class="ds-btn" href="detail.html?id=SR-202505-0152">ดูรายละเอียด</a></td>
+                    </tr>
+                    <tr>
+                      <td class="ds-table__check"><input type="checkbox" aria-label="เลือก SR-202505-0149"></td>
+                      <td data-label="เลขที่แจ้งซ่อม"><a class="ds-id-link ds-num" href="detail.html?id=SR-202505-0149">SR-202505-0149</a></td>
+                      <td data-label="เรื่อง / อาการ">เครื่องพิมพ์ชั้น 2 กระดาษติด</td>
+                      <td data-label="ประเภท">เครื่องพิมพ์</td>
+                      <td data-label="หน่วยงาน">ฝ่ายบัญชี</td>
+                      <td class="ds-num ds-nowrap" data-label="วันที่แจ้ง">13/05/2568</td>
+                      <td data-label="สถานะ"><span class="ds-pill ds-pill--done">เสร็จสิ้น</span></td>
+                      <td class="ds-table__actions"><a class="ds-btn" href="detail.html?id=SR-202505-0149">ดูรายละเอียด</a></td>
+                    </tr>
+                    <tr>
+                      <td class="ds-table__check"><input type="checkbox" aria-label="เลือก SR-202505-0147"></td>
+                      <td data-label="เลขที่แจ้งซ่อม"><a class="ds-id-link ds-num" href="detail.html?id=SR-202505-0147">SR-202505-0147</a></td>
+                      <td data-label="เรื่อง / อาการ">เก้าอี้สำนักงานล้อหัก</td>
+                      <td data-label="ประเภท">เฟอร์นิเจอร์</td>
+                      <td data-label="หน่วยงาน">ฝ่ายบุคคล</td>
+                      <td class="ds-num ds-nowrap" data-label="วันที่แจ้ง">12/05/2568</td>
+                      <td data-label="สถานะ"><span class="ds-pill ds-pill--cancel">ยกเลิก</span></td>
+                      <td class="ds-table__actions"><a class="ds-btn" href="detail.html?id=SR-202505-0147">ดูรายละเอียด</a></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <nav class="ds-pager" aria-label="เปลี่ยนหน้า">
+                <p class="ds-pager__info">แสดง 1–4 จาก 128 รายการ</p>
+                <ul class="ds-pager__list">
+                  <li><button class="ds-pager__btn" type="button" disabled aria-label="หน้าก่อนหน้า"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-chevron-left"></use></svg></button></li>
+                  <li><a class="ds-pager__btn" href="?page=1" aria-current="page">1</a></li>
+                  <li><a class="ds-pager__btn" href="?page=2">2</a></li>
+                  <li><a class="ds-pager__btn" href="?page=3">3</a></li>
+                  <li class="ds-pager__gap" aria-hidden="true">…</li>
+                  <li><a class="ds-pager__btn" href="?page=32">32</a></li>
+                  <li><a class="ds-pager__btn" href="?page=2" aria-label="หน้าถัดไป"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-chevron-right"></use></svg></a></li>
+                </ul>
+                <label class="ds-pager__size">แสดง
+                  <select class="ds-select ds-select--sm"><option>10</option><option>25</option><option>50</option></select> รายการ</label>
+              </nav>
+            </div>
+            <p class="gx-h">ไม่มีข้อมูล — ds-table__empty บน &lt;td colspan&gt; (ds-table--fluid = ไม่บังคับกว้างขั้นต่ำ 540px)</p>
+            <div data-demo="block">
+              <div class="ds-table-wrap" role="region" aria-label="ผลการค้นหา" tabindex="0">
+                <table class="ds-table ds-table--fluid">
+                  <thead><tr><th>เลขที่แจ้งซ่อม</th><th>เรื่อง / อาการ</th><th>สถานะ</th></tr></thead>
+                  <tbody><tr><td class="ds-table__empty" colspan="3">ไม่พบรายการที่ตรงกับตัวกรอง</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== 12 LISTS (recent, notes, quick actions, timeline, definition list) ===== -->
+          <section class="ds-panel" id="cx-lists" aria-labelledby="cx-lists-t">
+            <h3 class="ds-panel__title" id="cx-lists-t">12. รายการ</h3>
+            <div class="ds-grid ds-grid--2">
+              <div>
+                <p class="gx-h">ds-recent — เลขที่ | เรื่อง | วันที่ | สถานะ (--reflow = 2 บรรทัดเมื่อแคบ)</p>
+                <div data-demo="block">
+                  <ul class="ds-recent ds-recent--reflow">
+                    <li class="ds-recent__item">
+                      <a class="ds-id-link ds-num" href="detail.html?id=SR-202505-0153">SR-202505-0153</a>
+                      <span class="ds-recent__name" title="เครื่องปรับอากาศ ชั้น 3 (ไม่เย็น)">เครื่องปรับอากาศ ชั้น 3 (ไม่เย็น)</span>
+                      <time class="ds-recent__time ds-num" datetime="2025-05-15">15/05/2568</time>
+                      <span class="ds-pill ds-pill--pending">รอดำเนินการ</span>
+                    </li>
+                    <li class="ds-recent__item">
+                      <a class="ds-id-link ds-num" href="detail.html?id=SR-202505-0152">SR-202505-0152</a>
+                      <span class="ds-recent__name" title="Notebook (จอดับ)">Notebook (จอดับ)</span>
+                      <time class="ds-recent__time ds-num" datetime="2025-05-14">14/05/2568</time>
+                      <span class="ds-pill ds-pill--progress">กำลังดำเนินการ</span>
+                    </li>
+                    <li class="ds-recent__item">
+                      <a class="ds-id-link ds-num" href="detail.html?id=SR-202505-0149">SR-202505-0149</a>
+                      <span class="ds-recent__name" title="เครื่องพิมพ์ชั้น 2 (กระดาษติด)">เครื่องพิมพ์ชั้น 2 (กระดาษติด)</span>
+                      <time class="ds-recent__time ds-num" datetime="2025-05-13">13/05/2568</time>
+                      <span class="ds-pill ds-pill--done">เสร็จสิ้น</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div>
+                <p class="gx-h">ds-notes — การแจ้งเตือน: ไอคอนกลมสีตามข้อมูล + ข้อความ + เวลา</p>
+                <div data-demo="block">
+                  <ul class="ds-notes">
+                    <li class="ds-notes__item">
+                      <span class="ds-notes__icon" style="background:var(--ds-red)"><svg class="ds-ic ds-ic--sm" aria-hidden="true"><use href="#ds-i-bell"></use></svg></span>
+                      <span>มีงานค้างเกินกำหนด 9 รายการ <small class="ds-notes__time ds-num">15/05/2568 09:00</small></span>
+                    </li>
+                    <li class="ds-notes__item">
+                      <span class="ds-notes__icon" style="background:var(--ds-green)"><svg class="ds-ic ds-ic--sm" aria-hidden="true"><use href="#ds-i-check"></use></svg></span>
+                      <span>ปิดงาน SR-202505-0149 เรียบร้อย <small class="ds-notes__time ds-num">14/05/2568 16:30</small></span>
+                    </li>
+                    <li class="ds-notes__item">
+                      <span class="ds-notes__icon" style="background:var(--ds-orange)"><svg class="ds-ic ds-ic--sm" aria-hidden="true"><use href="#ds-i-clock"></use></svg></span>
+                      <span>ครบกำหนดบำรุงรักษาเครื่องปรับอากาศ 4 เครื่อง <small class="ds-notes__time ds-num">14/05/2568 08:00</small></span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div>
+                <p class="gx-h">ds-quick — ปุ่มลัด: &lt;a&gt; = ไปหน้าอื่น, &lt;button&gt; = ทำงานในหน้า</p>
+                <div data-demo="block">
+                  <div class="ds-quick">
+                    <a class="ds-quick__btn" href="form.html" style="background:var(--ds-blue)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-plus"></use></svg><span>แจ้งซ่อมใหม่<small class="ds-quick__sub">สร้างคำขอแจ้งซ่อม</small></span></a>
+                    <a class="ds-quick__btn" href="#" style="background:var(--ds-green)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-scan"></use></svg><span>สแกน QR<small class="ds-quick__sub">ค้นหาครุภัณฑ์</small></span></a>
+                    <a class="ds-quick__btn" href="detail.html" style="background:var(--ds-orange)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-task"></use></svg><span>งานของฉัน<small class="ds-quick__sub">6 งานที่รับผิดชอบ</small></span></a>
+                    <a class="ds-quick__btn" href="#" style="background:var(--ds-purple)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-chart"></use></svg><span>รายงาน<small class="ds-quick__sub">สรุปประจำเดือน</small></span></a>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p class="gx-h">ds-timeline — สีจุดผ่าน --ds-accent (ค่าเริ่มต้นน้ำเงิน)</p>
+                <div data-demo="block">
+                  <ol class="ds-timeline">
+                    <li class="ds-timeline__item" style="--ds-accent:var(--ds-green)">
+                      <span class="ds-timeline__dot" aria-hidden="true"></span>
+                      <p class="ds-timeline__title">ปิดงานซ่อม</p>
+                      <time class="ds-timeline__time" datetime="2025-05-15T16:30">15/05/2568 16:30 น.</time>
+                      <div class="ds-timeline__body">เปลี่ยนลูกยางดึงกระดาษ ทดสอบพิมพ์ผ่าน</div>
+                    </li>
+                    <li class="ds-timeline__item" style="--ds-accent:var(--ds-yellow)">
+                      <span class="ds-timeline__dot" aria-hidden="true"></span>
+                      <p class="ds-timeline__title">เริ่มดำเนินการ</p>
+                      <time class="ds-timeline__time" datetime="2025-05-14T10:05">14/05/2568 10:05 น.</time>
+                    </li>
+                    <li class="ds-timeline__item">
+                      <span class="ds-timeline__dot" aria-hidden="true"></span>
+                      <p class="ds-timeline__title">รับเรื่อง / มอบหมายช่าง</p>
+                      <time class="ds-timeline__time" datetime="2025-05-13T09:12">13/05/2568 09:12 น.</time>
+                      <div class="ds-timeline__body">มอบหมาย: วิทยา ทองแก้ว</div>
+                    </li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+            <p class="gx-h">ds-dl — รายการคำจำกัดความ (หน้ารายละเอียด / dialog)</p>
+            <div data-demo="block">
+              <dl class="ds-dl">
+                <dt>เลขที่แจ้งซ่อม</dt><dd class="ds-num">SR-202505-0149</dd>
+                <dt>เรื่อง / อาการ</dt><dd>เครื่องพิมพ์ชั้น 2 กระดาษติด</dd>
+                <dt>ประเภท</dt><dd>เครื่องพิมพ์</dd>
+                <dt>หน่วยงาน</dt><dd>ฝ่ายบัญชี</dd>
+                <dt>สถานะ</dt><dd><span class="ds-pill ds-pill--done">เสร็จสิ้น</span></dd>
+              </dl>
+            </div>
+          </section>
+
+          <!-- ===== 13 EMPTY / LOADING STATES ===== -->
+          <section class="ds-panel" id="cx-states" aria-labelledby="cx-states-t">
+            <h3 class="ds-panel__title" id="cx-states-t">13. สถานะว่าง / โหลด</h3>
+            <div class="ds-grid ds-grid--3">
+              <div>
+                <p class="gx-h">ds-empty</p>
+                <div data-demo="block">
+                  <div class="ds-empty">
+                    <svg class="ds-ic ds-empty__icon" aria-hidden="true"><use href="#ds-i-file-text"></use></svg>
+                    <p class="ds-empty__title">ยังไม่มีใบแจ้งซ่อม</p>
+                    <p class="ds-empty__text">เมื่อมีการแจ้งซ่อม รายการจะแสดงที่นี่</p>
+                    <a class="ds-btn" href="form.html">แจ้งซ่อมใหม่</a>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p class="gx-h">ds-skeleton (ใส่ aria-busy="true" ที่กล่อง)</p>
+                <div data-demo="block">
+                  <div class="ds-panel" aria-busy="true">
+                    <span class="ds-skeleton ds-skeleton--title" aria-hidden="true"></span>
+                    <span class="ds-skeleton ds-skeleton--circle" aria-hidden="true"></span>
+                    <span class="ds-skeleton" aria-hidden="true"></span>
+                    <span class="ds-skeleton" aria-hidden="true"></span>
+                    <span class="ds-skeleton" aria-hidden="true"></span>
+                    <span class="ds-skeleton ds-skeleton--block" aria-hidden="true"></span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p class="gx-h">ds-spinner (--sm 14px · ปกติ · --lg 32px)</p>
+                <div data-demo>
+                  <span class="ds-spinner ds-spinner--sm" aria-hidden="true"></span>
+                  <span class="ds-spinner" role="status" aria-label="กำลังโหลด"></span>
+                  <span class="ds-spinner ds-spinner--lg" role="status" aria-label="กำลังโหลด"></span>
+                  <button type="button" class="ds-btn" disabled><span class="ds-spinner" aria-hidden="true"></span> กำลังบันทึก…</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== 14 DIALOG, CONFIRM, TOAST, TOOLTIP ===== -->
+          <section class="ds-panel" id="cx-overlays" aria-labelledby="cx-overlays-t">
+            <h3 class="ds-panel__title" id="cx-overlays-t">14. หน้าต่าง &amp; การแจ้งผล</h3>
+            <p class="gx-h">ds-dialog — เปิดด้วย data-ds-open="id", ปิดด้วย data-ds-close (หรือคลิกพื้นหลังเมื่อมี data-ds-backdrop-close)</p>
+            <div data-demo>
+              <button type="button" class="ds-btn" data-ds-open="cxDlgNew"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-plus"></use></svg>แจ้งซ่อมใหม่ (dialog)</button>
+              <dialog class="ds-dialog" id="cxDlgNew" aria-labelledby="cxDlgNewT" data-ds-backdrop-close>
+                <form class="ds-dialog__body" method="dialog">
+                  <h2 class="ds-dialog__title" id="cxDlgNewT">แจ้งซ่อมใหม่</h2>
+                  <p class="ds-dialog__text">กรอกข้อมูลให้ครบถ้วน ช่างจะติดต่อกลับภายใน 1 วันทำการ</p>
+                  <label class="ds-field"><span class="ds-field__label">เรื่อง / อาการ</span><input class="ds-input" name="title" required autofocus placeholder="เช่น เครื่องปรับอากาศ ชั้น 3 ไม่เย็น"></label>
+                  <label class="ds-field"><span class="ds-field__label">ประเภทครุภัณฑ์</span><select class="ds-select" name="cat"><option>คอมพิวเตอร์ / Notebook</option><option>เครื่องปรับอากาศ</option><option>เครื่องพิมพ์</option><option>เฟอร์นิเจอร์</option><option>ระบบไฟฟ้า</option><option>อื่น ๆ</option></select></label>
+                  <div class="ds-dialog__actions">
+                    <button type="button" class="ds-btn ds-btn--ghost" data-ds-close>ยกเลิก</button>
+                    <button class="ds-btn" value="ok">บันทึกใบแจ้งซ่อม</button>
+                  </div>
+                </form>
+              </dialog>
+            </div>
+            <p class="gx-h">ยืนยันก่อนทำงาน — แบบไม่เขียน JS (data-ds-confirm) และแบบ JS (DS.confirm)</p>
+            <div data-demo>
+              <button type="button" class="ds-btn ds-btn--danger" data-ds-confirm="ลบใบแจ้งซ่อม SR-202505-0147 ? ไม่สามารถย้อนกลับได้" data-ds-confirm-title="ลบรายการนี้?" data-ds-confirm-ok="ลบ" data-ds-confirm-danger data-cx-deleted><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-trash"></use></svg>ลบ (data-ds-confirm)</button>
+              <button type="button" class="ds-btn ds-btn--ghost" data-cx-confirm>ปิดงาน (DS.confirm)</button>
+              <!-- JS: DS.confirm({title:'ปิดงานซ่อม?', text:'...', okText:'ปิดงาน'}).then(function (ok) { if (ok) form.submit(); }); -->
+            </div>
+            <p class="gx-h">DS.toast — แสดงทีละข้อความ ด้านล่างกลางจอ (ห้ามเขียน .ds-toast เป็น HTML ตรง ๆ)</p>
+            <div data-demo>
+              <button type="button" class="ds-btn ds-btn--ghost" data-cx-toast="info"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-info"></use></svg>toast ทั่วไป</button>
+              <button type="button" class="ds-btn ds-btn--success" data-cx-toast="success"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-check"></use></svg>toast สำเร็จ</button>
+              <button type="button" class="ds-btn ds-btn--danger" data-cx-toast="danger"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-x"></use></svg>toast ผิดพลาด</button>
+              <!-- JS: DS.toast('บันทึกใบแจ้งซ่อม SR-202505-0153 แล้ว', {type:'success'}); -->
+            </div>
+            <p class="gx-h">tooltip — ใส่ data-ds-tip ให้องค์ประกอบใดก็ได้ (แสดงทั้งเมาส์และคีย์บอร์ดโฟกัส)</p>
+            <div data-demo>
+              <button type="button" class="ds-btn ds-btn--ghost" data-ds-tip="ส่งออกเป็นไฟล์ Excel"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-download"></use></svg>ชี้ที่ปุ่มนี้</button>
+              <span class="ds-pill ds-pill--info" tabindex="0" data-ds-tip="รออะไหล่จากผู้จำหน่าย 3–5 วัน">รออะไหล่</span>
+            </div>
+          </section>
+
+          <!-- ===== 15 GRIDS ===== -->
+          <section class="ds-panel" id="cx-grids" aria-labelledby="cx-grids-t">
+            <h3 class="ds-panel__title" id="cx-grids-t">15. กริด</h3>
+            <p class="gx-note">ช่องว่าง 12px ทุกกริด · ย่อตาม breakpoint 1280 / 900 / 620 (ลองย่อหน้าต่าง)</p>
+            <p class="gx-h">ds-grid--2 (1 คอลัมน์ที่ ≤620px)</p>
+            <div data-demo="block">
+              <div class="ds-grid ds-grid--2">
+                <div class="ds-panel">คอลัมน์ 1 / 2</div>
+                <div class="ds-panel">คอลัมน์ 2 / 2</div>
+              </div>
+            </div>
+            <p class="gx-h">ds-grid--3 (1 คอลัมน์ที่ ≤900px)</p>
+            <div data-demo="block">
+              <div class="ds-grid ds-grid--3">
+                <div class="ds-panel">1 / 3</div>
+                <div class="ds-panel">2 / 3</div>
+                <div class="ds-panel">3 / 3</div>
+              </div>
+            </div>
+            <p class="gx-h">ds-grid--4 (2 คอลัมน์ที่ ≤1280px, 1 คอลัมน์ที่ ≤620px)</p>
+            <div data-demo="block">
+              <div class="ds-grid ds-grid--4">
+                <div class="ds-panel">1 / 4</div>
+                <div class="ds-panel">2 / 4</div>
+                <div class="ds-panel">3 / 4</div>
+                <div class="ds-panel">4 / 4</div>
+              </div>
+            </div>
+            <p class="gx-h">ds-grid--aside — เนื้อหาหลัก + แถบข้าง 320px (1 คอลัมน์ที่ ≤900px)</p>
+            <div data-demo="block">
+              <div class="ds-grid ds-grid--aside">
+                <div class="ds-stack">
+                  <div class="ds-panel">เนื้อหาหลัก (ds-stack)</div>
+                  <div class="ds-panel">พาเนลถัดไป</div>
+                </div>
+                <aside class="ds-stack" aria-label="ข้อมูลประกอบ">
+                  <div class="ds-panel">แถบข้าง 320px</div>
+                </aside>
+              </div>
+            </div>
+            <p class="gx-h">ds-grid--dash-a (1.22fr 1fr 1fr) และ ds-grid--dash-b (1.7fr 1.12fr 1fr) — แถวของแดชบอร์ด</p>
+            <div data-demo="block">
+              <div class="ds-stack">
+                <div class="ds-grid ds-grid--dash-a">
+                  <div class="ds-panel">dash-a 1.22fr</div>
+                  <div class="ds-panel">1fr</div>
+                  <div class="ds-panel">1fr</div>
+                </div>
+                <div class="ds-grid ds-grid--dash-b">
+                  <div class="ds-panel">dash-b 1.7fr</div>
+                  <div class="ds-panel">1.12fr</div>
+                  <div class="ds-panel">1fr</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== 16 DROPDOWN: USER MENU ===== -->
+          <section class="ds-panel" id="cx-dropdown" aria-labelledby="cx-dropdown-t">
+            <h3 class="ds-panel__title" id="cx-dropdown-t">16. เมนูผู้ใช้ (dropdown)</h3>
+            <p class="gx-note">ปุ่ม <code>[data-ds-dropdown]</code> เปิด/ปิดองค์ประกอบตาม aria-controls (เปิดได้ทีละอัน) · ปิดเมื่อคลิกนอกกรอบ, กด Esc (โฟกัสกลับที่ปุ่ม), กด Tab ออก หรือเลือกรายการ · ใน role="menu" ใช้ลูกศรขึ้น/ลง, Home, End · ≤620px แสดงเป็นแผ่นเต็มความกว้างใต้แถบบน · JS: <code>DS.dropdown.open(id)</code> / <code>.close()</code> / <code>.toggle(id)</code></p>
+            <p class="gx-h">ds-user (เป็น &lt;button&gt;) + ds-menu — ตัวจริงอยู่มุมขวาบนของหน้านี้ · ออกจากระบบในระบบจริงต้องเป็นฟอร์ม POST + CSRF</p>
+            <div data-demo class="gx-end">
+              <div class="ds-dropdown">
+                <button type="button" class="ds-user" data-ds-dropdown aria-controls="cxUserMenu" aria-expanded="false" aria-haspopup="menu">
+                  <span class="ds-avatar" aria-hidden="true">ส</span>
+                  <span class="ds-user__meta"><b>สมชาย ใจดี</b><small>ผู้จัดการ (SUPERVISOR)</small></span>
+                  <svg class="ds-ic ds-ic--sm ds-user__caret" aria-hidden="true"><use href="#ds-i-chevron-down"></use></svg>
+                </button>
+                <div class="ds-menu" id="cxUserMenu" role="menu" aria-label="เมนูผู้ใช้" hidden>
+                  <div class="ds-menu__header" role="none"><b>สมชาย ใจดี</b><small>somchai.j@example.go.th</small></div>
+                  <a class="ds-menu__item" role="menuitem" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-user"></use></svg>ข้อมูลส่วนตัว</a>
+                  <a class="ds-menu__item" role="menuitem" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-lock"></use></svg>เปลี่ยนรหัสผ่าน</a>
+                  <hr class="ds-menu__sep">
+                  <a class="ds-menu__item ds-menu__item--danger" role="menuitem" href="login.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-logout"></use></svg>ออกจากระบบ</a>
+                </div>
+              </div>
+            </div>
+            <p class="gx-h">ds-menu กับปุ่มอื่น — เมนู “เพิ่มเติม” ของแถวในตาราง (รายการอันตรายแยกด้วย ds-menu__sep)</p>
+            <div data-demo class="gx-end">
+              <div class="ds-dropdown">
+                <button type="button" class="ds-btn ds-btn--ghost ds-btn--icon" data-ds-dropdown aria-controls="cxRowMenu" aria-expanded="false" aria-haspopup="menu" aria-label="การดำเนินการเพิ่มเติม SR-202505-0152"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-more"></use></svg></button>
+                <div class="ds-menu" id="cxRowMenu" role="menu" aria-label="การดำเนินการ SR-202505-0152" hidden>
+                  <a class="ds-menu__item" role="menuitem" href="detail.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-eye"></use></svg>ดูรายละเอียด</a>
+                  <a class="ds-menu__item" role="menuitem" href="form.html?id=SR-202505-0152"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-edit"></use></svg>แก้ไข</a>
+                  <a class="ds-menu__item" role="menuitem" href="print.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-printer"></use></svg>พิมพ์ใบแจ้งซ่อม</a>
+                  <hr class="ds-menu__sep">
+                  <a class="ds-menu__item ds-menu__item--danger" role="menuitem" href="#" data-cx-menu-cancel><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-x-circle"></use></svg>ยกเลิกใบแจ้งซ่อม</a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== 17 NOTIFICATIONS POPOVER ===== -->
+          <section class="ds-panel" id="cx-notif" aria-labelledby="cx-notif-t">
+            <h3 class="ds-panel__title" id="cx-notif-t">17. การแจ้งเตือน (popover)</h3>
+            <p class="gx-note">ds-popover = กล่องเนื้อหาอิสระ (หัว / เนื้อหาเลื่อนได้ / ท้าย) ใช้ ds-dropdown ตัวเดียวกัน · รายการที่ยังไม่อ่านใส่ class <code>is-unread</code> · ปุ่ม <code>[data-ds-notif-readall]</code> ล้าง is-unread และจุดตัวเลขบนปุ่ม แล้วส่งเหตุการณ์ <code>ds:notif-readall</code> ให้ระบบจริงส่งคำขอ “อ่านทั้งหมด” ไปเซิร์ฟเวอร์</p>
+            <p class="gx-h">ปุ่มกระดิ่ง + ds-popover (ตัวจริงอยู่ในแถบบน มี 5 รายการ)</p>
+            <div data-demo class="gx-end">
+              <div class="ds-dropdown">
+                <button type="button" class="ds-icon-btn" data-ds-dropdown aria-controls="cxNotifPanel" aria-expanded="false"
+                        aria-haspopup="true" aria-label="การแจ้งเตือน (ยังไม่อ่าน 2 รายการ)">
+                  <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-bell"></use></svg><span class="ds-icon-btn__dot ds-num" aria-hidden="true">2</span>
+                </button>
+                <div class="ds-popover" id="cxNotifPanel" hidden>
+                  <div class="ds-popover__head">
+                    <h2 class="ds-popover__title">การแจ้งเตือน</h2>
+                    <button type="button" class="ds-link-btn" data-ds-notif-readall>อ่านทั้งหมดแล้ว</button>
+                  </div>
+                  <ul class="ds-notes ds-popover__body">
+                    <li class="ds-notes__item is-unread">
+                      <span class="ds-notes__icon" style="background:var(--ds-red)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-bell"></use></svg></span>
+                      <span><a class="ds-notes__link" href="list.html">มีงานค้างเกินกำหนด 9 รายการ</a><small class="ds-notes__time ds-num">15/05/2568 09:00</small></span>
+                    </li>
+                    <li class="ds-notes__item is-unread">
+                      <span class="ds-notes__icon" style="background:var(--ds-orange)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-wrench"></use></svg></span>
+                      <span><a class="ds-notes__link" href="detail.html">SR-202505-0152 เครื่องปรับอากาศ ชั้น 3 รออะไหล่ (คอมเพรสเซอร์)</a><small class="ds-notes__time ds-num">15/05/2568 08:42</small></span>
+                    </li>
+                    <li class="ds-notes__item">
+                      <span class="ds-notes__icon" style="background:var(--ds-green)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-check"></use></svg></span>
+                      <span><a class="ds-notes__link" href="list.html?status=done">ปิดงาน SR-202505-0147 แล้ว รอผู้แจ้งประเมินความพึงพอใจ</a><small class="ds-notes__time ds-num">13/05/2568 14:05</small></span>
+                    </li>
+                  </ul>
+                  <div class="ds-popover__foot"><a class="ds-link-btn" href="#">ดูการแจ้งเตือนทั้งหมด →</a></div>
+                </div>
+              </div>
+            </div>
+            <p class="gx-note">สีไอคอน: <code>--ds-red</code> เกินกำหนด · <code>--ds-orange</code> เตือน · <code>--ds-blue</code> ข้อมูล · <code>--ds-green</code> เสร็จสิ้น · ไม่มีรายการที่ยังไม่อ่าน = ไม่ต้องใส่ span จุดตัวเลข และตัดจำนวนออกจาก aria-label</p>
+          </section>
+
+          <!-- ===== 18 SIDEBAR NAV GROUP ===== -->
+          <section class="ds-panel" id="cx-navgroup" aria-labelledby="cx-navgroup-t">
+            <h3 class="ds-panel__title" id="cx-navgroup-t">18. เมนูย่อยแถบข้าง (ds-nav__group)</h3>
+            <p class="gx-note">ตัวจริงอยู่ในแถบด้านข้างของหน้านี้ (เมนู “ตั้งค่า”) · ปุ่ม <code>ds-nav__toggle</code> เป็น ds-nav__item ชนิด &lt;button&gt; จึงหน้าตาเหมือนเมนูปกติ · aria-controls = id ของ <code>ds-nav__sub</code> · เมนูย่อยไม่มีไอคอน · เมื่อแถบข้างย่อเป็นแถบไอคอน 72px เมนูย่อยจะซ่อน และการคลิกปุ่มกลุ่มจะขยายแถบข้างก่อนแล้วจึงเปิดกลุ่ม · กล่องสีกรมท่าด้านล่างเป็นเพียงพื้นหลังจำลองของแถบข้าง</p>
+            <p class="gx-h">กลุ่มปิด (ค่าเริ่มต้น) และกลุ่มที่มีหน้าปัจจุบัน — เซิร์ฟเวอร์เรนเดอร์สถานะเปิดเองได้: aria-expanded="true" + has-current + ไม่มี hidden</p>
+            <div data-demo="block" class="gx-navy">
+              <nav class="ds-nav" aria-label="ตัวอย่างเมนูย่อย">
+                <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-db"></use></svg>ข้อมูลหลัก</a>
+                <div class="ds-nav__group">
+                  <button type="button" class="ds-nav__item ds-nav__toggle" aria-expanded="false" aria-controls="cx-nav-settings"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-gear"></use></svg>ตั้งค่า<svg class="ds-ic ds-ic--sm ds-nav__caret" aria-hidden="true"><use href="#ds-i-chevron-down"></use></svg></button>
+                  <div class="ds-nav__sub" id="cx-nav-settings" hidden>
+                    <a class="ds-nav__item ds-nav__subitem" href="#">ตั้งค่าบริษัท</a>
+                    <a class="ds-nav__item ds-nav__subitem" href="#">ตั้งค่าระบบ</a>
+                    <a class="ds-nav__item ds-nav__subitem" href="#">ผู้ใช้งานและสิทธิ์</a>
+                    <a class="ds-nav__item ds-nav__subitem" href="#">บันทึกการใช้งาน</a>
+                  </div>
+                </div>
+                <div class="ds-nav__group">
+                  <button type="button" class="ds-nav__item ds-nav__toggle has-current" aria-expanded="true" aria-controls="cx-nav-reports"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-chart"></use></svg>รายงาน<svg class="ds-ic ds-ic--sm ds-nav__caret" aria-hidden="true"><use href="#ds-i-chevron-down"></use></svg></button>
+                  <div class="ds-nav__sub" id="cx-nav-reports">
+                    <a class="ds-nav__item ds-nav__subitem" href="#">สรุปงานซ่อมรายเดือน</a>
+                    <a class="ds-nav__item ds-nav__subitem" href="#" aria-current="page">ประวัติซ่อมตามครุภัณฑ์</a>
+                    <a class="ds-nav__item ds-nav__subitem" href="#">ผลการประเมินความพึงพอใจ</a>
+                  </div>
+                </div>
+              </nav>
+            </div>
+          </section>
+
+          <!-- ===== 19 COMBOBOX ===== -->
+          <section class="ds-panel" id="cx-combo" aria-labelledby="cx-combo-t">
+            <h3 class="ds-panel__title" id="cx-combo-t">19. ช่องเลือกแบบค้นหา (combobox)</h3>
+            <p class="gx-note">ใช้แทน Select2 สำหรับเลือกค่าเดียว: เขียน &lt;select&gt; ปกติแล้วใส่ <code>data-ds-combobox</code> — ds-ui.js สร้างช่องพิมพ์ค้นหา (role="combobox") ให้เอง · select เดิมยังเป็นแหล่งข้อมูลจริง (id / name / value เดิม, ส่งฟอร์มได้ตามปกติ, เกิด change + input) · รองรับ optgroup และตัวเลือกปิดใช้งาน · พิมพ์เพื่อกรอง, ลูกศรขึ้น/ลง + Enter เลือก, Esc ยกเลิก · ลบข้อความทั้งหมด = เลือกตัวเลือกว่าง (value="") · เพิ่มภายหลัง: <code>DS.combobox.enhance(el)</code></p>
+            <div data-demo="block">
+              <div class="ds-form">
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxComboDept">หน่วยงาน <span class="ds-field__req" aria-hidden="true">*</span></label>
+                  <select class="ds-select" id="cxComboDept" name="dept" required aria-describedby="cxComboDeptHint" data-ds-combobox>
+                    <option value="">— เลือกหน่วยงาน —</option>
+                    <optgroup label="สำนักงานกลาง">
+                      <option value="ADM">ฝ่ายบริหาร</option>
+                      <option value="HR">ฝ่ายบุคคล</option>
+                      <option value="ACC">ฝ่ายบัญชี</option>
+                      <option value="FIN">ฝ่ายการเงิน</option>
+                    </optgroup>
+                    <optgroup label="ฝ่ายปฏิบัติการ">
+                      <option value="IT">ฝ่ายไอที</option>
+                      <option value="MKT">ฝ่ายการตลาด</option>
+                      <option value="PUR">ฝ่ายจัดซื้อ</option>
+                      <option value="RND" disabled>ฝ่ายวิจัยและพัฒนา (ยุบรวมแล้ว)</option>
+                    </optgroup>
+                    <optgroup label="สาขา">
+                      <option value="CNX">สาขาเชียงใหม่</option>
+                      <option value="KKC">สาขาขอนแก่น</option>
+                      <option value="HDY">สาขาหาดใหญ่</option>
+                    </optgroup>
+                  </select>
+                  <p class="ds-field__hint" id="cxComboDeptHint">ลองพิมพ์ “ไอ” หรือ “สาขา” · ตัวเลือกสีจางเลือกไม่ได้</p>
+                </div>
+                <div class="ds-field">
+                  <label class="ds-field__label" for="cxComboTech">ช่างผู้รับผิดชอบ</label>
+                  <select class="ds-select" id="cxComboTech" name="technician" data-ds-combobox>
+                    <option value="">— ยังไม่มอบหมาย —</option>
+                    <option value="T01">วิชัย ช่างเย็น (เครื่องปรับอากาศ)</option>
+                    <option value="T02" selected>ประเสริฐ มั่นคง (ไฟฟ้า)</option>
+                    <option value="T03">วิทยา ทองแก้ว (คอมพิวเตอร์)</option>
+                    <option value="T04">สุรชัย แก้วมณี (ประปา)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <p class="gx-note">ค่าที่ส่งไปกับฟอร์ม: dept = <code id="cxComboDeptOut">""</code> · technician = <code id="cxComboTechOut">"T02"</code>
+              · <button type="button" class="ds-link-btn" data-cx-combo-set>ตั้งค่าด้วยสคริปต์: technician = "T01"</button></p>
+          </section>
+
+          <!-- ===== 20 SPECIAL PAGES (standalone archetypes, links only) ===== -->
+          <section class="ds-panel" id="cx-special" aria-labelledby="cx-special-t">
+            <h3 class="ds-panel__title" id="cx-special-t">20. หน้าพิเศษ (ไม่มีแถบข้าง / แถบบน)</h3>
+            <p class="gx-h">error.html — หน้าข้อผิดพลาด (ต้นแบบเลือกแบบด้วย ?code=403 | 404 | 419 | 500 | 503 · ระบบจริงเรนเดอร์จากเซิร์ฟเวอร์ เช่น Laravel resources/views/errors/404.blade.php)</p>
+            <div class="gx-links">
+              <a class="ds-btn ds-btn--ghost" href="error.html?code=404"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-search"></use></svg>404 ไม่พบหน้าที่ต้องการ</a>
+              <a class="ds-btn ds-btn--ghost" href="error.html?code=403"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-lock"></use></svg>403 ไม่มีสิทธิ์เข้าถึง</a>
+              <a class="ds-btn ds-btn--ghost" href="error.html?code=500"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-alert-triangle"></use></svg>500 ระบบขัดข้อง</a>
+              <a class="ds-btn ds-btn--ghost" href="error.html?code=419"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-clock"></use></svg>419 เซสชันหมดอายุ</a>
+              <a class="ds-btn ds-btn--ghost" href="error.html?code=503"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-gear"></use></svg>503 ปิดปรับปรุงระบบ</a>
+            </div>
+            <p class="gx-h">print.html — เอกสาร A4 “ใบแจ้งซ่อม” SR-202505-0152 (ฟอนต์ Sarabun, ขาว-ดำเสมอทั้งสองธีม, พอดี 1 หน้า A4 · ปุ่ม <code>data-ds-print</code> = window.print())</p>
+            <div class="gx-links">
+              <a class="ds-btn ds-btn--ghost" href="print.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-printer"></use></svg>เปิดใบแจ้งซ่อม (print.html)</a>
+            </div>
+            <p class="gx-h">login.html — หน้าเข้าสู่ระบบ</p>
+            <div class="gx-links">
+              <a class="ds-btn ds-btn--ghost" href="login.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-login"></use></svg>เปิดหน้าเข้าสู่ระบบ (login.html)</a>
+            </div>
+          </section>
+
+        </div>
+        <!-- ===== /gx-sections ===== -->
+      </div>
+      <!-- ===== /GALLERY LAYOUT ===== -->
+
+    </main>
+    <!-- ===== /PAGE CONTENT (everything below is the shared footer) ===== -->
+
+    <!-- ===== FOOTER (shared layout: partials/footer) =====
+         Plain PHP: footer.php, from the closing main tag to the end of the file.
+         Blade: resources/views/partials/footer.blade.php.
+         Version, system name and copyright are per system;
+         ds-footer__spacer pushes the copyright to the right edge. -->
+    <footer class="ds-footer">
+      <span class="ds-footer__brand"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-gear"></use></svg>SMMS</span><span>Version 1.0.0 (MVP)</span><span aria-hidden="true">|</span><span>Smart Maintenance &amp; Asset Service Management System</span><span aria-hidden="true">|</span><span>ต้นแบบ HTML · ข้อมูลทั้งหมดเป็นตัวอย่าง</span>
+      <span class="ds-footer__spacer">© 2025 บริษัท ตัวอย่าง จำกัด | All rights reserved.</span>
+    </footer>
+    <!-- ===== /FOOTER ===== -->
+
+  </div>
+  <!-- ===== /MAIN COLUMN ===== -->
+
+</div>
+<!-- ===== /APP SHELL =====
+     No scripts in the shell: ds-ui.js (in head) wires everything. A page
+     that needs its own script adds it at the end of the page body, never in
+     the shared includes. -->
+
+<!-- ===== PAGE SCRIPT (components.html only) ===== -->
+<script>
+/* PAGE SCRIPT (ตัวอย่าง) — แทนที่ด้วยข้อมูลจากเซิร์ฟเวอร์
+   Gallery behaviour for components.html only (not part of ds-ui.js):
+   1. "ดูโค้ด HTML" blocks generated from every [data-demo] container. This runs at the end of <body>,
+      BEFORE ds-ui.js wires the page on DOMContentLoaded, so each snippet is the authored markup
+      (not the JS-enhanced DOM) and can never drift from the live demo.
+   2. Color swatches / type scale read live values with getComputedStyle (refreshed on theme change).
+   3. Icon grid from DS.iconNames, demo charts via DS.charts, table sort/select, toast/confirm demos,
+      row-menu / mark-all-read / combobox value demos (sections 16-19). */
+(function () {
+  'use strict';
+  var DS = window.DS;
+  if (!DS) return;
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+
+  /* ---------- copy to clipboard (navigator.clipboard, fallback: hidden textarea + execCommand) ---------- */
+  function copyText(text) {
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.className = 'ds-sr-only';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      return ok ? Promise.resolve() : Promise.reject(new Error('copy failed'));
+    }
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text).catch(fallback);
+    return fallback();
+  }
+  function copyWithToast(text, what) {
+    copyText(text).then(function () {
+      DS.toast('คัดลอก' + what + 'แล้ว', { type: 'success' });
+    }, function () {
+      DS.toast('คัดลอกไม่สำเร็จ — เลือกข้อความแล้วกด Ctrl+C', { type: 'danger' });
+    });
+  }
+
+  /* ---------- 1. code snippets from [data-demo] ---------- */
+  var BOOL_ATTR = /\s(disabled|checked|readonly|required|autofocus|multiple|hidden|novalidate|selected|open|data-[\w-]+)=""/g;
+  function cleanSnippet(html) {
+    var lines = html.replace(/\r/g, '').replace(/^\s*\n/, '').replace(/\s+$/, '').split('\n');
+    var min = Infinity;
+    lines.forEach(function (l) { if (l.trim()) min = Math.min(min, l.match(/^ */)[0].length); });
+    if (!isFinite(min)) min = 0;
+    return lines.map(function (l) { return l.slice(Math.min(min, l.match(/^ */)[0].length)); })
+      .join('\n').replace(BOOL_ATTR, ' $1');
+  }
+  $$('[data-demo]').forEach(function (demo, i) {
+    var code = cleanSnippet(demo.innerHTML);
+    var d = document.createElement('details');
+    d.className = 'gx-code';
+    d.innerHTML = '<summary>ดูโค้ด HTML</summary>' +
+      '<div class="gx-code__bar"><button type="button" class="ds-btn ds-btn--ghost">' + DS.icon('copy') + 'คัดลอกโค้ด</button></div>' +
+      '<pre tabindex="0" aria-label="โค้ด HTML ตัวอย่างที่ ' + (i + 1) + '"><code>' + DS.esc(code) + '</code></pre>';
+    d.querySelector('button').addEventListener('click', function () { copyWithToast(code, 'โค้ด HTML '); });
+    demo.insertAdjacentElement('afterend', d);
+  });
+
+  /* ---------- 2. color swatches (token list = ds-ui.css :root) ---------- */
+  var STATUS_TH = { pending: 'รอดำเนินการ', progress: 'กำลังดำเนินการ', done: 'เสร็จสิ้น', cancel: 'ยกเลิก', info: 'รออะไหล่', neutral: 'ฉบับร่าง' };
+  var COLOR_GROUPS = [
+    ['พื้นผิวและตัวอักษร (เปลี่ยนตามธีม)', ['bg', 'surface', 'surface-2', 'line', 'line-strong', 'ink', 'ink-2', 'ink-3', 'link', 'track', 'good', 'bad']],
+    ['สถานะ (คู่ -bg / -ink, เปลี่ยนตามธีม)', ['pending', 'progress', 'done', 'cancel', 'info', 'neutral'], true],
+    ['จานสีข้อมูลและ alias (เหมือนกันทั้งสองธีม)', ['blue', 'sky', 'green', 'yellow', 'orange', 'red', 'purple', 'gray', 'blue-strong', 'green-strong', 'orange-strong', 'purple-strong', 'red-strong', 'primary', 'danger', 'focus']],
+    ['แบรนด์ / Navy (ตายตัวทั้งสองธีม)', ['navy-950', 'navy-900', 'navy-800', 'navy-600', 'nav-active-a', 'nav-active-b', 'nav-active-edge', 'logo', 'on-color', 'on-navy', 'on-navy-2', 'on-navy-3', 'on-navy-lead', 'on-navy-date', 'on-navy-muted', 'hero-glow-a', 'hero-glow-b', 'sun', 'cloud']],
+    ['โปร่งใส / ซ้อนทับ', ['nav-hover', 'nav-sep', 'sidebar-grid', 'overlay', 'scrim', 'tooltip-bg', 'float-edge']]
+  ];
+  var valueEls = [];
+  function swatch(name, pair) {
+    var chip, names;
+    if (pair) {
+      chip = '<span class="gx-swatch__chip" style="background:var(--ds-' + name + '-bg);color:var(--ds-' + name + '-ink)">' + STATUS_TH[name] + '</span>';
+      names = ['--ds-' + name + '-bg', '--ds-' + name + '-ink'];
+    } else {
+      chip = '<span class="gx-swatch__chip" style="background:var(--ds-' + name + ')"></span>';
+      names = ['--ds-' + name];
+    }
+    return '<div class="gx-swatch">' + chip + names.map(function (n) {
+      return '<code class="gx-swatch__name">' + n + '</code><code class="gx-swatch__val" data-cx-var="' + n + '"></code>';
+    }).join('') + '</div>';
+  }
+  $('#cxSwatches').innerHTML = COLOR_GROUPS.map(function (g) {
+    return '<p class="gx-h">' + DS.esc(g[0]) + '</p><div class="gx-swatches">' +
+      g[1].map(function (n) { return swatch(n, g[2]); }).join('') + '</div>';
+  }).join('');
+  valueEls = $$('[data-cx-var]');
+
+  /* ---------- 2b. type scale ---------- */
+  var SIZES = [['3xl', 'ค่า KPI, หัวข้อ hero'], ['2xl', 'โลโก้แถบบน'], ['xl', 'หัวข้อ dialog'], ['lg', 'หัวข้อพาเนล'],
+    ['md', 'เนื้อหา (body)'], ['sm', 'ปุ่ม, ป้ายฟอร์ม, เครื่องมือพาเนล'], ['xs', 'ข้อความรอง, ท้ายการ์ด KPI'], ['2xs', 'ขนาดเล็กสุด']];
+  var WEIGHTS = [['light', 'เนื้อหา'], ['regular', 'ค่ากลาง'], ['medium', 'หัวข้อ, strong, th'], ['bold', 'โลโก้ / wordmark เท่านั้น']];
+  var SAMPLE = 'แจ้งซ่อมเครื่องปรับอากาศ ชั้น 3 · SR-202505-0153';
+  function typeRow(token, note, style) {
+    return '<div class="gx-type__row"><div class="gx-type__meta"><b>' + token + '</b><br><span data-cx-type></span> · ' + note + '</div>' +
+      '<div class="gx-type__sample" style="' + style + '">' + SAMPLE + '</div></div>';
+  }
+  $('#cxTypeSizes').innerHTML = SIZES.map(function (s) {
+    return typeRow('--ds-fs-' + s[0], s[1], 'font-size:var(--ds-fs-' + s[0] + ')');
+  }).join('');
+  $('#cxTypeWeights').innerHTML = WEIGHTS.map(function (w) {
+    return typeRow('--ds-fw-' + w[0], w[1], 'font-size:var(--ds-fs-lg);font-weight:var(--ds-fw-' + w[0] + ')');
+  }).join('');
+
+  function refreshTokens() {
+    var cs = getComputedStyle(document.documentElement);
+    valueEls.forEach(function (el) { el.textContent = cs.getPropertyValue(el.getAttribute('data-cx-var')).trim() || '(ไม่ได้กำหนด)'; });
+    $$('[data-cx-type]').forEach(function (el) {
+      var s = getComputedStyle(el.parentNode.nextElementSibling);
+      el.textContent = s.fontSize + ' / ' + s.fontWeight;
+    });
+    var ic = $('[data-cx-theme] use');
+    if (ic) ic.setAttribute('href', DS.theme.get() === 'dark' ? '#ds-i-sun' : '#ds-i-moon');
+  }
+  refreshTokens();
+  document.addEventListener('ds:themechange', refreshTokens);
+  try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', refreshTokens); } catch (e) { /* old Safari */ }
+  $('[data-cx-theme]').addEventListener('click', function () { DS.theme.toggle(); });
+
+  /* ---------- 3. icon grid (click = copy the icon markup) ---------- */
+  $('#cxIconCount').textContent = DS.iconNames.length;
+  $('#cxIcons').innerHTML = DS.iconNames.map(function (n) {
+    return '<button type="button" class="gx-icon" data-cx-icon="' + DS.esc(n) + '" aria-label="คัดลอกโค้ดไอคอน ' + DS.esc(n) + '">' +
+      DS.icon(n) + '<span>' + DS.esc(n) + '</span></button>';
+  }).join('');
+  $('#cxIcons').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-cx-icon]');
+    if (!b) return;
+    var n = b.getAttribute('data-cx-icon');
+    copyWithToast('<svg class="ds-ic" aria-hidden="true"><use href="#ds-i-' + n + '"></use></svg>', 'ไอคอน ' + n + ' ');
+  });
+
+  /* ---------- 10. charts (sample data = the dashboard's 128 requests) ---------- */
+  DS.charts.donut('#cxDonut', [
+    { label: 'รอดำเนินการ', value: 18, color: '--ds-blue' },
+    { label: 'กำลังดำเนินการ', value: 22, color: '--ds-yellow' },
+    { label: 'เสร็จสิ้น', value: 81, color: '--ds-green' },
+    { label: 'ยกเลิก', value: 7, color: '--ds-red' }
+  ], { legend: '#cxDonutLg', center: 128, centerLabel: 'รายการ' });
+  DS.charts.pie('#cxPie', [
+    { label: 'สำนักงานกลาง', value: 36, color: '--ds-blue' },
+    { label: 'ฝ่ายไอที', value: 26, color: '--ds-green' },
+    { label: 'ฝ่ายบัญชี', value: 19, color: '--ds-yellow' },
+    { label: 'ฝ่ายบุคคล', value: 15, color: '--ds-orange' },
+    { label: 'ฝ่ายการตลาด', value: 13, color: '--ds-red' },
+    { label: 'อื่น ๆ', value: 19, color: '--ds-gray' }
+  ], { legend: '#cxPieLg' });
+  DS.charts.bars('#cxBars', [
+    { label: 'คอมพิวเตอร์ / Notebook', value: 32, color: '--ds-blue' },
+    { label: 'เครื่องปรับอากาศ', value: 24, color: '--ds-sky' },
+    { label: 'เครื่องพิมพ์', value: 18, color: '--ds-green' },
+    { label: 'เฟอร์นิเจอร์', value: 15, color: '--ds-yellow' },
+    { label: 'ระบบไฟฟ้า', value: 12, color: '--ds-orange' },
+    { label: 'อื่น ๆ', value: 27, color: '--ds-gray' }
+  ]);
+
+  /* ---------- 11. table: sortable headers, select all, delete row after confirm ---------- */
+  var table = $('#cxTable');
+  function sortKey(td) {
+    var t = td.textContent.trim();
+    var m = t.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    return m ? m[3] + m[2] + m[1] : t;
+  }
+  table.addEventListener('click', function (e) {
+    var btn = e.target.closest('.ds-table__sort');
+    if (btn) {
+      var th = btn.closest('th');
+      var dir = th.getAttribute('aria-sort') === 'ascending' ? 'descending' : 'ascending';
+      $$('th[aria-sort]', table).forEach(function (h) { h.setAttribute('aria-sort', 'none'); });
+      th.setAttribute('aria-sort', dir);
+      var col = th.cellIndex, body = table.tBodies[0];
+      $$('tr', body).sort(function (a, b) {
+        var r = sortKey(a.cells[col]).localeCompare(sortKey(b.cells[col]), 'th', { numeric: true });
+        return dir === 'ascending' ? r : -r;
+      }).forEach(function (tr) { body.appendChild(tr); });
+      return;
+    }
+    var del = e.target.closest('[data-ds-confirm]');   /* reached only after the user pressed OK */
+    if (del) {
+      var row = del.closest('tr');
+      DS.toast('ลบ ' + row.cells[1].textContent.trim() + ' แล้ว (ตัวอย่าง)', { type: 'success' });
+      row.parentNode.removeChild(row);
+    }
+  });
+  function syncSelection() {
+    var boxes = $$('tbody .ds-table__check input', table);
+    var on = boxes.filter(function (b) { return b.checked; }).length;
+    var all = $('thead .ds-table__check input', table);
+    all.checked = on > 0 && on === boxes.length;
+    all.indeterminate = on > 0 && on < boxes.length;
+    boxes.forEach(function (b) { b.closest('tr').classList.toggle('is-selected', b.checked); });
+  }
+  table.addEventListener('change', function (e) {
+    if (!e.target.matches('.ds-table__check input')) return;
+    if (e.target.closest('thead')) $$('tbody .ds-table__check input', table).forEach(function (b) { b.checked = e.target.checked; });
+    syncSelection();
+  });
+  syncSelection();
+
+  /* ---------- 14. dialog result, confirm, toasts ---------- */
+  $('#cxDlgNew').addEventListener('close', function () {
+    if (this.returnValue === 'ok') DS.toast('บันทึกใบแจ้งซ่อม SR-202505-0154 แล้ว (ตัวอย่าง)', { type: 'success' });
+    this.returnValue = '';
+    $('form', this).reset();
+  });
+  $('[data-cx-deleted]').addEventListener('click', function () {   /* runs only after OK in the data-ds-confirm dialog */
+    DS.toast('ลบ SR-202505-0147 แล้ว (ตัวอย่าง)', { type: 'success' });
+  });
+  $('[data-cx-confirm]').addEventListener('click', function () {
+    DS.confirm({ title: 'ปิดงานซ่อม?', text: 'ยืนยันปิดงาน SR-202505-0152 และแจ้งผลผู้แจ้ง', okText: 'ปิดงาน', cancelText: 'ยกเลิก' })
+      .then(function (ok) { DS.toast(ok ? 'ปิดงาน SR-202505-0152 แล้ว' : 'ยกเลิกการปิดงาน', { type: ok ? 'success' : 'info' }); });
+  });
+  var TOASTS = {
+    info: 'ระบบจะปิดปรับปรุง 20/05/2568 เวลา 18:00 น.',
+    success: 'บันทึกใบแจ้งซ่อม SR-202505-0153 แล้ว',
+    danger: 'บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'
+  };
+  $$('[data-cx-toast]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var t = b.getAttribute('data-cx-toast');
+      DS.toast(TOASTS[t], { type: t });
+    });
+  });
+
+  /* ---------- 16. row menu demo action ---------- */
+  $('[data-cx-menu-cancel]').addEventListener('click', function (e) {
+    e.preventDefault();
+    DS.toast('ตัวอย่าง: ยกเลิกใบแจ้งซ่อม SR-202505-0152 (ระบบจริงให้ยืนยันด้วย DS.confirm ก่อน)', { type: 'info' });
+  });
+
+  /* ---------- 17. "mark all read": production POSTs to the server here ---------- */
+  document.addEventListener('ds:notif-readall', function () {
+    DS.toast('อ่านการแจ้งเตือนทั้งหมดแล้ว (ตัวอย่าง: ระบบจริงส่งคำขอไปเซิร์ฟเวอร์)', { type: 'success' });
+  });
+
+  /* ---------- 19. combobox: show the native select values (the real form data) ---------- */
+  function showComboValue(id) {
+    var sel = document.getElementById(id), out = document.getElementById(id + 'Out');
+    if (sel && out) out.textContent = JSON.stringify(sel.value);
+  }
+  ['cxComboDept', 'cxComboTech'].forEach(function (id) {
+    var sel = document.getElementById(id);
+    if (!sel) return;
+    sel.addEventListener('change', function () { showComboValue(id); });
+    showComboValue(id);
+  });
+  $('[data-cx-combo-set]').addEventListener('click', function () {
+    var sel = document.getElementById('cxComboTech');
+    sel.value = 'T01';                                 /* the combobox follows the native value */
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+
+  /* ---------- demo forms never submit (method="dialog" forms are left alone) ---------- */
+  document.addEventListener('submit', function (e) {
+    var f = e.target;
+    if (!f.closest('[data-demo]') || (f.getAttribute('method') || '').toLowerCase() === 'dialog') return;
+    e.preventDefault();
+    DS.toast('ตัวอย่าง: ฟอร์มนี้ไม่ได้ส่งข้อมูลจริง', { type: 'info' });
+  });
+})();
+</script>
+</body>
+</html>

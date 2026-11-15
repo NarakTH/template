@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แดชบอร์ดภาพรวม | SMMS แจ้งซ่อม</title>
+<!-- =========================================================================
+  DS UI Kit : starter.html (canonical page shell)
+
+  Every page of the kit, and every page of a system restyled with the kit,
+  copies its shell from this file. Per page, change ONLY:
+    1. the <title>
+    2. which .ds-nav__item carries aria-current="page" (see SIDEBAR below)
+    3. the content inside <main class="ds-content"> (breadcrumb, h2, panels)
+  The shell has no page-specific CSS or JS. All styling lives in
+  ../assets/ds-ui.css, all behaviour in ../assets/ds-ui.js (window.DS).
+
+  Splitting the shell into shared includes (full recipes: AI-UI-GUIDE.md)
+    Plain PHP
+      partials/header.php = from the DOCTYPE down to and including the
+                            opening main tag (head, skip link, sidebar, topbar)
+      partials/footer.php = from the closing main tag to the end (footer,
+                            closing wrappers, body, html)
+      A page sets $pageTitle and $active, includes header.php, prints its
+      own content, then includes footer.php.
+    Laravel Blade
+      resources/views/components/layouts/app.blade.php holds this whole file;
+      the page content is the component slot (it replaces the placeholder
+      page head + panel inside main); the regions marked SIDEBAR, TOPBAR and
+      FOOTER become partials/sidebar.blade.php, partials/header.blade.php and
+      partials/footer.blade.php. The <title> comes from a title prop.
+
+  These comments intentionally contain no PHP tags and no live Blade
+  directives, so the file stays inert when copied into a .php or .blade.php
+  file. The one Blade snippet (logout form, TOPBAR user menu) is wrapped in
+  a Blade comment, so Blade strips it instead of running it.
+  Asset paths: kit pages use ../assets/ ; other systems on this IIS host
+  link the shared copy at /template/assets/ds-ui.css and ds-ui.js.
+========================================================================== -->
+<!-- Kanit web font: the kit standard font (same request as the original).
+     The preconnects only speed it up. No color-scheme meta on purpose:
+     native widgets stay light in both themes, like the original. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap">
+<link rel="stylesheet" href="../assets/ds-ui.css">
+<!-- ds-ui.js stays in <head> WITHOUT defer/async: it applies the saved theme
+     (html[data-theme], localStorage "ds-theme") before first paint, then on
+     DOMContentLoaded injects the icon sprite and wires sidebar, tooltips,
+     dialogs, tabs and the theme toggle. -->
+<script src="../assets/ds-ui.js"></script>
+</head>
+<!-- class="ds-body" is part of the shell: margin 0 + page background
+     (needed by browsers without :has(), e.g. Firefox ESR 115). -->
+<body class="ds-body">
+
+<!-- ===== SKIP LINK (shared layout: start of header.php / app.blade.php) =====
+     First focusable element on every page; jumps past sidebar and topbar to
+     main#ds-main. Visible only while focused. -->
+<a class="ds-skip-link" href="#ds-main">ข้ามไปยังเนื้อหาหลัก</a>
+
+<!-- ===== APP SHELL (shared layout) =====
+     ds-app = 2-column grid (225px sidebar + main column). It opens in
+     header.php and closes in footer.php (Blade: both ends in the layout). -->
+<div class="ds-app">
+
+  <!-- ===== SIDEBAR (shared layout: partials/sidebar) =====
+       Plain PHP: part of header.php (or partials/sidebar.php included by it).
+       Blade: resources/views/partials/sidebar.blade.php.
+       At 900px and below it becomes off-canvas; ds-ui.js toggles .is-open
+       from the topbar menu button (aria-controls="ds-sidebar"), so keep
+       id="ds-sidebar" unchanged. -->
+  <aside class="ds-sidebar" id="ds-sidebar" aria-label="แถบด้านข้าง">
+
+    <!-- Brand: gear + check mark (cleaned: the invisible junk path and the
+         "26.500"-style number artifacts are removed; colours come from
+         tokens). Replace the mark, name and tagline per system. -->
+    <div class="ds-sidebar__brand">
+      <svg class="ds-sidebar__logo" width="50" height="50" viewBox="0 0 48 48" aria-hidden="true">
+        <path style="fill:var(--ds-logo)" d="M20.5 2h7l1.1 5.4 3.2 1.3 4.6-3 5 4.9-3.1 4.6 1.3 3.2L45 19.5v7l-5.4 1.1-1.3 3.2 3.1 4.6-5 5-4.6-3.1-3.2 1.3L27.5 44h-7l-1.1-5.4-3.2-1.3-4.6 3.1-5-5 3.1-4.6-1.3-3.2L3 26.5v-7l5.4-1.1 1.3-3.2-3.1-4.6 5-4.9 4.6 3 3.2-1.3z"/>
+        <circle style="fill:var(--ds-navy-950)" cx="24" cy="23" r="10.5"/>
+        <path style="stroke:var(--ds-on-color)" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M18.5 23.5l4 4 7.5-8.5"/>
+      </svg>
+      <div>
+        <b class="ds-sidebar__name">SMMS</b>
+        <small class="ds-sidebar__tagline">Smart Maintenance &amp;<br>Asset Service Management</small>
+      </div>
+    </div>
+
+    <!-- Main navigation: real links between pages (no JS routing).
+         aria-current="page" goes on exactly ONE item, the one for the page
+         being shown: dashboard.html = แดชบอร์ดภาพรวม, form.html = แจ้งซ่อมใหม่,
+         list.html = รายการแจ้งซ่อม, detail.html = งานของฉัน,
+         components.html = คลังคอมโพเนนต์ (UI Kit).
+         This page: แดชบอร์ดภาพรวม carries aria-current="page".
+         Example: <a class="ds-nav__item" href="list.html" aria-current="page">
+           Plain PHP: each page sets $active (e.g. 'list') before including
+             header.php; every item prints aria-current="page" only when
+             $active equals its own key.
+           Blade: in partials/sidebar.blade.php print the attribute when
+             request()->routeIs('repairs.*') (the item's route pattern) is true.
+         href="#" = page not built in this kit; point it at the real URL.
+         ds-nav__count = optional server-rendered counter (here: overdue
+         requests); leave the span out when the count is 0.
+         ds-nav__sep = divider between menu groups; ds-nav__label (optional)
+         = small group heading.
+         ds-nav__group = collapsible sub-menu: a button.ds-nav__toggle (it IS
+         a ds-nav__item, so it looks like one; aria-controls = the id of its
+         ds-nav__sub) + div.ds-nav__sub holding ds-nav__item ds-nav__subitem
+         links. Sub items have no icon (they only show in the full sidebar;
+         the 72px icon rail hides them, and a click on the toggle there
+         first expands the sidebar, then opens the group).
+         Current sub page: put aria-current="page" on the SUB item only (never
+         on the toggle). ds-ui.js then opens that group on load and adds
+         class has-current to its toggle. To avoid a closed-then-open flash,
+         the server can render the open state itself on the same condition:
+         aria-expanded="true" + class has-current on the toggle and NO hidden
+         attribute on the ds-nav__sub.
+           Plain PHP: each settings page sets $active (e.g. 'settings.users');
+             the group is open when $active starts with 'settings.'.
+           Blade: open the group when request()->routeIs('settings.*') is
+             true; each sub item gets aria-current="page" when
+             request()->routeIs('settings.users') (its own route) is true.
+         Other groups: copy the block with a new id (ds-nav-reports, ...). -->
+    <nav class="ds-nav" aria-label="เมนูหลัก">
+      <a class="ds-nav__item" href="dashboard.html" aria-current="page"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-home"></use></svg>แดชบอร์ดภาพรวม</a>
+      <a class="ds-nav__item" href="form.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-user"></use></svg>แจ้งซ่อมใหม่</a>
+      <a class="ds-nav__item" href="list.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-doc"></use></svg>รายการแจ้งซ่อม <span class="ds-nav__count ds-num">9<span class="ds-sr-only"> รายการเกินกำหนด</span></span></a>
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-printer"></use></svg>ครุภัณฑ์ / สินทรัพย์</a>
+      <a class="ds-nav__item" href="detail.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-task"></use></svg>งานของฉัน</a>
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-cal"></use></svg>ปฏิทินงาน</a>
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-doc"></use></svg>รายงาน</a>
+      <hr class="ds-nav__sep">
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-db"></use></svg>ข้อมูลหลัก</a>
+      <div class="ds-nav__group">
+        <button type="button" class="ds-nav__item ds-nav__toggle" aria-expanded="false" aria-controls="ds-nav-settings"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-gear"></use></svg>ตั้งค่า<svg class="ds-ic ds-ic--sm ds-nav__caret" aria-hidden="true"><use href="#ds-i-chevron-down"></use></svg></button>
+        <div class="ds-nav__sub" id="ds-nav-settings" hidden>
+          <a class="ds-nav__item ds-nav__subitem" href="#">ตั้งค่าบริษัท</a>
+          <a class="ds-nav__item ds-nav__subitem" href="#">ตั้งค่าระบบ</a>
+          <a class="ds-nav__item ds-nav__subitem" href="#">ผู้ใช้งานและสิทธิ์</a>
+          <a class="ds-nav__item ds-nav__subitem" href="#">บันทึกการใช้งาน</a>
+        </div>
+      </div>
+      <a class="ds-nav__item" href="components.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-image"></use></svg>คลังคอมโพเนนต์ (UI Kit)</a>
+    </nav>
+
+    <!-- Sidebar quote: decorative slogan pinned to the bottom of the sidebar.
+         Keep, replace or remove per system. -->
+    <div class="ds-sidebar__quote"><p>“ดูแลทุกสินทรัพย์<br>ให้พร้อมใช้งาน<small>เพื่อองค์กรที่เดินหน้าได้ไกลกว่า”</small></p><em>Maintain Today<br>for a Better Tomorrow</em></div>
+  </aside>
+  <!-- ===== /SIDEBAR ===== -->
+
+  <!-- ===== MAIN COLUMN (shared layout) =====
+       ds-main stacks topbar, content and footer. Opens in header.php and
+       closes in footer.php (Blade: both ends in the layout). -->
+  <div class="ds-main">
+
+    <!-- ===== TOPBAR (shared layout: partials/header) =====
+         Plain PHP: part of header.php (or partials/topbar.php included by it).
+         Blade: resources/views/partials/header.blade.php.
+         Fixed order: menu button (visible only at 900px and below), logo,
+         system title (h1), search, theme toggle, notifications, user.
+         Name / role / initial / counts come from the session and the server. -->
+    <header class="ds-topbar">
+      <!-- Hamburger: ds-ui.js opens/closes the off-canvas sidebar and keeps
+           aria-expanded in sync; Esc and an outside click close it. -->
+      <button type="button" class="ds-icon-btn ds-menu-btn" data-ds-sidebar-toggle aria-controls="ds-sidebar" aria-expanded="false" aria-label="เปิดเมนู"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-menu"></use></svg></button>
+      <span class="ds-topbar__logo"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-gear"></use></svg>SMMS</span>
+      <!-- The page's single h1 = the system name. The page's own title is the
+           h2 in ds-page-head. -->
+      <h1 class="ds-topbar__title">ระบบบริหารจัดการงานแจ้งซ่อมและบำรุงรักษาพัสดุครุภัณฑ์องค์กร</h1>
+      <!-- Search button: shown at 620px and below only (one compact topbar
+           row); ds-ui.js opens the search field as a full-width row under
+           the topbar. Keep it right BEFORE the ds-search. -->
+      <button type="button" class="ds-icon-btn ds-search-btn" data-ds-search-toggle aria-controls="ds-search" aria-expanded="false" aria-label="ค้นหา"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-search"></use></svg></button>
+      <!-- Global search. To submit it, swap the label for
+           form class="ds-search" role="search" action="list.html" (GET);
+           the input already has name="q". -->
+      <label class="ds-search" id="ds-search"><input type="search" name="q" placeholder="ค้นหาใบแจ้งซ่อม, ครุภัณฑ์, สถานที่, ผู้แจ้ง..." aria-label="ค้นหา" autocomplete="off"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-search"></use></svg></label>
+      <!-- Theme toggle: ds-ui.js flips html[data-theme], saves it and swaps
+           the sun/moon icon. No other markup needed. -->
+      <button type="button" class="ds-icon-btn" data-ds-theme-toggle aria-label="สลับโหมดสว่าง/มืด" data-ds-tip="สลับโหมดสว่าง / มืด"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-sun"></use></svg></button>
+      <!-- Notifications popover (ds-dropdown). ds-ui.js opens the element
+           named by aria-controls, keeps aria-expanded in sync and closes it
+           on outside click / Esc / Tab out; only one dropdown is open at a
+           time. Server-rendered: the dot = unread count (leave the span out
+           when 0 and drop the count from aria-label), newest items first,
+           unread items get class is-unread. "อ่านทั้งหมดแล้ว"
+           (data-ds-notif-readall) clears is-unread + the dot in the page and
+           emits 'ds:notif-readall'; production listens for it and POSTs the
+           "mark all read" request. Icon colours: --ds-red = overdue,
+           --ds-orange = warning, --ds-blue = info, --ds-green = done. -->
+      <div class="ds-dropdown">
+        <button type="button" class="ds-icon-btn" data-ds-dropdown aria-controls="ds-notif-panel" aria-expanded="false"
+                aria-haspopup="true" aria-label="การแจ้งเตือน (ยังไม่อ่าน 3 รายการ)">
+          <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-bell"></use></svg><span class="ds-icon-btn__dot ds-num" aria-hidden="true">3</span>
+        </button>
+        <div class="ds-popover" id="ds-notif-panel" hidden>
+          <div class="ds-popover__head">
+            <h2 class="ds-popover__title">การแจ้งเตือน</h2>
+            <button type="button" class="ds-link-btn" data-ds-notif-readall>อ่านทั้งหมดแล้ว</button>
+          </div>
+          <ul class="ds-notes ds-popover__body">
+            <li class="ds-notes__item is-unread">
+              <span class="ds-notes__icon" style="background:var(--ds-red)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-bell"></use></svg></span>
+              <span><a class="ds-notes__link" href="list.html">มีงานค้างเกินกำหนด 9 รายการ</a><small class="ds-notes__time ds-num">15/05/2568 09:00</small></span>
+            </li>
+            <li class="ds-notes__item is-unread">
+              <span class="ds-notes__icon" style="background:var(--ds-orange)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-wrench"></use></svg></span>
+              <span><a class="ds-notes__link" href="detail.html">SR-202505-0152 เครื่องปรับอากาศ ชั้น 3 รออะไหล่ (คอมเพรสเซอร์)</a><small class="ds-notes__time ds-num">15/05/2568 08:42</small></span>
+            </li>
+            <li class="ds-notes__item is-unread">
+              <span class="ds-notes__icon" style="background:var(--ds-blue)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-doc"></use></svg></span>
+              <span><a class="ds-notes__link" href="list.html?status=pending">มีใบแจ้งซ่อมใหม่ 4 รายการ รอมอบหมายช่าง</a><small class="ds-notes__time ds-num">14/05/2568 16:30</small></span>
+            </li>
+            <li class="ds-notes__item">
+              <span class="ds-notes__icon" style="background:var(--ds-green)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-check"></use></svg></span>
+              <span><a class="ds-notes__link" href="list.html?status=done">ปิดงาน SR-202505-0147 แล้ว รอผู้แจ้งประเมินความพึงพอใจ</a><small class="ds-notes__time ds-num">13/05/2568 14:05</small></span>
+            </li>
+            <li class="ds-notes__item">
+              <span class="ds-notes__icon" style="background:var(--ds-blue)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-cal"></use></svg></span>
+              <span><a class="ds-notes__link" href="dashboard.html">ครุภัณฑ์ 6 รายการถึงรอบบำรุงรักษา (PM) ภายในสัปดาห์นี้</a><small class="ds-notes__time ds-num">12/05/2568 10:15</small></span>
+            </li>
+          </ul>
+          <div class="ds-popover__foot"><a class="ds-link-btn" href="#">ดูการแจ้งเตือนทั้งหมด →</a></div>
+        </div>
+      </div>
+      <!-- User menu (ds-dropdown, role="menu"): avatar initial + name and
+           role from the session; ds-user__meta is visually hidden at 900px
+           and below (still read by screen readers). Arrow keys / Home / End
+           move between menu items; opening with the keyboard focuses the
+           first item.
+           Logout: production MUST be a POST form with a CSRF token (never a
+           GET link). Replace the logout link below with the snippet inside
+           this Blade comment (it is stripped by Blade, so it never runs here):
+           {{-- <form method="POST" action="{{ route('logout') }}" role="none">
+                  @csrf
+                  <button type="submit" class="ds-menu__item ds-menu__item--danger" role="menuitem">
+                    <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-logout"></use></svg>ออกจากระบบ</button>
+                </form> --}}
+           Plain PHP: the same form with action="logout.php" and a hidden
+           input name="_token" holding the session's CSRF token. -->
+      <div class="ds-dropdown">
+        <button type="button" class="ds-user" data-ds-dropdown aria-controls="ds-user-menu" aria-expanded="false" aria-haspopup="menu">
+          <span class="ds-avatar" aria-hidden="true">ส</span>
+          <span class="ds-user__meta"><b>สมชาย ใจดี</b><small>ผู้จัดการ (SUPERVISOR)</small></span>
+          <svg class="ds-ic ds-ic--sm ds-user__caret" aria-hidden="true"><use href="#ds-i-chevron-down"></use></svg>
+        </button>
+        <div class="ds-menu" id="ds-user-menu" role="menu" aria-label="เมนูผู้ใช้" hidden>
+          <div class="ds-menu__header" role="none"><b>สมชาย ใจดี</b><small>somchai.j@example.go.th</small></div>
+          <a class="ds-menu__item" role="menuitem" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-user"></use></svg>ข้อมูลส่วนตัว</a>
+          <a class="ds-menu__item" role="menuitem" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-lock"></use></svg>เปลี่ยนรหัสผ่าน</a>
+          <hr class="ds-menu__sep">
+          <!-- production: logout must be a POST form with CSRF (Laravel). Template uses a link to login.html -->
+          <a class="ds-menu__item ds-menu__item--danger" role="menuitem" href="login.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-logout"></use></svg>ออกจากระบบ</a>
+        </div>
+      </div>
+    </header>
+    <!-- ===== /TOPBAR ===== -->
+
+    <!-- ===== PAGE CONTENT (per page; everything above is the shared header) =====
+         Plain PHP: header.php ends with the opening main tag below; the page
+         prints its content; footer.php starts at the closing main tag.
+         Blade: this main element stays in the layout and the page content is
+         the component slot, which replaces the placeholder page head + panel.
+         id="ds-main" (ds- prefixed, never a bare "main") is the skip-link
+         target; tabindex="-1" lets it take focus. -->
+    <main class="ds-content" id="ds-main" tabindex="-1">
+
+      <!-- ===== DASHBOARD PAGE =====
+           Faithful refactor of smms-dashboard_2.html on the kit. The dashboard
+           has no ds-page-head: the hero banner below carries the page title
+           (h2). Blocks, top to bottom: HERO ROW, KPI ROW, CHART ROW (dash-a),
+           WORK ROW (dash-b). Everything marked "PAGE SCRIPT" is demo data that
+           the server replaces. -->
+
+      <!-- ===== HERO ROW (hero banner + date card) ===== -->
+      <section class="ds-hero-row" aria-label="ภาพรวมระบบ">
+        <!-- Hero banner: building art (tokens only), title, lead, 4 points,
+             quote (hidden at 900px and below). -->
+        <div class="ds-hero">
+          <svg class="ds-hero__art" viewBox="0 0 600 160" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+            <defs>
+              <linearGradient id="dashHeroGlow" x1="0" x2="1"><stop offset="0" style="stop-color:var(--ds-navy-800)" stop-opacity="0"/><stop offset=".5" style="stop-color:var(--ds-hero-glow-a)" stop-opacity=".55"/><stop offset="1" style="stop-color:var(--ds-hero-glow-b)" stop-opacity=".8"/></linearGradient>
+              <pattern id="dashHeroWin" width="26" height="20" patternUnits="userSpaceOnUse"><rect width="26" height="20" fill="none" style="stroke:var(--ds-navy-950)" stroke-width="2.5"/></pattern>
+            </defs>
+            <polygon points="250,160 330,-10 600,-40 600,160" fill="url(#dashHeroGlow)"/><polygon points="250,160 330,-10 600,-40 600,160" fill="url(#dashHeroWin)" opacity=".7"/>
+            <polygon points="120,160 200,40 300,20 260,160" fill="url(#dashHeroGlow)" opacity=".5"/><polygon points="120,160 200,40 300,20 260,160" fill="url(#dashHeroWin)" opacity=".45"/>
+          </svg>
+          <h2 class="ds-hero__title">สินทรัพย์พร้อมใช้ งานต่อเนื่อง องค์กรเดินหน้า</h2>
+          <p class="ds-hero__lead">ขับเคลื่อนการบริการงานซ่อมบำรุงรวดเร็ว แม่นยำ ตรวจสอบได้ทุกขั้นตอน</p>
+          <ul class="ds-hero__points">
+            <li><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-clock"></use></svg>ลดเวลาซ่อม</li>
+            <li><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-task"></use></svg>ติดตามได้ทุกขั้นตอน</li>
+            <li><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-db"></use></svg>ข้อมูลครบถ้วน</li>
+            <li><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-cal"></use></svg>รายงานแบบ Real-time</li>
+          </ul>
+          <div class="ds-hero__quote" aria-hidden="true">“ดูแลวันนี้<span>เพื่อพรุ่งนี้ที่ดีกว่า”</span></div>
+        </div>
+        <!-- Date card: the date line is written by PAGE SCRIPT from TODAY (the
+             same date the demo data uses); the time is live (data-ds-clock).
+             On a real system drop the page script part and use
+             data-ds-clock="date" on the date line too. Weather = sample. -->
+        <div class="ds-datecard">
+          <div class="ds-datecard__date" id="dashDate">วันพฤหัสบดีที่ <b>15 พฤษภาคม 2025</b></div>
+          <time class="ds-datecard__time ds-num" data-ds-clock="time">10:24 น.</time>
+          <div class="ds-datecard__weather">
+            <svg viewBox="0 0 70 56" aria-hidden="true"><g style="stroke:var(--ds-sun)" stroke-width="3" stroke-linecap="round"><path d="M44 4v6M62 12l-4 4M26 12l4 4M68 28h-6M60 44l-3-3"/></g><circle cx="44" cy="26" r="11" style="fill:var(--ds-sun)"/><path d="M16 52a11 11 0 0 1 1-22 15 15 0 0 1 28 3 10 10 0 0 1 1 19z" style="fill:var(--ds-cloud)"/></svg>
+            <div><div class="ds-datecard__temp">32°C</div><small class="ds-datecard__place">กรุงเทพมหานคร<br>มีเมฆบางส่วน</small></div>
+          </div>
+        </div>
+      </section>
+      <!-- ===== /HERO ROW ===== -->
+
+      <!-- ===== KPI ROW (5 cards, deltas vs previous month) =====
+           Server-rendered first paint; PAGE SCRIPT re-renders the same markup
+           (kpiHtml) after every status change. Delta: ▲/▼ + % change;
+           --good / --bad says whether the change is good for the business
+           (a lower MTTR is good). -->
+      <section class="ds-kpis" id="dashKpis" aria-label="ตัวชี้วัดหลัก">
+        <div class="ds-kpi">
+          <span class="ds-kpi__icon" style="background:var(--ds-blue)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-wrench"></use></svg></span>
+          <div><div class="ds-kpi__label" lang="en">Total Requests</div><div class="ds-kpi__row"><span class="ds-kpi__value ds-num">128</span><span class="ds-kpi__delta ds-kpi__delta--good">▲ +12%<span class="ds-sr-only"> (ดีขึ้น)</span></span></div></div>
+          <div class="ds-kpi__foot"><span>คำขอแจ้งซ่อมทั้งหมด</span><span>จากเดือนที่แล้ว</span></div>
+        </div>
+        <div class="ds-kpi">
+          <span class="ds-kpi__icon" style="background:var(--ds-green)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-check"></use></svg></span>
+          <div><div class="ds-kpi__label" lang="en">Completed</div><div class="ds-kpi__row"><span class="ds-kpi__value ds-num">96</span><span class="ds-kpi__delta ds-kpi__delta--good">▲ +19%<span class="ds-sr-only"> (ดีขึ้น)</span></span></div></div>
+          <div class="ds-kpi__foot"><span>ดำเนินการเสร็จสิ้น</span><span>จากเดือนที่แล้ว</span></div>
+        </div>
+        <div class="ds-kpi">
+          <span class="ds-kpi__icon" style="background:var(--ds-orange)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-clock"></use></svg></span>
+          <div><div class="ds-kpi__label" lang="en">Avg. MTTR</div><div class="ds-kpi__row"><span class="ds-kpi__value ds-num">1.8 วัน</span><span class="ds-kpi__delta ds-kpi__delta--good">▼ -32%<span class="ds-sr-only"> (ดีขึ้น)</span></span></div></div>
+          <div class="ds-kpi__foot"><span>ระยะเวลาในการซ่อมเฉลี่ย</span><span>จากเดือนที่แล้ว</span></div>
+        </div>
+        <div class="ds-kpi">
+          <span class="ds-kpi__icon" style="background:var(--ds-red)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-alert"></use></svg></span>
+          <div><div class="ds-kpi__label" lang="en">Pending</div><div class="ds-kpi__row"><span class="ds-kpi__value ds-num">18</span><span class="ds-kpi__delta ds-kpi__delta--bad">▲ +2<span class="ds-sr-only"> (แย่ลง)</span></span></div></div>
+          <div class="ds-kpi__foot"><span>คำขอที่ยังไม่เริ่มดำเนินการ</span><span>เข้าใหม่วันนี้</span></div>
+        </div>
+        <div class="ds-kpi">
+          <span class="ds-kpi__icon" style="background:var(--ds-purple)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-db"></use></svg></span>
+          <div><div class="ds-kpi__label" lang="en">Total Assets</div><div class="ds-kpi__row"><span class="ds-kpi__value ds-num">532</span><span class="ds-kpi__delta ds-kpi__delta--good">▲ +2%<span class="ds-sr-only"> (ดีขึ้น)</span></span></div></div>
+          <div class="ds-kpi__foot"><span>จำนวนครุภัณฑ์ทั้งหมด</span><span>จากเดือนที่แล้ว</span></div>
+        </div>
+      </section>
+      <!-- ===== /KPI ROW ===== -->
+
+      <!-- ===== CHART ROW (dash-a: donut | bars | pie) =====
+           At 1280px and below the first panel spans the full row; at 900px
+           and below one column. The period selects are visual only here. -->
+      <section class="ds-grid ds-grid--dash-a" aria-label="สถิติงานแจ้งซ่อม">
+
+        <!-- ===== STATUS DONUT ===== DS.charts.donut + legend "n (x.x%)" -->
+        <section class="ds-panel" aria-labelledby="dashStTitle">
+          <div class="ds-panel__head">
+            <h3 class="ds-panel__title" id="dashStTitle">สถานะงานแจ้งซ่อม (Service Request Status)</h3>
+            <div class="ds-panel__tools"><select class="ds-select ds-select--sm" aria-label="ช่วงเวลา: สถานะงานแจ้งซ่อม"><option>เดือนนี้</option></select></div>
+          </div>
+          <div class="ds-chart">
+            <svg class="ds-chart__svg" id="dashDonut" viewBox="0 0 180 180" role="img" aria-label="สัดส่วนสถานะงานแจ้งซ่อม"></svg>
+            <ul class="ds-legend" id="dashDonutLegend"></ul>
+          </div>
+        </section>
+
+        <!-- ===== CATEGORY BARS ===== DS.charts.bars (width relative to the top category) -->
+        <section class="ds-panel" aria-labelledby="dashCatTitle">
+          <div class="ds-panel__head">
+            <h3 class="ds-panel__title" id="dashCatTitle">ประเภทครุภัณฑ์ที่แจ้งซ่อมสูงสุด</h3>
+            <div class="ds-panel__tools"><select class="ds-select ds-select--sm" aria-label="ช่วงเวลา: ประเภทครุภัณฑ์"><option>เดือนนี้</option></select></div>
+          </div>
+          <div class="ds-bars" id="dashCatBars"></div>
+        </section>
+
+        <!-- ===== DEPARTMENT PIE ===== DS.charts.pie + tight legend "x%" -->
+        <section class="ds-panel" aria-labelledby="dashDeptTitle">
+          <div class="ds-panel__head">
+            <h3 class="ds-panel__title" id="dashDeptTitle">สัดส่วนงานตามพื้นที่ (หน่วยงาน)</h3>
+            <div class="ds-panel__tools"><select class="ds-select ds-select--sm" aria-label="ช่วงเวลา: สัดส่วนงานตามหน่วยงาน"><option>เดือนนี้</option></select></div>
+          </div>
+          <div class="ds-chart">
+            <svg class="ds-chart__svg" id="dashPie" viewBox="0 0 180 180" role="img" aria-label="สัดส่วนงานตามหน่วยงาน"></svg>
+            <ul class="ds-legend ds-legend--tight" id="dashPieLegend"></ul>
+          </div>
+        </section>
+
+      </section>
+      <!-- ===== /CHART ROW ===== -->
+
+      <!-- ===== WORK ROW (dash-b: follow-up table | recent | quick + notes) ===== -->
+      <section class="ds-grid ds-grid--dash-b" aria-label="งานและการแจ้งเตือน">
+
+        <!-- ===== FOLLOW-UP TABLE =====
+             Default: open requests due today or earlier (badge = count), 5 rows.
+             Typing in the topbar search filters ALL requests (title becomes
+             "ผลการค้นหา ..."). The link button toggles 5 rows / all rows and is
+             hidden when there are 5 rows or fewer. Rows: PAGE SCRIPT rowHtml().
+             data-label on every td is ready for a stacked mobile table. -->
+        <section class="ds-panel" aria-labelledby="dashFuHead">
+          <div class="ds-panel__head">
+            <h3 class="ds-panel__title" id="dashFuHead"><span id="dashFuTitle">งานที่ต้องติดตามวันนี้ (Today's Follow-up)</span> <span class="ds-badge ds-num" id="dashFuCount">17</span></h3>
+            <div class="ds-panel__tools"><button type="button" class="ds-link-btn" id="dashFuMore" aria-controls="dashFuRows" aria-expanded="false">ดูทั้งหมด →</button></div>
+          </div>
+          <div class="ds-table-wrap" role="region" aria-labelledby="dashFuTitle" tabindex="0">
+            <table class="ds-table ds-table--stack">
+              <thead><tr><th scope="col">#</th><th scope="col">เลขที่แจ้งซ่อม</th><th scope="col">เรื่อง / อุปกรณ์</th><th scope="col">ผู้แจ้ง</th><th scope="col">กำหนดเสร็จ</th><th scope="col">สถานะ</th><th scope="col" class="ds-table__actions">การดำเนินการ</th></tr></thead>
+              <tbody id="dashFuRows">
+                <tr><td class="ds-table__empty" colspan="7">กำลังโหลด...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== RECENT REQUESTS ===== last 5 requests, newest first:
+             id link | name (detail in brackets removed) | date | status pill -->
+        <section class="ds-panel" aria-labelledby="dashRecentTitle">
+          <div class="ds-panel__head">
+            <h3 class="ds-panel__title" id="dashRecentTitle">งานล่าสุด (Recent Requests)</h3>
+            <div class="ds-panel__tools"><a class="ds-link-btn" href="list.html">ดูทั้งหมด <span aria-hidden="true">→</span></a></div>
+          </div>
+          <ul class="ds-recent" id="dashRecent"></ul>
+        </section>
+
+        <!-- ===== SIDE STACK (quick actions + notifications) ===== -->
+        <div class="ds-stack">
+
+          <!-- ===== QUICK ACTIONS ===== <a> = navigation, <button> = in-page
+               action. data-todo = page not built in this kit (PAGE SCRIPT
+               shows a toast); point it at the real URL instead. -->
+          <section class="ds-panel" aria-labelledby="dashQuickTitle">
+            <h3 class="ds-panel__title" id="dashQuickTitle">เมนูด่วน (Quick Actions)</h3>
+            <div class="ds-quick">
+              <button type="button" class="ds-quick__btn" data-ds-open="dashDlgNew" style="background:var(--ds-blue)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-plus"></use></svg><span>แจ้งซ่อมใหม่<small class="ds-quick__sub">สร้างคำขอแจ้งซ่อม</small></span></button>
+              <button type="button" class="ds-quick__btn" data-todo="สแกน/ค้นหาครุภัณฑ์" style="background:var(--ds-green)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-scan"></use></svg><span>สแกน/ค้นหาครุภัณฑ์<small class="ds-quick__sub">ค้นหาข้อมูลสินทรัพย์</small></span></button>
+              <button type="button" class="ds-quick__btn" data-todo="พิมพ์ใบแจ้งซ่อม" style="background:var(--ds-orange)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-doc"></use></svg><span>พิมพ์ใบแจ้งซ่อม<small class="ds-quick__sub">Print / PDF</small></span></button>
+              <button type="button" class="ds-quick__btn" data-todo="รายงาน" style="background:var(--ds-purple)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-chart"></use></svg><span>ดูรายงาน<small class="ds-quick__sub">สรุปผลการซ่อมบำรุง</small></span></button>
+            </div>
+          </section>
+
+          <!-- ===== NOTIFICATIONS ===== colored round icon + text + time -->
+          <section class="ds-panel" aria-labelledby="dashNotesTitle">
+            <div class="ds-panel__head">
+              <h3 class="ds-panel__title" id="dashNotesTitle">แจ้งเตือน</h3>
+              <div class="ds-panel__tools"><button type="button" class="ds-link-btn" data-todo="การแจ้งเตือน">ดูทั้งหมด <span aria-hidden="true">→</span></button></div>
+            </div>
+            <ul class="ds-notes" id="dashNotes"></ul>
+          </section>
+
+        </div>
+        <!-- ===== /SIDE STACK ===== -->
+
+      </section>
+      <!-- ===== /WORK ROW ===== -->
+
+    </main>
+    <!-- ===== /PAGE CONTENT (everything below is the shared footer) ===== -->
+
+    <!-- ===== FOOTER (shared layout: partials/footer) =====
+         Plain PHP: footer.php, from the closing main tag to the end of the file.
+         Blade: resources/views/partials/footer.blade.php.
+         Version, system name and copyright are per system;
+         ds-footer__spacer pushes the copyright to the right edge. -->
+    <footer class="ds-footer">
+      <span class="ds-footer__brand"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-gear"></use></svg>SMMS</span><span>Version 1.0.0 (MVP)</span><span aria-hidden="true">|</span><span>Smart Maintenance &amp; Asset Service Management System</span><span aria-hidden="true">|</span><span>ต้นแบบ HTML · ข้อมูลทั้งหมดเป็นตัวอย่าง</span>
+      <span class="ds-footer__spacer">© 2025 บริษัท ตัวอย่าง จำกัด | All rights reserved.</span>
+    </footer>
+    <!-- ===== /FOOTER ===== -->
+
+  </div>
+  <!-- ===== /MAIN COLUMN ===== -->
+
+</div>
+<!-- ===== /APP SHELL =====
+     No scripts in the shell: ds-ui.js (in head) wires everything. A page
+     that needs its own script adds it at the end of the page body, never in
+     the shared includes. -->
+
+<!-- ===== DIALOG: NEW REQUEST (opened by the quick action "แจ้งซ่อมใหม่") =====
+     method="dialog": the browser validates the required fields, then closes
+     the dialog; PAGE SCRIPT handles the submit event (demo: adds the request
+     to the list). On a real system post to the create URL instead, or link
+     the tile to form.html. -->
+<dialog class="ds-dialog" id="dashDlgNew" aria-labelledby="dashDlgNewTitle">
+  <form class="ds-dialog__body" method="dialog" id="dashFormNew">
+    <h2 class="ds-dialog__title" id="dashDlgNewTitle">แจ้งซ่อมใหม่</h2>
+    <label class="ds-field"><span class="ds-field__label">เรื่อง / อาการ</span>
+      <input class="ds-input" id="dashNewTitle" name="title" required autofocus placeholder="เช่น เครื่องพิมพ์ชั้น 2 กระดาษติด"></label>
+    <label class="ds-field"><span class="ds-field__label">ประเภทครุภัณฑ์</span>
+      <select class="ds-select" id="dashNewCat" name="cat"><option>คอมพิวเตอร์ / Notebook</option><option>เครื่องปรับอากาศ</option><option>เครื่องพิมพ์</option><option>เฟอร์นิเจอร์</option><option>ระบบไฟฟ้า</option><option>อื่น ๆ</option></select></label>
+    <label class="ds-field"><span class="ds-field__label">หน่วยงาน</span>
+      <select class="ds-select" id="dashNewDept" name="dept"><option>สำนักงานกลาง</option><option>ฝ่ายไอที</option><option>ฝ่ายบัญชี</option><option>ฝ่ายบุคคล</option><option>ฝ่ายการตลาด</option><option>อื่น ๆ</option></select></label>
+    <label class="ds-field"><span class="ds-field__label">ผู้แจ้ง</span>
+      <input class="ds-input" id="dashNewBy" name="by" required value="สมชาย ใจดี"></label>
+    <div class="ds-dialog__actions">
+      <button type="button" class="ds-btn ds-btn--ghost" data-ds-close>ยกเลิก</button>
+      <button class="ds-btn" value="ok">บันทึกใบแจ้งซ่อม</button>
+    </div>
+  </form>
+</dialog>
+<!-- ===== /DIALOG: NEW REQUEST ===== -->
+
+<!-- ===== DIALOG: VIEW REQUEST (id link / "ดูรายละเอียด" in the table and
+     the recent list) =====
+     PAGE SCRIPT fills the title, the ds-dl rows and the actions: ปิด always,
+     รับงาน when pending (-> progress), ปิดงาน when in progress (-> done). -->
+<dialog class="ds-dialog" id="dashDlgView" aria-labelledby="dashViewTitle">
+  <div class="ds-dialog__body">
+    <h2 class="ds-dialog__title" id="dashViewTitle">รายละเอียดใบแจ้งซ่อม</h2>
+    <dl class="ds-dl" id="dashViewBody"></dl>
+    <div class="ds-dialog__actions" id="dashViewActs"><button type="button" class="ds-btn ds-btn--ghost" data-ds-close>ปิด</button></div>
+  </div>
+</dialog>
+<!-- ===== /DIALOG: VIEW REQUEST ===== -->
+
+<!-- ===== PAGE SCRIPT (ตัวอย่าง) — แทนที่ด้วยข้อมูลจากเซิร์ฟเวอร์ =====
+     Same deterministic demo data as the original (seeded rnd, TODAY =
+     15 May 2025) so every number matches smms-dashboard_2.html. Uses only
+     the kit API: DS.charts, DS.toast, DS.icon, DS.fmtDate, DS.esc, DS.dialog.
+     Page hooks (not kit hooks): data-id (open the view dialog), data-set
+     (change status), data-todo (page not built -> toast). -->
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- demo data (identical generator to the original) ---------- */
+  var TODAY = new Date(2025, 4, 15);
+  var PREV = { total: 114, done: 81, mttr: 2.65, assets: 521 }; // previous month, for the KPI deltas
+  var ASSETS = 532;
+  var ST = {
+    pending: { label: 'รอดำเนินการ', color: '--ds-blue' },
+    progress: { label: 'กำลังดำเนินการ', color: '--ds-yellow' },
+    done: { label: 'เสร็จสิ้น', color: '--ds-green' },
+    cancel: { label: 'ยกเลิก', color: '--ds-red' }
+  };
+  var CATS = {
+    'คอมพิวเตอร์ / Notebook': ['คอมพิวเตอร์ (เปิดไม่ติด)', 'Notebook (จอดับ)', 'คอมพิวเตอร์ (ทำงานช้า)'],
+    'เครื่องปรับอากาศ': ['เครื่องปรับอากาศ ชั้น 3 (ไม่เย็น)', 'เครื่องปรับอากาศ (น้ำหยด)', 'เครื่องปรับอากาศ (เสียงดัง)'],
+    'เครื่องพิมพ์': ['เครื่องพิมพ์ (กระดาษติด)', 'เครื่องพิมพ์ (หมึกเลอะ)', 'เครื่องสแกน (สแกนไม่ได้)'],
+    'เฟอร์นิเจอร์': ['เก้าอี้สำนักงาน (ซ่อมล้อ)', 'โต๊ะทำงาน (ลิ้นชักเสีย)', 'ตู้เอกสาร (บานพับหลุด)'],
+    'ระบบไฟฟ้า': ['ไฟห้องประชุม (ไม่ติด)', 'ปลั๊กไฟ (ชำรุด)', 'ไฟทางเดิน (กะพริบ)'],
+    'อื่น ๆ': ['เครื่องฉายโปรเจคเตอร์', 'ระบบเครือข่าย', 'โทรศัพท์ภายใน', 'ประตูกระจก']
+  };
+  var CAT_NAMES = Object.keys(CATS);
+  var CAT_N = [32, 24, 18, 15, 12, 27], CAT_C = ['--ds-blue', '--ds-sky', '--ds-green', '--ds-yellow', '--ds-orange', '--ds-gray'];
+  var DEPTS = ['สำนักงานกลาง', 'ฝ่ายไอที', 'ฝ่ายบัญชี', 'ฝ่ายบุคคล', 'ฝ่ายการตลาด', 'อื่น ๆ'];
+  var DEPT_N = [36, 26, 19, 15, 13, 19], DEPT_C = ['--ds-blue', '--ds-green', '--ds-yellow', '--ds-orange', '--ds-red', '--ds-gray'];
+  var PEOPLE = ['สุภาวดี สิทธิ์', 'เอกชัย นามวง', 'ชนกานต์ มีศรี', 'วิทยา ทองแก้ว', 'กัลยา แสงดี', 'ธนพล รุ่งเรือง', 'ปวีณา ใจงาม', 'อนุชา พรหมมา'];
+
+  var seed = 20250515;
+  function rnd() { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
+  function pick(a) { return a[Math.floor(rnd() * a.length)]; }
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(rnd() * (i + 1)), x = a[i]; a[i] = a[j]; a[j] = x; }
+    return a;
+  }
+  function day(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+  function repeat(v, n) { var a = []; while (n-- > 0) a.push(v); return a; }
+  function fill(names, counts) {
+    var a = [];
+    names.forEach(function (c, i) { a = a.concat(repeat(c, counts[i])); });
+    return shuffle(a);
+  }
+  var catPool = fill(CAT_NAMES, CAT_N), deptPool = fill(DEPTS, DEPT_N);
+  var stOrder = shuffle(repeat('done', 84).concat(repeat('cancel', 6)))
+    .concat(shuffle(repeat('done', 12).concat(repeat('progress', 8), repeat('pending', 18))));
+  var T = [];
+  for (var i = 0; i < 128; i++) {
+    var created = day(new Date(2025, 4, 1), Math.floor(i * 14.5 / 128)), cat = catPool[i], status = stOrder[i];
+    var t = { id: 'SR-202505-' + String(i + 25).padStart(4, '0'), title: pick(CATS[cat]), cat: cat, dept: deptPool[i],
+      by: pick(PEOPLE), created: created, due: day(created, 1 + Math.floor(rnd() * 4)), status: status };
+    if (status === 'done') t.days = Math.round((0.7 + rnd() * 2.6) * 10) / 10;
+    T.push(t);
+  }
+
+  /* ---------- helpers ---------- */
+  var esc = DS.esc, fmt = function (d) { return DS.fmtDate(d); };
+  function $(id) { return document.getElementById(id); }
+  function pct(n, d) { return d ? (n * 100 / d).toFixed(1) + '%' : '0%'; }
+  function isOpen(t) { return t.status === 'pending' || t.status === 'progress'; }
+  function isLate(t) { return isOpen(t) && t.due < TODAY; }
+  function isDue(t) { return isOpen(t) && t.due <= TODAY; }
+  function find(id) { return T.filter(function (x) { return x.id === id; })[0]; }
+  function pill(s) { return '<span class="ds-pill ds-pill--' + s + '">' + ST[s].label + '</span>'; }
+  function isoDay(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  var query = '', showAll = false;
+
+  // Date card line from TODAY: Thai long date, Gregorian year (as in the original).
+  (function () {
+    var el = $('dashDate'), head, body;
+    try {
+      head = new Intl.DateTimeFormat('th-TH-u-ca-buddhist', { weekday: 'long' }).format(TODAY) + 'ที่ ';
+      body = new Intl.DateTimeFormat('th-TH-u-ca-buddhist', { day: 'numeric', month: 'long', year: 'numeric' }).format(TODAY);
+    } catch (e) { head = DS.fmtDateLong(TODAY, { weekday: true }).replace(/\d.*$/, ''); body = DS.fmtDateLong(TODAY); }
+    el.textContent = head;
+    el.appendChild(document.createElement('b')).textContent = body;
+  })();
+
+  /* ---------- KPI card (same markup as the static cards above) ---------- */
+  function delta(now, prev, upGood, abs) {
+    var d = now - prev, up = d >= 0, txt = (up ? '+' : '') + (abs ? d : Math.round(d / prev * 100) + '%');
+    return { text: (up ? '▲ ' : '▼ ') + txt, good: up === upGood };
+  }
+  function kpiHtml(icon, color, label, value, dl, foot1, foot2) {
+    return '<div class="ds-kpi"><span class="ds-kpi__icon" style="background:var(' + color + ')">' + DS.icon(icon) + '</span>' +
+      '<div><div class="ds-kpi__label" lang="en">' + label + '</div><div class="ds-kpi__row"><span class="ds-kpi__value ds-num">' +
+      esc(value) + '</span><span class="ds-kpi__delta ds-kpi__delta--' + (dl.good ? 'good' : 'bad') + '">' + esc(dl.text) +
+      '<span class="ds-sr-only"> (' + (dl.good ? 'ดีขึ้น' : 'แย่ลง') + ')</span></span></div></div>' +
+      '<div class="ds-kpi__foot"><span>' + foot1 + '</span><span>' + foot2 + '</span></div></div>';
+  }
+
+  /* ---------- follow-up row / recent item / notification item ---------- */
+  function rowHtml(t, i) {
+    return '<tr><td class="ds-num" data-label="#">' + (i + 1) + '</td>' +
+      '<td data-label="เลขที่แจ้งซ่อม"><a class="ds-id-link ds-num" href="detail.html?id=' + t.id + '" data-id="' + t.id + '">' + t.id + '</a></td>' +
+      '<td data-label="เรื่อง / อุปกรณ์">' + esc(t.title) + '</td>' +
+      '<td class="ds-nowrap" data-label="ผู้แจ้ง">' + esc(t.by) + '</td>' +
+      '<td class="ds-num ds-nowrap" data-label="กำหนดเสร็จ">' + fmt(t.due) + '</td>' +
+      '<td data-label="สถานะ">' + pill(t.status) + '</td>' +
+      '<td class="ds-table__actions" data-label="การดำเนินการ"><button type="button" class="ds-btn" data-id="' + t.id + '">ดูรายละเอียด</button></td></tr>';
+  }
+  function recentHtml(t) {
+    return '<li class="ds-recent__item"><a class="ds-id-link ds-num" href="detail.html?id=' + t.id + '" data-id="' + t.id + '">' + t.id + '</a>' +
+      '<span class="ds-recent__name" title="' + esc(t.title) + '">' + esc(t.title.replace(/\s*\(.*\)/, '')) + '</span>' +
+      '<time class="ds-recent__time ds-num" datetime="' + isoDay(t.created) + '">' + fmt(t.created) + '</time>' + pill(t.status) + '</li>';
+  }
+  function noteHtml(n) {
+    return '<li class="ds-notes__item"><span class="ds-notes__icon" style="background:var(' + n[0] + ')">' + DS.icon(n[1], 'ds-ic--sm') +
+      '</span><span>' + esc(n[2]) + '<small class="ds-notes__time ds-num">' + n[3] + '</small></span></li>';
+  }
+
+  /* ---------- render everything from T ---------- */
+  function render() {
+    var n = T.length;
+    function by(k) { return T.filter(function (t) { return t.status === k; }); }
+    var done = by('done'), pend = by('pending'), late = T.filter(isLate), due = T.filter(isDue);
+    var mttr = done.reduce(function (s, t) { return s + t.days; }, 0) / (done.length || 1);
+    var newToday = pend.filter(function (t) { return +t.created === +TODAY; }).length;
+
+    // KPI ROW
+    $('dashKpis').innerHTML =
+      kpiHtml('wrench', '--ds-blue', 'Total Requests', n, delta(n, PREV.total, true), 'คำขอแจ้งซ่อมทั้งหมด', 'จากเดือนที่แล้ว') +
+      kpiHtml('check', '--ds-green', 'Completed', done.length, delta(done.length, PREV.done, true), 'ดำเนินการเสร็จสิ้น', 'จากเดือนที่แล้ว') +
+      kpiHtml('clock', '--ds-orange', 'Avg. MTTR', mttr.toFixed(1) + ' วัน', delta(mttr, PREV.mttr, false), 'ระยะเวลาในการซ่อมเฉลี่ย', 'จากเดือนที่แล้ว') +
+      kpiHtml('alert', '--ds-red', 'Pending', pend.length, delta(newToday, 0, false, true), 'คำขอที่ยังไม่เริ่มดำเนินการ', 'เข้าใหม่วันนี้') +
+      kpiHtml('db', '--ds-purple', 'Total Assets', ASSETS, delta(ASSETS, PREV.assets, true), 'จำนวนครุภัณฑ์ทั้งหมด', 'จากเดือนที่แล้ว');
+
+    // Sidebar counter (overdue requests); the shell renders it, the demo keeps it in sync.
+    var navCnt = document.querySelector('.ds-nav__count');
+    if (navCnt) {
+      navCnt.innerHTML = late.length + '<span class="ds-sr-only"> รายการเกินกำหนด</span>';
+      navCnt.hidden = !late.length;
+    }
+
+    // STATUS DONUT / CATEGORY BARS / DEPARTMENT PIE
+    DS.charts.donut('#dashDonut', Object.keys(ST).map(function (k) {
+      return { label: ST[k].label, value: by(k).length, color: ST[k].color };
+    }), { legend: '#dashDonutLegend' });
+    var cats = CAT_NAMES.map(function (c) { return T.filter(function (t) { return t.cat === c; }).length; });
+    var mx = Math.max.apply(null, cats.concat([1]));
+    DS.charts.bars('#dashCatBars', CAT_NAMES.map(function (c, i) { return { label: c, value: cats[i], color: CAT_C[i] }; }), { total: n });
+    DS.charts.pie('#dashPie', DEPTS.map(function (d, i) {
+      return { label: d, value: T.filter(function (t) { return t.dept === d; }).length, color: DEPT_C[i] };
+    }), { legend: '#dashPieLegend' });
+
+    // FOLLOW-UP TABLE (search from the topbar, 5 rows / all)
+    var list;
+    if (query) {
+      var q = query.toLowerCase();
+      list = T.filter(function (t) { return (t.id + t.title + t.by + t.cat + t.dept).toLowerCase().indexOf(q) > -1; });
+      $('dashFuTitle').textContent = 'ผลการค้นหา “' + query + '”';
+    } else {
+      list = due;
+      $('dashFuTitle').textContent = "งานที่ต้องติดตามวันนี้ (Today's Follow-up)";
+    }
+    $('dashFuCount').textContent = list.length;
+    list = list.slice().sort(function (x, y) { return y.due - x.due || x.id.localeCompare(y.id); });
+    var shown = showAll ? list : list.slice(0, 5), more = $('dashFuMore');
+    more.textContent = showAll ? 'ย่อรายการ ↑' : 'ดูทั้งหมด →';
+    more.setAttribute('aria-expanded', String(showAll));
+    more.hidden = list.length <= 5;
+    $('dashFuRows').innerHTML = shown.map(rowHtml).join('') ||
+      '<tr><td class="ds-table__empty" colspan="7">ไม่พบรายการ</td></tr>';
+
+    // RECENT REQUESTS (last 5, newest first)
+    $('dashRecent').innerHTML = T.slice(-5).reverse().map(recentHtml).join('');
+
+    // NOTIFICATIONS panel (the topbar bell popover keeps its own server-rendered
+    // unread count; the demo only keeps its overdue item in sync with the data)
+    var notes = [
+      ['--ds-red', 'bell', 'มีงานค้างเกินกำหนด ' + late.length + ' รายการ', '15/05/2568 09:00'],
+      ['--ds-orange', 'info', 'อุปกรณ์ “' + CAT_NAMES[cats.indexOf(mx)] + '” มีการแจ้งซ่อมบ่อย (' + mx + ' ครั้ง)', '14/05/2568 16:30'],
+      ['--ds-blue', 'info', 'มีการอัปเดตข้อมูลครุภัณฑ์ ' + (ASSETS - PREV.assets + 1) + ' รายการ', '12/05/2568 10:15']
+    ];
+    $('dashNotes').innerHTML = notes.map(noteHtml).join('');
+    var overdueNote = document.querySelector('#ds-notif-panel a[href^="list.html"]');
+    if (overdueNote) overdueNote.textContent = notes[0][2];
+  }
+
+  /* ---------- view dialog ---------- */
+  function view(id) {
+    var t = find(id);
+    if (!t) return;
+    $('dashViewTitle').textContent = t.id + ' · ' + t.title;
+    $('dashViewBody').innerHTML = [
+      ['สถานะ', pill(t.status) + (isLate(t) ? ' <span class="ds-text-bad">เกินกำหนด</span>' : '')],
+      ['ประเภท', esc(t.cat)], ['หน่วยงาน', esc(t.dept)], ['ผู้แจ้ง', esc(t.by)],
+      ['วันที่แจ้ง', fmt(t.created)], ['กำหนดเสร็จ', fmt(t.due)],
+      t.days ? ['ใช้เวลาซ่อม', t.days + ' วัน'] : null
+    ].filter(Boolean).map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>'; }).join('');
+    var a = '<button type="button" class="ds-btn ds-btn--ghost" data-ds-close>ปิด</button>';
+    if (t.status === 'pending') a += '<button type="button" class="ds-btn" data-set="progress" data-set-id="' + t.id + '">รับงาน</button>';
+    if (t.status === 'progress') a += '<button type="button" class="ds-btn" data-set="done" data-set-id="' + t.id + '">ปิดงาน</button>';
+    $('dashViewActs').innerHTML = a;
+    DS.dialog.open('dashDlgView');
+  }
+
+  /* ---------- page events (kit hooks data-ds-* are handled by ds-ui.js) ---------- */
+  function todo(name) { DS.toast('หน้า “' + name + '” ยังไม่รวมอยู่ในต้นแบบนี้'); }
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('button,a') : null;
+    if (!el) return;
+    if (el.id === 'dashFuMore') { showAll = !showAll; render(); return; }
+    if (el.hasAttribute('data-set')) { // รับงาน / ปิดงาน
+      var t = find(el.getAttribute('data-set-id'));
+      if (!t) return;
+      t.status = el.getAttribute('data-set');
+      if (t.status === 'done') t.days = Math.max(0.5, Math.round((TODAY - t.created) / 864e5 * 10) / 10);
+      DS.dialog.close('dashDlgView');
+      render();
+      DS.toast((t.status === 'done' ? 'ปิดงาน ' : 'รับงาน ') + t.id + ' แล้ว');
+      return;
+    }
+    if (el.hasAttribute('data-id')) { e.preventDefault(); view(el.getAttribute('data-id')); return; }
+    if (el.hasAttribute('data-todo')) { todo(el.getAttribute('data-todo')); return; }
+    // Demo only: sidebar / user-menu / notification links without a page (href="#").
+    // The bell and the user button are ds-ui.js dropdowns (data-ds-dropdown).
+    if (el.matches('.ds-nav__item[href="#"], .ds-menu__item[href="#"], .ds-popover a[href="#"]')) { e.preventDefault(); todo(el.textContent.replace('→', '').trim()); return; }
+  });
+
+  // Topbar search filters the follow-up table (shell input name="q").
+  var search = document.querySelector('.ds-topbar .ds-search input');
+  if (search) search.addEventListener('input', function () { query = search.value.trim(); showAll = false; render(); });
+
+  // New request (demo: add to the list, newest first in "งานล่าสุด").
+  $('dashFormNew').addEventListener('submit', function () {
+    var id = 'SR-202505-' + String(T.length + 25).padStart(4, '0');
+    T.push({ id: id, title: $('dashNewTitle').value.trim(), cat: $('dashNewCat').value, dept: $('dashNewDept').value,
+      by: $('dashNewBy').value.trim(), created: TODAY, due: TODAY, status: 'pending' });
+    $('dashNewTitle').value = '';
+    query = '';
+    if (search) search.value = '';
+    render();
+    DS.toast('บันทึกใบแจ้งซ่อม ' + id + ' แล้ว');
+  });
+
+  // Same feedback as the original theme button.
+  document.addEventListener('ds:themechange', function (e) {
+    if (e.detail && e.detail.source === 'os') return;   // OS switch: nothing was clicked
+    DS.toast(e.detail && e.detail.theme === 'dark' ? 'โหมดมืด' : 'โหมดสว่าง');
+  });
+
+  render();
+})();
+</script>
+<!-- ===== /PAGE SCRIPT ===== -->
+</body>
+</html>

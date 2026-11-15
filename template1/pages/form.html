@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แจ้งซ่อมใหม่ | SMMS แจ้งซ่อม</title>
+<!-- =========================================================================
+  DS UI Kit : starter.html (canonical page shell)
+
+  Every page of the kit, and every page of a system restyled with the kit,
+  copies its shell from this file. Per page, change ONLY:
+    1. the <title>
+    2. which .ds-nav__item carries aria-current="page" (see SIDEBAR below)
+    3. the content inside <main class="ds-content"> (breadcrumb, h2, panels)
+  The shell has no page-specific CSS or JS. All styling lives in
+  ../assets/ds-ui.css, all behaviour in ../assets/ds-ui.js (window.DS).
+
+  Splitting the shell into shared includes (full recipes: AI-UI-GUIDE.md)
+    Plain PHP
+      partials/header.php = from the DOCTYPE down to and including the
+                            opening main tag (head, skip link, sidebar, topbar)
+      partials/footer.php = from the closing main tag to the end (footer,
+                            closing wrappers, body, html)
+      A page sets $pageTitle and $active, includes header.php, prints its
+      own content, then includes footer.php.
+    Laravel Blade
+      resources/views/components/layouts/app.blade.php holds this whole file;
+      the page content is the component slot (it replaces the placeholder
+      page head + panel inside main); the regions marked SIDEBAR, TOPBAR and
+      FOOTER become partials/sidebar.blade.php, partials/header.blade.php and
+      partials/footer.blade.php. The <title> comes from a title prop.
+
+  These comments intentionally contain no PHP tags and no live Blade
+  directives, so the file stays inert when copied into a .php or .blade.php
+  file. The one Blade snippet (logout form, TOPBAR user menu) is wrapped in
+  a Blade comment, so Blade strips it instead of running it.
+  Asset paths: kit pages use ../assets/ ; other systems on this IIS host
+  link the shared copy at /template/assets/ds-ui.css and ds-ui.js.
+========================================================================== -->
+<!-- Kanit web font: the kit standard font (same request as the original).
+     The preconnects only speed it up. No color-scheme meta on purpose:
+     native widgets stay light in both themes, like the original. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap">
+<link rel="stylesheet" href="../assets/ds-ui.css">
+<!-- ds-ui.js stays in <head> WITHOUT defer/async: it applies the saved theme
+     (html[data-theme], localStorage "ds-theme") before first paint, then on
+     DOMContentLoaded injects the icon sprite and wires sidebar, tooltips,
+     dialogs, tabs and the theme toggle. -->
+<script src="../assets/ds-ui.js"></script>
+</head>
+<!-- class="ds-body" is part of the shell: margin 0 + page background
+     (needed by browsers without :has(), e.g. Firefox ESR 115). -->
+<body class="ds-body">
+
+<!-- ===== SKIP LINK (shared layout: start of header.php / app.blade.php) =====
+     First focusable element on every page; jumps past sidebar and topbar to
+     main#ds-main. Visible only while focused. -->
+<a class="ds-skip-link" href="#ds-main">ข้ามไปยังเนื้อหาหลัก</a>
+
+<!-- ===== APP SHELL (shared layout) =====
+     ds-app = 2-column grid (225px sidebar + main column). It opens in
+     header.php and closes in footer.php (Blade: both ends in the layout). -->
+<div class="ds-app">
+
+  <!-- ===== SIDEBAR (shared layout: partials/sidebar) =====
+       Plain PHP: part of header.php (or partials/sidebar.php included by it).
+       Blade: resources/views/partials/sidebar.blade.php.
+       At 900px and below it becomes off-canvas; ds-ui.js toggles .is-open
+       from the topbar menu button (aria-controls="ds-sidebar"), so keep
+       id="ds-sidebar" unchanged. -->
+  <aside class="ds-sidebar" id="ds-sidebar" aria-label="แถบด้านข้าง">
+
+    <!-- Brand: gear + check mark (cleaned: the invisible junk path and the
+         "26.500"-style number artifacts are removed; colours come from
+         tokens). Replace the mark, name and tagline per system. -->
+    <div class="ds-sidebar__brand">
+      <svg class="ds-sidebar__logo" width="50" height="50" viewBox="0 0 48 48" aria-hidden="true">
+        <path style="fill:var(--ds-logo)" d="M20.5 2h7l1.1 5.4 3.2 1.3 4.6-3 5 4.9-3.1 4.6 1.3 3.2L45 19.5v7l-5.4 1.1-1.3 3.2 3.1 4.6-5 5-4.6-3.1-3.2 1.3L27.5 44h-7l-1.1-5.4-3.2-1.3-4.6 3.1-5-5 3.1-4.6-1.3-3.2L3 26.5v-7l5.4-1.1 1.3-3.2-3.1-4.6 5-4.9 4.6 3 3.2-1.3z"/>
+        <circle style="fill:var(--ds-navy-950)" cx="24" cy="23" r="10.5"/>
+        <path style="stroke:var(--ds-on-color)" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M18.5 23.5l4 4 7.5-8.5"/>
+      </svg>
+      <div>
+        <b class="ds-sidebar__name">SMMS</b>
+        <small class="ds-sidebar__tagline">Smart Maintenance &amp;<br>Asset Service Management</small>
+      </div>
+    </div>
+
+    <!-- Main navigation: real links between pages (no JS routing).
+         aria-current="page" goes on exactly ONE item, the one for the page
+         being shown: dashboard.html = แดชบอร์ดภาพรวม, form.html = แจ้งซ่อมใหม่,
+         list.html = รายการแจ้งซ่อม, detail.html = งานของฉัน,
+         components.html = คลังคอมโพเนนต์ (UI Kit).
+         This page: แจ้งซ่อมใหม่ carries aria-current="page".
+         Example: <a class="ds-nav__item" href="list.html" aria-current="page">
+           Plain PHP: each page sets $active (e.g. 'list') before including
+             header.php; every item prints aria-current="page" only when
+             $active equals its own key.
+           Blade: in partials/sidebar.blade.php print the attribute when
+             request()->routeIs('repairs.*') (the item's route pattern) is true.
+         href="#" = page not built in this kit; point it at the real URL.
+         ds-nav__count = optional server-rendered counter (here: overdue
+         requests); leave the span out when the count is 0.
+         ds-nav__sep = divider between menu groups; ds-nav__label (optional)
+         = small group heading.
+         ds-nav__group = collapsible sub-menu: a button.ds-nav__toggle (it IS
+         a ds-nav__item, so it looks like one; aria-controls = the id of its
+         ds-nav__sub) + div.ds-nav__sub holding ds-nav__item ds-nav__subitem
+         links. Sub items have no icon (they only show in the full sidebar;
+         the 72px icon rail hides them, and a click on the toggle there
+         first expands the sidebar, then opens the group).
+         Current sub page: put aria-current="page" on the SUB item only (never
+         on the toggle). ds-ui.js then opens that group on load and adds
+         class has-current to its toggle. To avoid a closed-then-open flash,
+         the server can render the open state itself on the same condition:
+         aria-expanded="true" + class has-current on the toggle and NO hidden
+         attribute on the ds-nav__sub.
+           Plain PHP: each settings page sets $active (e.g. 'settings.users');
+             the group is open when $active starts with 'settings.'.
+           Blade: open the group when request()->routeIs('settings.*') is
+             true; each sub item gets aria-current="page" when
+             request()->routeIs('settings.users') (its own route) is true.
+         Other groups: copy the block with a new id (ds-nav-reports, ...). -->
+    <nav class="ds-nav" aria-label="เมนูหลัก">
+      <a class="ds-nav__item" href="dashboard.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-home"></use></svg>แดชบอร์ดภาพรวม</a>
+      <a class="ds-nav__item" href="form.html" aria-current="page"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-user"></use></svg>แจ้งซ่อมใหม่</a>
+      <a class="ds-nav__item" href="list.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-doc"></use></svg>รายการแจ้งซ่อม <span class="ds-nav__count ds-num">9<span class="ds-sr-only"> รายการเกินกำหนด</span></span></a>
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-printer"></use></svg>ครุภัณฑ์ / สินทรัพย์</a>
+      <a class="ds-nav__item" href="detail.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-task"></use></svg>งานของฉัน</a>
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-cal"></use></svg>ปฏิทินงาน</a>
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-doc"></use></svg>รายงาน</a>
+      <hr class="ds-nav__sep">
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-db"></use></svg>ข้อมูลหลัก</a>
+      <div class="ds-nav__group">
+        <button type="button" class="ds-nav__item ds-nav__toggle" aria-expanded="false" aria-controls="ds-nav-settings"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-gear"></use></svg>ตั้งค่า<svg class="ds-ic ds-ic--sm ds-nav__caret" aria-hidden="true"><use href="#ds-i-chevron-down"></use></svg></button>
+        <div class="ds-nav__sub" id="ds-nav-settings" hidden>
+          <a class="ds-nav__item ds-nav__subitem" href="#">ตั้งค่าบริษัท</a>
+          <a class="ds-nav__item ds-nav__subitem" href="#">ตั้งค่าระบบ</a>
+          <a class="ds-nav__item ds-nav__subitem" href="#">ผู้ใช้งานและสิทธิ์</a>
+          <a class="ds-nav__item ds-nav__subitem" href="#">บันทึกการใช้งาน</a>
+        </div>
+      </div>
+      <a class="ds-nav__item" href="components.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-image"></use></svg>คลังคอมโพเนนต์ (UI Kit)</a>
+    </nav>
+
+    <!-- Sidebar quote: decorative slogan pinned to the bottom of the sidebar.
+         Keep, replace or remove per system. -->
+    <div class="ds-sidebar__quote"><p>“ดูแลทุกสินทรัพย์<br>ให้พร้อมใช้งาน<small>เพื่อองค์กรที่เดินหน้าได้ไกลกว่า”</small></p><em>Maintain Today<br>for a Better Tomorrow</em></div>
+  </aside>
+  <!-- ===== /SIDEBAR ===== -->
+
+  <!-- ===== MAIN COLUMN (shared layout) =====
+       ds-main stacks topbar, content and footer. Opens in header.php and
+       closes in footer.php (Blade: both ends in the layout). -->
+  <div class="ds-main">
+
+    <!-- ===== TOPBAR (shared layout: partials/header) =====
+         Plain PHP: part of header.php (or partials/topbar.php included by it).
+         Blade: resources/views/partials/header.blade.php.
+         Fixed order: menu button (visible only at 900px and below), logo,
+         system title (h1), search, theme toggle, notifications, user.
+         Name / role / initial / counts come from the session and the server. -->
+    <header class="ds-topbar">
+      <!-- Hamburger: ds-ui.js opens/closes the off-canvas sidebar and keeps
+           aria-expanded in sync; Esc and an outside click close it. -->
+      <button type="button" class="ds-icon-btn ds-menu-btn" data-ds-sidebar-toggle aria-controls="ds-sidebar" aria-expanded="false" aria-label="เปิดเมนู"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-menu"></use></svg></button>
+      <span class="ds-topbar__logo"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-gear"></use></svg>SMMS</span>
+      <!-- The page's single h1 = the system name. The page's own title is the
+           h2 in ds-page-head. -->
+      <h1 class="ds-topbar__title">ระบบบริหารจัดการงานแจ้งซ่อมและบำรุงรักษาพัสดุครุภัณฑ์องค์กร</h1>
+      <!-- Search button: shown at 620px and below only (one compact topbar
+           row); ds-ui.js opens the search field as a full-width row under
+           the topbar. Keep it right BEFORE the ds-search. -->
+      <button type="button" class="ds-icon-btn ds-search-btn" data-ds-search-toggle aria-controls="ds-search" aria-expanded="false" aria-label="ค้นหา"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-search"></use></svg></button>
+      <!-- Global search. To submit it, swap the label for
+           form class="ds-search" role="search" action="list.html" (GET);
+           the input already has name="q". -->
+      <label class="ds-search" id="ds-search"><input type="search" name="q" placeholder="ค้นหาใบแจ้งซ่อม, ครุภัณฑ์, สถานที่, ผู้แจ้ง..." aria-label="ค้นหา" autocomplete="off"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-search"></use></svg></label>
+      <!-- Theme toggle: ds-ui.js flips html[data-theme], saves it and swaps
+           the sun/moon icon. No other markup needed. -->
+      <button type="button" class="ds-icon-btn" data-ds-theme-toggle aria-label="สลับโหมดสว่าง/มืด" data-ds-tip="สลับโหมดสว่าง / มืด"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-sun"></use></svg></button>
+      <!-- Notifications popover (ds-dropdown). ds-ui.js opens the element
+           named by aria-controls, keeps aria-expanded in sync and closes it
+           on outside click / Esc / Tab out; only one dropdown is open at a
+           time. Server-rendered: the dot = unread count (leave the span out
+           when 0 and drop the count from aria-label), newest items first,
+           unread items get class is-unread. "อ่านทั้งหมดแล้ว"
+           (data-ds-notif-readall) clears is-unread + the dot in the page and
+           emits 'ds:notif-readall'; production listens for it and POSTs the
+           "mark all read" request. Icon colours: --ds-red = overdue,
+           --ds-orange = warning, --ds-blue = info, --ds-green = done. -->
+      <div class="ds-dropdown">
+        <button type="button" class="ds-icon-btn" data-ds-dropdown aria-controls="ds-notif-panel" aria-expanded="false"
+                aria-haspopup="true" aria-label="การแจ้งเตือน (ยังไม่อ่าน 3 รายการ)">
+          <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-bell"></use></svg><span class="ds-icon-btn__dot ds-num" aria-hidden="true">3</span>
+        </button>
+        <div class="ds-popover" id="ds-notif-panel" hidden>
+          <div class="ds-popover__head">
+            <h2 class="ds-popover__title">การแจ้งเตือน</h2>
+            <button type="button" class="ds-link-btn" data-ds-notif-readall>อ่านทั้งหมดแล้ว</button>
+          </div>
+          <ul class="ds-notes ds-popover__body">
+            <li class="ds-notes__item is-unread">
+              <span class="ds-notes__icon" style="background:var(--ds-red)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-bell"></use></svg></span>
+              <span><a class="ds-notes__link" href="list.html">มีงานค้างเกินกำหนด 9 รายการ</a><small class="ds-notes__time ds-num">15/05/2568 09:00</small></span>
+            </li>
+            <li class="ds-notes__item is-unread">
+              <span class="ds-notes__icon" style="background:var(--ds-orange)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-wrench"></use></svg></span>
+              <span><a class="ds-notes__link" href="detail.html">SR-202505-0152 เครื่องปรับอากาศ ชั้น 3 รออะไหล่ (คอมเพรสเซอร์)</a><small class="ds-notes__time ds-num">15/05/2568 08:42</small></span>
+            </li>
+            <li class="ds-notes__item is-unread">
+              <span class="ds-notes__icon" style="background:var(--ds-blue)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-doc"></use></svg></span>
+              <span><a class="ds-notes__link" href="list.html?status=pending">มีใบแจ้งซ่อมใหม่ 4 รายการ รอมอบหมายช่าง</a><small class="ds-notes__time ds-num">14/05/2568 16:30</small></span>
+            </li>
+            <li class="ds-notes__item">
+              <span class="ds-notes__icon" style="background:var(--ds-green)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-check"></use></svg></span>
+              <span><a class="ds-notes__link" href="list.html?status=done">ปิดงาน SR-202505-0147 แล้ว รอผู้แจ้งประเมินความพึงพอใจ</a><small class="ds-notes__time ds-num">13/05/2568 14:05</small></span>
+            </li>
+            <li class="ds-notes__item">
+              <span class="ds-notes__icon" style="background:var(--ds-blue)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-cal"></use></svg></span>
+              <span><a class="ds-notes__link" href="dashboard.html">ครุภัณฑ์ 6 รายการถึงรอบบำรุงรักษา (PM) ภายในสัปดาห์นี้</a><small class="ds-notes__time ds-num">12/05/2568 10:15</small></span>
+            </li>
+          </ul>
+          <div class="ds-popover__foot"><a class="ds-link-btn" href="#">ดูการแจ้งเตือนทั้งหมด →</a></div>
+        </div>
+      </div>
+      <!-- User menu (ds-dropdown, role="menu"): avatar initial + name and
+           role from the session; ds-user__meta is visually hidden at 900px
+           and below (still read by screen readers). Arrow keys / Home / End
+           move between menu items; opening with the keyboard focuses the
+           first item.
+           Logout: production MUST be a POST form with a CSRF token (never a
+           GET link). Replace the logout link below with the snippet inside
+           this Blade comment (it is stripped by Blade, so it never runs here):
+           {{-- <form method="POST" action="{{ route('logout') }}" role="none">
+                  @csrf
+                  <button type="submit" class="ds-menu__item ds-menu__item--danger" role="menuitem">
+                    <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-logout"></use></svg>ออกจากระบบ</button>
+                </form> --}}
+           Plain PHP: the same form with action="logout.php" and a hidden
+           input name="_token" holding the session's CSRF token. -->
+      <div class="ds-dropdown">
+        <button type="button" class="ds-user" data-ds-dropdown aria-controls="ds-user-menu" aria-expanded="false" aria-haspopup="menu">
+          <span class="ds-avatar" aria-hidden="true">ส</span>
+          <span class="ds-user__meta"><b>สมชาย ใจดี</b><small>ผู้จัดการ (SUPERVISOR)</small></span>
+          <svg class="ds-ic ds-ic--sm ds-user__caret" aria-hidden="true"><use href="#ds-i-chevron-down"></use></svg>
+        </button>
+        <div class="ds-menu" id="ds-user-menu" role="menu" aria-label="เมนูผู้ใช้" hidden>
+          <div class="ds-menu__header" role="none"><b>สมชาย ใจดี</b><small>somchai.j@example.go.th</small></div>
+          <a class="ds-menu__item" role="menuitem" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-user"></use></svg>ข้อมูลส่วนตัว</a>
+          <a class="ds-menu__item" role="menuitem" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-lock"></use></svg>เปลี่ยนรหัสผ่าน</a>
+          <hr class="ds-menu__sep">
+          <!-- production: logout must be a POST form with CSRF (Laravel). Template uses a link to login.html -->
+          <a class="ds-menu__item ds-menu__item--danger" role="menuitem" href="login.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-logout"></use></svg>ออกจากระบบ</a>
+        </div>
+      </div>
+    </header>
+    <!-- ===== /TOPBAR ===== -->
+
+    <!-- ===== PAGE CONTENT (per page; everything above is the shared header) =====
+         Plain PHP: header.php ends with the opening main tag below; the page
+         prints its content; footer.php starts at the closing main tag.
+         Blade: this main element stays in the layout and the page content is
+         the component slot, which replaces the placeholder page head + panel.
+         id="ds-main" (ds- prefixed, never a bare "main") is the skip-link
+         target; tabindex="-1" lets it take focus. -->
+    <main class="ds-content" id="ds-main" tabindex="-1">
+
+      <!-- ===== PAGE HEAD =====
+           Create/edit form archetype: breadcrumb, title (h2) and description.
+           No page-level actions here: the form buttons live in the sticky
+           ds-form-actions bar at the bottom of the form (FORM ACTIONS).
+           Edit mode: title "แก้ไขใบแจ้งซ่อม SR-202505-0xxx", fields pre-filled
+           by the server, submit text "บันทึกการแก้ไข". -->
+      <div class="ds-page-head">
+        <div class="ds-page-head__main">
+          <nav class="ds-breadcrumb" aria-label="เส้นทางนำทาง">
+            <ol>
+              <li><a href="dashboard.html">หน้าหลัก</a></li>
+              <li><a href="list.html">รายการแจ้งซ่อม</a></li>
+              <li aria-current="page">แจ้งซ่อมใหม่</li>
+            </ol>
+          </nav>
+          <h2 class="ds-page-head__title">แจ้งซ่อมใหม่</h2>
+          <p class="ds-page-head__sub">กรอกข้อมูลให้ครบถ้วน เพื่อให้หัวหน้างานตรวจสอบและมอบหมายช่างได้รวดเร็ว</p>
+        </div>
+      </div>
+
+      <!-- ===== INFO ALERT (required-field legend) ===== -->
+      <div class="ds-alert ds-alert--info">
+        <svg class="ds-ic ds-alert__icon" aria-hidden="true"><use href="#ds-i-info"></use></svg>
+        <div class="ds-alert__body"><p>ช่องที่มี <span class="ds-field__req">*</span> จำเป็นต้องกรอก</p></div>
+      </div>
+
+      <!-- ===== REPAIR REQUEST FORM =====
+           form.ds-stack = vertical stack (12px gap) of ds-form-section panels,
+           closed by the sticky ds-form-actions bar. novalidate: the page script
+           validates (no browser bubbles); the server must validate again.
+           Field pattern (one per control):
+             div.ds-field > label.ds-field__label[for] (+ span.ds-field__req)
+                          > .ds-input | .ds-select | .ds-textarea  [required aria-required="true"]
+                          > p.ds-field__hint (id, referenced by aria-describedby)
+           Searchable select (หน่วยงาน, ประเภทครุภัณฑ์): add data-ds-combobox to the
+             .ds-select. ds-ui.js wraps it in .ds-combo with a visible text input;
+             the select keeps id/name/value and stays the source of truth (it
+             fires change/input), label[for], required, aria-invalid,
+             aria-describedby and focus() are forwarded to the visible input.
+             After setting .value from a script, dispatch 'change' on the select.
+           Server-side error (render it instead of the script): add
+             aria-invalid="true" aria-describedby="xErr xHint" to the control and
+             <p class="ds-field__error" id="xErr">ข้อความ</p> at the end of its ds-field. -->
+      <form class="ds-stack" id="fRepair" action="list.html" method="post" enctype="multipart/form-data" novalidate aria-labelledby="fRepairTitle">
+        <span class="ds-sr-only" id="fRepairTitle">แบบฟอร์มแจ้งซ่อมใหม่</span>
+
+        <!-- ===== ERROR SUMMARY (validation) =====
+             Hidden until a submit fails. Title = error count; each item is a
+             link (href="#fieldId") that moves focus to the invalid field. -->
+        <div class="ds-alert ds-alert--danger" id="fErrSummary" role="alert" hidden>
+          <svg class="ds-ic ds-alert__icon" aria-hidden="true"><use href="#ds-i-alert-triangle"></use></svg>
+          <div class="ds-alert__body">
+            <p class="ds-alert__title" id="fErrTitle">กรุณาแก้ไขข้อมูล</p>
+            <ul id="fErrList"></ul>
+          </div>
+        </div>
+
+        <!-- ===== SECTION 1: ข้อมูลผู้แจ้ง (reporter) ===== -->
+        <section class="ds-form-section" aria-labelledby="secReporter">
+          <div class="ds-form-section__head">
+            <span class="ds-form-section__num" aria-hidden="true">1</span>
+            <h3 class="ds-form-section__title" id="secReporter">ข้อมูลผู้แจ้ง</h3>
+            <p class="ds-form-section__desc">ใช้สำหรับติดต่อกลับและแจ้งผลการซ่อม</p>
+          </div>
+          <div class="ds-form">
+            <!-- Read-only: the number is assigned by the server on submit -->
+            <div class="ds-field">
+              <label class="ds-field__label" for="fRef">เลขที่ใบแจ้ง</label>
+              <input class="ds-input" id="fRef" name="request_no" type="text" value="สร้างอัตโนมัติ" readonly aria-describedby="fRefHint">
+              <p class="ds-field__hint" id="fRefHint">ระบบกำหนดเลขที่ (SR-ปีเดือน-ลำดับ) ให้เมื่อส่งคำขอ</p>
+            </div>
+            <!-- Pre-filled from the signed-in user (server) -->
+            <div class="ds-field">
+              <label class="ds-field__label" for="fName">ชื่อผู้แจ้ง<span class="ds-field__req" aria-hidden="true">*</span></label>
+              <input class="ds-input" id="fName" name="reporter_name" type="text" value="สมชาย ใจดี" autocomplete="name" maxlength="100" required aria-required="true">
+            </div>
+            <div class="ds-field">
+              <label class="ds-field__label" for="fDept">หน่วยงาน<span class="ds-field__req" aria-hidden="true">*</span></label>
+              <select class="ds-select" id="fDept" name="department" required aria-required="true" data-ds-combobox>
+                <option value="">— เลือกหน่วยงาน —</option>
+                <option value="central">สำนักงานกลาง</option>
+                <option value="it">ฝ่ายไอที</option>
+                <option value="account">ฝ่ายบัญชี</option>
+                <option value="hr">ฝ่ายบุคคล</option>
+                <option value="marketing">ฝ่ายการตลาด</option>
+                <option value="procurement">ฝ่ายจัดซื้อและพัสดุ</option>
+                <option value="facility">ฝ่ายอาคารสถานที่</option>
+                <option value="legal">ฝ่ายกฎหมาย</option>
+              </select>
+            </div>
+            <div class="ds-field">
+              <label class="ds-field__label" for="fPhone">เบอร์โทรภายใน<span class="ds-field__req" aria-hidden="true">*</span></label>
+              <input class="ds-input ds-num" id="fPhone" name="phone_ext" type="tel" inputmode="numeric" autocomplete="tel-extension" maxlength="5" placeholder="เช่น 1234" required aria-required="true" aria-describedby="fPhoneHint">
+              <p class="ds-field__hint" id="fPhoneHint">ตัวเลข 3–5 หลัก</p>
+            </div>
+            <div class="ds-field ds-field--full">
+              <label class="ds-field__label" for="fEmail">อีเมล</label>
+              <input class="ds-input" id="fEmail" name="email" type="email" autocomplete="email" maxlength="120" placeholder="name@example.co.th" aria-describedby="fEmailHint">
+              <p class="ds-field__hint" id="fEmailHint">ไม่บังคับ · ใช้รับการแจ้งเตือนเมื่อสถานะใบแจ้งซ่อมเปลี่ยน</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== SECTION 2: ข้อมูลครุภัณฑ์ (asset) ===== -->
+        <section class="ds-form-section" aria-labelledby="secAsset">
+          <div class="ds-form-section__head">
+            <span class="ds-form-section__num" aria-hidden="true">2</span>
+            <h3 class="ds-form-section__title" id="secAsset">ข้อมูลครุภัณฑ์</h3>
+            <p class="ds-form-section__desc">ระบุเลขครุภัณฑ์เพื่อดึงประวัติการซ่อม หรือสแกน QR บนตัวเครื่อง</p>
+          </div>
+          <div class="ds-form">
+            <!-- ds-input-group: control + button joined (the button stretches to the control height) -->
+            <div class="ds-field">
+              <label class="ds-field__label" for="fAsset">เลขครุภัณฑ์</label>
+              <div class="ds-input-group">
+                <input class="ds-input" id="fAsset" name="asset_no" type="text" maxlength="30" placeholder="เช่น IT-NB-2566-0147" autocomplete="off" aria-describedby="fAssetHint">
+                <button class="ds-btn ds-btn--ghost" type="button" id="btnScan"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-scan"></use></svg>สแกน<span class="ds-sr-only">เลขครุภัณฑ์</span></button>
+              </div>
+              <p class="ds-field__hint" id="fAssetHint">ไม่บังคับ · ไม่ทราบเลขให้เว้นว่างและระบุสถานที่แทน</p>
+            </div>
+            <div class="ds-field">
+              <label class="ds-field__label" for="fCat">ประเภทครุภัณฑ์<span class="ds-field__req" aria-hidden="true">*</span></label>
+              <select class="ds-select" id="fCat" name="category" required aria-required="true" data-ds-combobox>
+                <option value="">— เลือกประเภท —</option>
+                <option value="computer">คอมพิวเตอร์ / Notebook</option>
+                <option value="aircon">เครื่องปรับอากาศ</option>
+                <option value="printer">เครื่องพิมพ์</option>
+                <option value="furniture">เฟอร์นิเจอร์</option>
+                <option value="electric">ระบบไฟฟ้า</option>
+                <option value="other">อื่น ๆ</option>
+              </select>
+            </div>
+            <!-- Addon = decorative icon joined to the control -->
+            <div class="ds-field">
+              <label class="ds-field__label" for="fLoc">สถานที่ / ห้อง<span class="ds-field__req" aria-hidden="true">*</span></label>
+              <div class="ds-input-group">
+                <span class="ds-input-group__addon" aria-hidden="true"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-map-pin"></use></svg></span>
+                <input class="ds-input" id="fLoc" name="location" type="text" maxlength="120" placeholder="เช่น อาคาร A ชั้น 3 ห้อง 305" required aria-required="true">
+              </div>
+            </div>
+            <!-- Disabled example: shown for context, not editable, not submitted -->
+            <div class="ds-field">
+              <label class="ds-field__label" for="fOwner">ผู้รับผิดชอบ</label>
+              <input class="ds-input" id="fOwner" name="assignee" type="text" value="กำหนดโดยหัวหน้างาน" disabled aria-describedby="fOwnerHint">
+              <p class="ds-field__hint" id="fOwnerHint">หัวหน้างานจะมอบหมายช่างหลังตรวจสอบคำขอ</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== SECTION 3: รายละเอียดปัญหา (problem) ===== -->
+        <section class="ds-form-section" aria-labelledby="secProblem">
+          <div class="ds-form-section__head">
+            <span class="ds-form-section__num" aria-hidden="true">3</span>
+            <h3 class="ds-form-section__title" id="secProblem">รายละเอียดปัญหา</h3>
+            <p class="ds-form-section__desc">อธิบายอาการให้ชัดเจน ช่างจะเตรียมอะไหล่ได้ถูกต้อง</p>
+          </div>
+          <div class="ds-form">
+            <div class="ds-field ds-field--full">
+              <label class="ds-field__label" for="fTitle">หัวข้อ<span class="ds-field__req" aria-hidden="true">*</span></label>
+              <input class="ds-input" id="fTitle" name="title" type="text" maxlength="100" placeholder="เช่น เครื่องพิมพ์ชั้น 2 กระดาษติดบ่อย" required aria-required="true">
+            </div>
+            <!-- Live counter: the page script updates #fDetailCount on every input -->
+            <div class="ds-field ds-field--full">
+              <label class="ds-field__label" for="fDetail">อาการ / รายละเอียด<span class="ds-field__req" aria-hidden="true">*</span></label>
+              <textarea class="ds-textarea" id="fDetail" name="detail" rows="5" maxlength="500" placeholder="เกิดอะไรขึ้น เริ่มเมื่อไร และได้ลองแก้ไขอะไรไปแล้วบ้าง" required aria-required="true" aria-describedby="fDetailHint"></textarea>
+              <p class="ds-field__hint ds-field__hint--split" id="fDetailHint"><span>อย่างน้อย 10 ตัวอักษร</span><span><span class="ds-num" id="fDetailCount">0/500</span> ตัวอักษร</span></p>
+            </div>
+            <!-- Radio group: the group label is a span (no fieldset) so the
+                 radiogroup can carry aria-required / aria-invalid / aria-describedby -->
+            <div class="ds-field">
+              <span class="ds-field__label" id="fPrioLbl">ความเร่งด่วน<span class="ds-field__req" aria-hidden="true">*</span></span>
+              <div class="ds-choice-group" id="fPrio" role="radiogroup" aria-labelledby="fPrioLbl" aria-required="true" aria-describedby="fPrioHint">
+                <label class="ds-check"><input type="radio" id="fPrio1" name="priority" value="normal"> ปกติ</label>
+                <label class="ds-check"><input type="radio" id="fPrio2" name="priority" value="urgent"> ด่วน</label>
+                <label class="ds-check"><input type="radio" id="fPrio3" name="priority" value="critical"> ด่วนมาก</label>
+              </div>
+              <p class="ds-field__hint" id="fPrioHint">ด่วนมาก = กระทบการทำงานของทั้งหน่วยงาน</p>
+            </div>
+            <div class="ds-field">
+              <label class="ds-field__label" for="fDue">วันที่ต้องการให้แล้วเสร็จ</label>
+              <input class="ds-input ds-num" id="fDue" name="due_date" type="date" aria-describedby="fDueHint">
+              <p class="ds-field__hint" id="fDueHint">ไม่บังคับ · ต้องไม่ก่อนวันนี้</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== SECTION 4: ไฟล์แนบ (attachments) =====
+             ds-file = drop zone: the real file input is stretched over it, so
+             click / keyboard / drag-and-drop all work. The page script adds
+             .is-dragover while dragging, merges selections (max 5, images or
+             PDF, 10 MB each) and lists them in #fFileList with remove buttons. -->
+        <section class="ds-form-section" aria-labelledby="secFiles">
+          <div class="ds-form-section__head">
+            <span class="ds-form-section__num" aria-hidden="true">4</span>
+            <h3 class="ds-form-section__title" id="secFiles">ไฟล์แนบ</h3>
+            <p class="ds-form-section__desc">ภาพถ่ายอาการหรือเอกสารประกอบ ช่วยให้ประเมินงานได้เร็วขึ้น</p>
+          </div>
+          <div class="ds-form">
+            <div class="ds-field ds-field--full">
+              <label class="ds-file" id="fFileZone">
+                <input class="ds-file__input" id="fFiles" type="file" name="attachments[]" multiple accept="image/*,.pdf,application/pdf" aria-describedby="fFilesHint fFilesCount">
+                <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-upload"></use></svg>
+                <span class="ds-file__title">ลากไฟล์มาวางที่นี่ หรือ <span class="ds-file__link">เลือกไฟล์</span></span>
+                <span class="ds-file__hint" id="fFilesHint">รูปภาพ (JPG, PNG) หรือ PDF · สูงสุด 5 ไฟล์ ไฟล์ละไม่เกิน 10 MB</span>
+              </label>
+              <p class="ds-field__hint" id="fFilesCount" aria-live="polite">ยังไม่ได้เลือกไฟล์ (0/5)</p>
+              <!-- Selected files (rendered by the page script):
+                   li.ds-file__item = type icon | name (truncated) | size | remove button -->
+              <ul class="ds-file__list" id="fFileList" aria-label="ไฟล์ที่เลือก" hidden></ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== SECTION 5: ยืนยันข้อมูล (consent) ===== -->
+        <section class="ds-form-section" aria-labelledby="secConfirm">
+          <div class="ds-form-section__head">
+            <span class="ds-form-section__num" aria-hidden="true">5</span>
+            <h3 class="ds-form-section__title" id="secConfirm">ยืนยันข้อมูล</h3>
+          </div>
+          <div class="ds-form">
+            <div class="ds-field ds-field--full">
+              <label class="ds-check"><input type="checkbox" id="fConsent" name="consent" value="1" required aria-required="true"> <span>ข้าพเจ้ายืนยันว่าข้อมูลถูกต้อง<span class="ds-field__req" aria-hidden="true">*</span></span></label>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== FORM ACTIONS (sticky bottom bar) =====
+             Stays at the viewport bottom while the form scrolls. Order:
+             ยกเลิก (ghost link, asks first) · บันทึกร่าง (ghost) ·
+             ส่งคำขอแจ้งซ่อม (primary submit). -->
+        <div class="ds-form-actions">
+          <p class="ds-form-actions__info"><span aria-hidden="true">*</span> จำเป็นต้องกรอก</p>
+          <a class="ds-btn ds-btn--ghost ds-btn--lg" href="list.html" data-ds-confirm="ข้อมูลที่กรอกไว้จะไม่ถูกบันทึก" data-ds-confirm-title="ยกเลิกการแจ้งซ่อม?" data-ds-confirm-ok="ออกจากหน้านี้" data-ds-confirm-cancel="กรอกต่อ">ยกเลิก</a>
+          <button class="ds-btn ds-btn--ghost ds-btn--lg" type="button" id="btnDraft"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-save"></use></svg>บันทึกร่าง</button>
+          <button class="ds-btn ds-btn--lg" type="submit"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-send"></use></svg>ส่งคำขอแจ้งซ่อม</button>
+        </div>
+      </form>
+
+    </main>
+    <!-- ===== /PAGE CONTENT (everything below is the shared footer) ===== -->
+
+    <!-- ===== FOOTER (shared layout: partials/footer) =====
+         Plain PHP: footer.php, from the closing main tag to the end of the file.
+         Blade: resources/views/partials/footer.blade.php.
+         Version, system name and copyright are per system;
+         ds-footer__spacer pushes the copyright to the right edge. -->
+    <footer class="ds-footer">
+      <span class="ds-footer__brand"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-gear"></use></svg>SMMS</span><span>Version 1.0.0 (MVP)</span><span aria-hidden="true">|</span><span>Smart Maintenance &amp; Asset Service Management System</span><span aria-hidden="true">|</span><span>ต้นแบบ HTML · ข้อมูลทั้งหมดเป็นตัวอย่าง</span>
+      <span class="ds-footer__spacer">© 2025 บริษัท ตัวอย่าง จำกัด | All rights reserved.</span>
+    </footer>
+    <!-- ===== /FOOTER ===== -->
+
+  </div>
+  <!-- ===== /MAIN COLUMN ===== -->
+
+</div>
+<!-- ===== /APP SHELL =====
+     No scripts in the shell: ds-ui.js (in head) wires everything. A page
+     that needs its own script adds it at the end of the page body, never in
+     the shared includes. -->
+
+<!-- ===== PAGE SCRIPT =====
+     Page-only behaviour (demo): character counter, scan demo, file list,
+     draft toast and client-side validation. Uses window.DS only. -->
+<script>
+/* PAGE SCRIPT (ตัวอย่าง) — แทนที่ด้วยข้อมูลจากเซิร์ฟเวอร์
+   ระบบจริง: ส่งฟอร์มไปเซิร์ฟเวอร์ (form.submit() หรือ fetch) และตรวจความถูกต้องซ้ำฝั่งเซิร์ฟเวอร์เสมอ */
+(function () {
+  'use strict';
+  var form = document.getElementById('fRepair');
+  if (!form || !window.DS) return;
+  function $(id) { return document.getElementById(id); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function isoToday() { var d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+
+  var MAX_FILES = 5, MAX_SIZE = 10 * 1024 * 1024, DETAIL_MAX = 500;
+  $('fDue').min = isoToday();
+
+  /* ---------- 1. character counter (0/500) ---------- */
+  var detail = $('fDetail'), counter = $('fDetailCount');
+  function updateCount() { counter.textContent = detail.value.length + '/' + DETAIL_MAX; }
+  detail.addEventListener('input', updateCount);
+  updateCount();
+
+  /* ---------- 2. scan demo (ระบบจริง: เปิดกล้อง / เครื่องอ่านบาร์โค้ด แล้วค้นครุภัณฑ์จากเซิร์ฟเวอร์) ---------- */
+  $('btnScan').addEventListener('click', function () {
+    $('fAsset').value = 'IT-NB-2566-0147';
+    $('fCat').value = 'computer';
+    if (!$('fLoc').value.trim()) $('fLoc').value = 'อาคาร A ชั้น 3 ห้อง 305 (ฝ่ายไอที)';
+    /* programmatic value: tell listeners (combobox text + validation recheck via the form 'change' listener) */
+    $('fCat').dispatchEvent(new Event('change', { bubbles: true }));
+    recheck($('fLoc'));
+    DS.toast('พบครุภัณฑ์ IT-NB-2566-0147 · Notebook Dell Latitude 5420', { type: 'success' });
+  });
+
+  /* ---------- 3. draft ---------- */
+  $('btnDraft').addEventListener('click', function () {
+    DS.toast('บันทึกร่างแล้ว เวลา ' + DS.fmtTime(new Date()) + ' น. (ยังไม่ส่งคำขอ)', { type: 'info' });
+  });
+
+  /* ---------- 4. attachments: drop zone + file list ---------- */
+  var zone = $('fFileZone'), fileInput = $('fFiles'), list = $('fFileList'), fileCount = $('fFilesCount');
+  var files = [], dragDepth = 0;
+  var canSync = typeof DataTransfer === 'function';
+  function okType(f) { return /^image\//.test(f.type) || f.type === 'application/pdf' || /\.(jpe?g|png|gif|webp|pdf)$/i.test(f.name); }
+  function fmtSize(b) { return b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
+  function syncInput() {           /* keep input.files = the listed files, so a normal submit sends them */
+    if (!canSync) return;
+    try { var dt = new DataTransfer(); files.forEach(function (f) { dt.items.add(f); }); fileInput.files = dt.files; } catch (e) { /* old browser: last selection only */ }
+  }
+  function renderFiles() {
+    list.innerHTML = files.map(function (f, i) {
+      return '<li class="ds-file__item">' + DS.icon(/^image\//.test(f.type) ? 'image' : 'file-text', 'ds-ic--sm') +
+        '<span class="ds-file__name" title="' + DS.esc(f.name) + '">' + DS.esc(f.name) + '</span>' +
+        '<span class="ds-file__size ds-num">' + fmtSize(f.size) + '</span>' +
+        '<button type="button" class="ds-btn ds-btn--ghost ds-btn--icon ds-file__remove" data-remove="' + i + '" aria-label="ลบไฟล์ ' + DS.esc(f.name) + '">' +
+        DS.icon('x', 'ds-ic--sm') + '</button></li>';
+    }).join('');
+    list.hidden = !files.length;
+    fileCount.textContent = files.length ? 'เลือกแล้ว ' + files.length + '/' + MAX_FILES + ' ไฟล์' : 'ยังไม่ได้เลือกไฟล์ (0/' + MAX_FILES + ')';
+  }
+  function addFiles(incoming) {
+    var rejected = [], overflow = 0;
+    Array.prototype.forEach.call(incoming, function (f) {
+      if (!okType(f) || f.size > MAX_SIZE) { rejected.push(f.name); return; }
+      if (files.some(function (g) { return g.name === f.name && g.size === f.size; })) return;
+      if (files.length >= MAX_FILES) { overflow++; return; }
+      files.push(f);
+    });
+    syncInput(); renderFiles();
+    if (rejected.length) DS.toast('ไม่รองรับไฟล์ ' + rejected.join(', ') + ' (รับเฉพาะรูปภาพหรือ PDF ไม่เกิน 10 MB)', { type: 'danger' });
+    else if (overflow) DS.toast('แนบได้สูงสุด ' + MAX_FILES + ' ไฟล์ ไฟล์ที่เกินไม่ถูกเพิ่ม', { type: 'danger' });
+  }
+  fileInput.addEventListener('change', function () { addFiles(fileInput.files); });
+  zone.addEventListener('dragenter', function () { dragDepth++; zone.classList.add('is-dragover'); });
+  zone.addEventListener('dragleave', function () { if (--dragDepth <= 0) { dragDepth = 0; zone.classList.remove('is-dragover'); } });
+  zone.addEventListener('dragover', function (e) { if (canSync) e.preventDefault(); });
+  zone.addEventListener('drop', function (e) {
+    dragDepth = 0; zone.classList.remove('is-dragover');
+    if (canSync && e.dataTransfer && e.dataTransfer.files.length) { e.preventDefault(); addFiles(e.dataTransfer.files); }
+  });
+  list.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-remove]');
+    if (!btn) return;
+    var i = +btn.getAttribute('data-remove');
+    files.splice(i, 1); syncInput(); renderFiles();
+    var next = list.querySelector('[data-remove="' + Math.min(i, files.length - 1) + '"]');
+    (next || fileInput).focus();
+  });
+
+  /* ---------- 5. validation ----------
+     RULES: id = the control (or the radiogroup), check(value) -> '' | Thai error message. */
+  function req(msg) { return function (v) { return v ? '' : msg; }; }
+  var RULES = [
+    { id: 'fName',    check: req('กรุณากรอกชื่อผู้แจ้ง') },
+    { id: 'fDept',    check: req('กรุณาเลือกหน่วยงาน') },
+    { id: 'fPhone',   check: function (v) { return !v ? 'กรุณากรอกเบอร์โทรภายใน' : /^\d{3,5}$/.test(v) ? '' : 'เบอร์โทรภายในต้องเป็นตัวเลข 3–5 หลัก'; } },
+    { id: 'fEmail',   check: function (v) { return !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'รูปแบบอีเมลไม่ถูกต้อง เช่น name@example.co.th'; } },
+    { id: 'fCat',     check: req('กรุณาเลือกประเภทครุภัณฑ์') },
+    { id: 'fLoc',     check: req('กรุณาระบุสถานที่ / ห้อง') },
+    { id: 'fTitle',   check: req('กรุณากรอกหัวข้อปัญหา') },
+    { id: 'fDetail',  check: function (v) { return !v ? 'กรุณาอธิบายอาการ / รายละเอียด' : v.length < 10 ? 'กรุณาอธิบายอาการอย่างน้อย 10 ตัวอักษร' : ''; } },
+    { id: 'fPrio',    check: req('กรุณาเลือกความเร่งด่วน') },
+    { id: 'fDue',     check: function (v) { return v && v < isoToday() ? 'วันที่ต้องการให้แล้วเสร็จต้องไม่ก่อนวันนี้' : ''; } },
+    { id: 'fConsent', check: req('กรุณายืนยันว่าข้อมูลถูกต้อง') }
+  ];
+  var baseDesc = {}, messages = {}, submitted = false;
+  var summary = $('fErrSummary'), errTitle = $('fErrTitle'), errList = $('fErrList');
+
+  function valueOf(el) {
+    if (el.getAttribute('role') === 'radiogroup') { var c = el.querySelector('input:checked'); return c ? c.value : ''; }
+    if (el.type === 'checkbox') return el.checked ? el.value : '';
+    return el.value.trim();
+  }
+  function focusTarget(el) {      /* radiogroup -> its checked (or first) radio; combobox select -> its visible input (id + '-ds') */
+    if (el.getAttribute('role') === 'radiogroup') return el.querySelector('input:checked') || el.querySelector('input');
+    return (el.hasAttribute('data-ds-combobox') && $(el.id + '-ds')) || el;
+  }
+  function focusField(el) {
+    var t = focusTarget(el);
+    t.scrollIntoView({ block: 'center' });   /* centre: never hidden behind the sticky action bar */
+    t.focus({ preventScroll: true });
+  }
+  function setError(el, msg) {
+    var id = el.id, errId = id + 'Err', err = $(errId);
+    if (!(id in baseDesc)) baseDesc[id] = el.getAttribute('aria-describedby') || '';
+    messages[id] = msg;
+    if (msg) {
+      if (!err) {
+        err = document.createElement('p');
+        err.className = 'ds-field__error'; err.id = errId;
+        el.closest('.ds-field').appendChild(err);
+      }
+      err.innerHTML = DS.icon('alert-triangle') + '<span>' + DS.esc(msg) + '</span>';
+      err.hidden = false;
+      el.setAttribute('aria-invalid', 'true');
+      el.setAttribute('aria-describedby', (errId + ' ' + baseDesc[id]).trim());
+    } else {
+      if (err) err.hidden = true;
+      el.removeAttribute('aria-invalid');
+      if (baseDesc[id]) el.setAttribute('aria-describedby', baseDesc[id]); else el.removeAttribute('aria-describedby');
+    }
+  }
+  function renderSummary() {
+    var items = RULES.filter(function (r) { return messages[r.id]; });
+    if (!items.length) { summary.hidden = true; errList.innerHTML = ''; return; }
+    summary.hidden = false;       /* show first, then fill: the role="alert" region announces the change */
+    errTitle.textContent = 'กรุณาแก้ไขข้อมูล ' + items.length + ' รายการ';
+    errList.innerHTML = items.map(function (r) {
+      return '<li><a href="#' + focusTarget($(r.id)).id + '" data-field="' + r.id + '">' + DS.esc(messages[r.id]) + '</a></li>';
+    }).join('');
+  }
+  function validateAll() {
+    var first = null;
+    RULES.forEach(function (r) {
+      var el = $(r.id), msg = r.check(valueOf(el));
+      setError(el, msg);
+      if (msg && !first) first = el;
+    });
+    renderSummary();
+    return first;
+  }
+  function ruleOf(target) {
+    for (var i = 0; i < RULES.length; i++) {
+      var el = $(RULES[i].id);
+      if (el === target || el.contains(target)) return RULES[i];
+    }
+    return null;
+  }
+  function recheck(target, soft) {   /* after a failed submit; soft (typing) = only update fields already flagged */
+    var r = ruleOf(target);
+    if (!submitted || !r || (soft && !messages[r.id])) return;
+    var el = $(r.id), msg = r.check(valueOf(el));
+    if (msg === (messages[r.id] || '')) return;   /* unchanged: no re-announcement */
+    setError(el, msg);
+    renderSummary();
+  }
+
+  errList.addEventListener('click', function (e) {
+    var a = e.target.closest('a[data-field]');
+    if (!a) return;
+    e.preventDefault();
+    focusField($(a.getAttribute('data-field')));
+  });
+  form.addEventListener('input', function (e) { recheck(e.target, true); });
+  form.addEventListener('change', function (e) { recheck(e.target); });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();           /* demo only: a real page submits when valid */
+    submitted = true;
+    var first = validateAll();
+    if (first) { focusField(first); return; }
+    DS.toast('ส่งคำขอแจ้งซ่อม SR-202505-0153 แล้ว', { type: 'success' });
+    /* ระบบจริง: form.submit() แล้ว redirect ไป detail.html?id=SR-202505-0153 */
+    form.reset();
+  });
+  form.addEventListener('reset', function () {
+    setTimeout(function () {      /* after the browser restores the default values */
+      submitted = false; files = [];
+      RULES.forEach(function (r) { setError($(r.id), ''); });
+      renderSummary(); renderFiles(); updateCount();
+      /* form.reset() fires no 'change': resync the combobox text with the restored selects */
+      [].forEach.call(form.querySelectorAll('select[data-ds-combobox]'), function (s) {
+        s.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+    }, 0);
+  });
+})();
+</script>
+</body>
+</html>

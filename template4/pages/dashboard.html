@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แดชบอร์ด | SMMS ระบบแจ้งซ่อม</title>
+<!-- =========================================================================
+  Template 4 : dashboard.html
+
+  Same system and SAMPLE figures as template1 / template3 (SMMS แจ้งซ่อม) so the
+  kits can be compared side by side. The look follows the TubHool style
+  (warm cream / near-black themes, coral accent, red highlight block, yellow
+  stat band, tinted bento cards, black active pill); no text, logo, image or
+  font was taken from that site.
+
+  Shell: a.t4-skip · header.t4-header · div.t4-app > aside.t4-side + main.t4-main
+  Assets: ../assets/t4-ui.css + ../assets/t4-ui.js (window.T4). No page CSS.
+  Demo only: data-t4-demo shows a toast; replace with real links in a system.
+========================================================================== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/t4-ui.css">
+<script src="../assets/t4-ui.js"></script>
+</head>
+<body class="t4-body">
+<a class="t4-skip" href="#t4-main">ข้ามไปยังเนื้อหา</a>
+
+<!-- ===== HEADER (shared layout: copy as is) ===== -->
+<header class="t4-header">
+  <button type="button" class="t4-icon-btn t4-menu-btn" data-t4-menu aria-controls="t4-side" aria-expanded="false" aria-label="เปิดเมนู"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-menu"></use></svg></button>
+  <a class="t4-brand" href="dashboard.html" aria-label="SMMS ระบบแจ้งซ่อม หน้าแรก">
+    <span class="t4-brand__mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M10.03 4.66L10.78 2.07L13.22 2.07L13.97 4.66A7.6 7.6 0 0 1 15.8 5.42L18.16 4.12L19.88 5.84L18.58 8.2A7.6 7.6 0 0 1 19.34 10.03L21.93 10.78L21.93 13.22L19.34 13.97A7.6 7.6 0 0 1 18.58 15.8L19.88 18.16L18.16 19.88L15.8 18.58A7.6 7.6 0 0 1 13.97 19.34L13.22 21.93L10.78 21.93L10.03 19.34A7.6 7.6 0 0 1 8.2 18.58L5.84 19.88L4.12 18.16L5.42 15.8A7.6 7.6 0 0 1 4.66 13.97L2.07 13.22L2.07 10.78L4.66 10.03A7.6 7.6 0 0 1 5.42 8.2L4.12 5.84L5.84 4.12L8.2 5.42A7.6 7.6 0 0 1 10.03 4.66z"/><circle cx="12" cy="12" r="5.2" fill="var(--t4-accent)"/><path d="M9.5 12.2l1.8 1.8 3.3-3.6" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="t4-brand__name">SMMS<small>ระบบแจ้งซ่อม</small></span>
+  </a>
+  <label class="t4-search">
+    <svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-search"></use></svg>
+    <span class="t4-sr-only">ค้นหา</span>
+    <input type="search" placeholder="ค้นหาเลขที่ใบแจ้ง ครุภัณฑ์ หรือผู้แจ้ง…" autocomplete="off">
+    <kbd class="t4-kbd">Ctrl K</kbd>
+  </label>
+  <div class="t4-header__actions">
+    <button type="button" class="t4-icon-btn t4-search-btn" aria-label="ค้นหา" data-t4-demo="ช่องค้นหาแบบเต็มจอบนมือถือ (ยังไม่รวมในตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-search"></use></svg></button>
+    <a class="t4-btn t4-btn--sm" href="form.html"><svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-plus"></use></svg>แจ้งซ่อมใหม่</a>
+    <button type="button" class="t4-icon-btn" data-t4-theme-toggle aria-label="เปลี่ยนโหมดสี"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-sun"></use></svg></button>
+    <div class="t4-pop-wrap">
+      <button type="button" class="t4-icon-btn" data-t4-pop="t4-pop-notif" aria-controls="t4-pop-notif" aria-expanded="false" aria-label="การแจ้งเตือน ยังไม่อ่าน 3 รายการ"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-bell"></use></svg><span class="t4-icon-btn__dot t4-num" aria-hidden="true">3</span></button>
+      <div class="t4-pop t4-pop--wide" id="t4-pop-notif" hidden>
+        <div class="t4-pop__head">การแจ้งเตือน <small>ยังไม่อ่าน 3 รายการ</small></div>
+        <ul class="t4-notes">
+          <li class="t4-note t4-tile--rose is-unread"><span class="t4-note__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-alert"></use></svg></span><p class="t4-note__t">มีงานค้างเกินกำหนด 9 รายการ<span class="t4-note__time t4-num">15/05/2568 09:00 น.</span></p></li>
+          <li class="t4-note t4-tile--blue is-unread"><span class="t4-note__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-wrench"></use></svg></span><p class="t4-note__t">SR-202505-0098 รออะไหล่ (คอมเพรสเซอร์)<span class="t4-note__time t4-num">15/05/2568 08:42 น.</span></p></li>
+          <li class="t4-note t4-tile--gold is-unread"><span class="t4-note__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-inbox"></use></svg></span><p class="t4-note__t">ใบแจ้งซ่อมใหม่ 4 รายการ รอมอบหมายช่าง<span class="t4-note__time t4-num">14/05/2568 16:30 น.</span></p></li>
+          <li class="t4-note t4-tile--green"><span class="t4-note__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-check"></use></svg></span><p class="t4-note__t">ปิดงาน SR-202505-0147 แล้ว รอผู้แจ้งประเมิน<span class="t4-note__time t4-num">14/05/2568 14:05 น.</span></p></li>
+        </ul>
+        <a class="t4-pop__foot" href="#" data-t4-demo="หน้าการแจ้งเตือนทั้งหมด (ยังไม่รวมในตัวอย่าง)">ดูการแจ้งเตือนทั้งหมด</a>
+      </div>
+    </div>
+    <div class="t4-pop-wrap">
+      <button type="button" class="t4-user" data-t4-pop="t4-pop-user" aria-controls="t4-pop-user" aria-expanded="false" aria-label="เมนูผู้ใช้ สมชาย ใจดี"><span class="t4-avatar" aria-hidden="true">ส</span><span class="t4-user__name">สมชาย ใจดี<small>หัวหน้างานซ่อมบำรุง</small></span></button>
+      <div class="t4-pop" id="t4-pop-user" hidden>
+        <div class="t4-pop__head"><span>สมชาย ใจดี<br><small>somchai.j@example.com</small></span></div>
+        <a class="t4-pop__item" href="#" data-t4-demo="หน้าโปรไฟล์ (ยังไม่รวมในตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-user"></use></svg>โปรไฟล์ของฉัน</a>
+        <a class="t4-pop__item" href="#" data-t4-demo="หน้าตั้งค่าบัญชี (ยังไม่รวมในตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-gear"></use></svg>ตั้งค่าบัญชี</a>
+        <a class="t4-pop__item" href="#" data-t4-demo="คู่มือการใช้งาน (ยังไม่รวมในตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-help"></use></svg>คู่มือการใช้งาน</a>
+        <div class="t4-pop__sep" role="separator"></div>
+        <a class="t4-pop__item t4-pop__item--danger" href="login.html"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-logout"></use></svg>ออกจากระบบ</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="t4-app">
+  <!-- ===== SIDEBAR (shared layout) =====
+       aria-current="page" goes on the item of this page; when it is inside a sub-menu
+       (.t4-nav-sub) t4-ui.js opens that sub-menu by itself. -->
+  <aside class="t4-side" id="t4-side" aria-label="เมนูหลัก">
+    <p class="t4-side__label">งานของฉัน</p>
+    <a class="t4-nav-item t4-tile--rose" href="dashboard.html" aria-current="page"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-home"></use></svg></span>แดชบอร์ด</a>
+    <a class="t4-nav-item t4-tile--gold" href="form.html"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-plus"></use></svg></span>แจ้งซ่อมใหม่</a>
+    <a class="t4-nav-item t4-tile--blue" href="list.html"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-list"></use></svg></span>รายการแจ้งซ่อม<span class="t4-nav-item__count t4-num" aria-label="เกินกำหนด 9 รายการ">9</span></a>
+    <a class="t4-nav-item t4-tile--green" href="#" data-t4-demo="หน้างานของฉัน (ยังไม่รวมในตัวอย่าง)"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-task"></use></svg></span>งานของฉัน</a>
+    <a class="t4-nav-item t4-tile--violet" href="#" data-t4-demo="หน้าปฏิทินงาน (ยังไม่รวมในตัวอย่าง)"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-cal"></use></svg></span>ปฏิทินงาน</a>
+    <p class="t4-side__label">ข้อมูลและรายงาน</p>
+    <div class="t4-nav-group">
+      <button type="button" class="t4-nav-item t4-tile--gold" data-t4-sub aria-expanded="false" aria-controls="t4-sub-asset"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-box"></use></svg></span>ครุภัณฑ์ / สินทรัพย์<svg class="t4-ic t4-nav-item__chev" aria-hidden="true"><use href="#t4-i-chev-down"></use></svg></button>
+      <div class="t4-nav-sub" id="t4-sub-asset" hidden>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าทะเบียนครุภัณฑ์ (ยังไม่รวมในตัวอย่าง)">ทะเบียนครุภัณฑ์</a>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าแผนบำรุงรักษา (PM) (ยังไม่รวมในตัวอย่าง)">แผนบำรุงรักษา (PM)<span class="t4-nav-sub__count t4-num" aria-label="ถึงรอบสัปดาห์นี้ 6 รายการ">6</span></a>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าครุภัณฑ์รอจำหน่าย (ยังไม่รวมในตัวอย่าง)">ครุภัณฑ์รอจำหน่าย</a>
+      </div>
+    </div>
+    <div class="t4-nav-group">
+      <button type="button" class="t4-nav-item t4-tile--blue" data-t4-sub aria-expanded="false" aria-controls="t4-sub-report"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-chart"></use></svg></span>รายงาน<svg class="t4-ic t4-nav-item__chev" aria-hidden="true"><use href="#t4-i-chev-down"></use></svg></button>
+      <div class="t4-nav-sub" id="t4-sub-report" hidden>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าสรุปประจำเดือน (ยังไม่รวมในตัวอย่าง)">สรุปประจำเดือน</a>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าแยกตามหน่วยงาน (ยังไม่รวมในตัวอย่าง)">แยกตามหน่วยงาน</a>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าแยกตามประเภทครุภัณฑ์ (ยังไม่รวมในตัวอย่าง)">แยกตามประเภทครุภัณฑ์</a>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าความพึงพอใจผู้แจ้ง (ยังไม่รวมในตัวอย่าง)">ความพึงพอใจผู้แจ้ง</a>
+      </div>
+    </div>
+    <a class="t4-nav-item t4-tile--grey" href="#" data-t4-demo="หน้าผู้ใช้และสิทธิ์ (ยังไม่รวมในตัวอย่าง)"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-users"></use></svg></span>ผู้ใช้และสิทธิ์</a>
+    <div class="t4-nav-group">
+      <button type="button" class="t4-nav-item t4-tile--grey" data-t4-sub aria-expanded="false" aria-controls="t4-sub-settings"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-gear"></use></svg></span>ตั้งค่า<svg class="t4-ic t4-nav-item__chev" aria-hidden="true"><use href="#t4-i-chev-down"></use></svg></button>
+      <div class="t4-nav-sub" id="t4-sub-settings" hidden>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าหน่วยงานและอาคาร (ยังไม่รวมในตัวอย่าง)">หน่วยงานและอาคาร</a>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าประเภทครุภัณฑ์ (ยังไม่รวมในตัวอย่าง)">ประเภทครุภัณฑ์</a>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าระยะเวลาตามความเร่งด่วน (ยังไม่รวมในตัวอย่าง)">ระยะเวลาตามความเร่งด่วน</a>
+      </div>
+    </div>
+    <div class="t4-side__help">
+      <b>ใช้งานครั้งแรก?</b>
+      แจ้งซ่อม ติดตาม และปิดงานได้ใน 4 ขั้นตอน
+      <a href="#" data-t4-demo="คู่มือการใช้งาน (ยังไม่รวมในตัวอย่าง)">อ่านคู่มือ <svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-arrow-right"></use></svg></a>
+    </div>
+  </aside>
+
+  <main class="t4-main" id="t4-main" tabindex="-1">
+    <div class="t4-container">
+
+      <!-- ===== HERO: greeting + highlighted key figure + status card ===== -->
+      <section class="t4-hero" aria-labelledby="t4-hero-title">
+        <div class="t4-hero__text">
+          <span class="t4-eyebrow"><span class="t4-eyebrow__dot" aria-hidden="true"></span>วันพฤหัสบดีที่ 15 พ.ค. 2568 · 10:24 น.</span>
+          <h1 class="t4-hero__title" id="t4-hero-title">สวัสดีคุณสมชาย<br>วันนี้มี <span class="t4-hl" data-t4-rotate='["17 งานต้องติดตาม","9 งานเกินกำหนด","4 ใบแจ้งใหม่"]'><span class="t4-hl__word" aria-hidden="true">17 งานต้องติดตาม</span><span class="t4-sr-only">17 งานต้องติดตาม</span></span></h1>
+          <p class="t4-hero__lead">ในนี้มี <b>9 งานเกินกำหนด</b> ที่ควรเร่ง และ <b>ใบแจ้งซ่อมใหม่ 4 รายการ</b> รอมอบหมายช่าง เริ่มจากงานที่เกินกำหนดก่อนได้เลย</p>
+          <div class="t4-hero__actions">
+            <a class="t4-btn" href="form.html"><svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-plus"></use></svg>แจ้งซ่อมใหม่</a>
+            <a class="t4-btn t4-btn--ghost" href="#t4-follow">ดูงานที่ต้องติดตาม <svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-arrow-right"></use></svg></a>
+          </div>
+          <div class="t4-hero__chips">
+            <span>ทางลัด</span>
+            <a class="t4-chip" href="#" data-t4-demo="ค้นหาครุภัณฑ์ (ยังไม่รวมในตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-scan"></use></svg>ค้นหาครุภัณฑ์</a>
+            <a class="t4-chip" href="list.html"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-list"></use></svg>รายการแจ้งซ่อม</a>
+            <a class="t4-chip" href="#" data-t4-demo="รายงานประจำเดือน (ยังไม่รวมในตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-chart"></use></svg>รายงานเดือนนี้</a>
+          </div>
+        </div>
+
+        <aside class="t4-glow" aria-labelledby="t4-status-title">
+          <div class="t4-glow__head">
+            <h2 class="t4-glow__title" id="t4-status-title">สถานะงานเดือนนี้</h2>
+            <span class="t4-eyebrow t4-eyebrow--accent">1–15 พ.ค. 2568</span>
+          </div>
+          <div class="t4-glow__body">
+            <div class="t4-ring">
+              <svg id="t4-ring" role="img" aria-label="ปิดงานแล้ว 75 เปอร์เซ็นต์ คือ 96 จาก 128 ใบ"></svg>
+              <div class="t4-ring__label" aria-hidden="true"><b class="t4-num">75%</b><small>ปิดงานแล้ว</small></div>
+            </div>
+            <ul class="t4-legend">
+              <li style="--t4-dot:var(--t4-gold)"><i></i><span>รอดำเนินการ</span><b class="t4-num">18</b></li>
+              <li style="--t4-dot:var(--t4-info)"><i></i><span>กำลังดำเนินการ</span><b class="t4-num">8</b></li>
+              <li style="--t4-dot:var(--t4-ok)"><i></i><span>เสร็จสิ้น</span><b class="t4-num">96</b></li>
+              <li style="--t4-dot:var(--t4-grey)"><i></i><span>ยกเลิก</span><b class="t4-num">6</b></li>
+            </ul>
+          </div>
+          <ol class="t4-flow" aria-label="ขั้นตอนงานซ่อม">
+            <li class="t4-flow__step"><b>1</b>แจ้งซ่อม</li><li aria-hidden="true">→</li>
+            <li class="t4-flow__step"><b>2</b>มอบหมายช่าง</li><li aria-hidden="true">→</li>
+            <li class="t4-flow__step"><b>3</b>ซ่อม</li><li aria-hidden="true">→</li>
+            <li class="t4-flow__step t4-flow__step--done"><b>✓</b>ปิดงาน</li>
+          </ol>
+        </aside>
+      </section>
+
+      <!-- ===== YELLOW STAT BAND ===== -->
+      <section class="t4-stats" aria-label="ตัวชี้วัดหลักเทียบกับเดือนที่แล้ว">
+        <div class="t4-stat"><div class="t4-stat__v t4-num">128</div><div class="t4-stat__l">คำขอแจ้งซ่อมทั้งหมด</div><span class="t4-stat__d t4-stat__d--good">▲ 12%</span></div>
+        <div class="t4-stat"><div class="t4-stat__v t4-num">96</div><div class="t4-stat__l">ดำเนินการเสร็จสิ้น</div><span class="t4-stat__d t4-stat__d--good">▲ 19%</span></div>
+        <div class="t4-stat"><div class="t4-stat__v t4-num">1.8 <small>วัน</small></div><div class="t4-stat__l">เวลาซ่อมเฉลี่ย (MTTR)</div><span class="t4-stat__d t4-stat__d--good">▼ 32% เร็วขึ้น</span></div>
+        <div class="t4-stat"><div class="t4-stat__v t4-num">18</div><div class="t4-stat__l">รอเริ่มดำเนินการ</div><span class="t4-stat__d t4-stat__d--bad">+2 วันนี้</span></div>
+        <div class="t4-stat"><div class="t4-stat__v t4-num">532</div><div class="t4-stat__l">ครุภัณฑ์ทั้งหมด</div><span class="t4-stat__d t4-stat__d--good">▲ 2%</span></div>
+      </section>
+
+      <!-- ===== OVERVIEW: tinted bento cards ===== -->
+      <section class="t4-sec" aria-labelledby="t4-ov-title">
+        <div class="t4-sec__head">
+          <div><h2 class="t4-sec__title" id="t4-ov-title">ภาพรวม <em>เดือนนี้</em></h2><p class="t4-sec__sub">1–15 พ.ค. 2568 เทียบกับช่วงเดียวกันของเดือนที่แล้ว</p></div>
+          <div class="t4-pills" role="group" aria-label="ช่วงเวลา">
+            <button type="button" class="t4-pill" aria-pressed="true">เดือนนี้</button>
+            <button type="button" class="t4-pill" aria-pressed="false" data-t4-demo="สลับช่วงเวลา (ตัวอย่าง)">เดือนที่แล้ว</button>
+            <button type="button" class="t4-pill" aria-pressed="false" data-t4-demo="สลับช่วงเวลา (ตัวอย่าง)">ปีนี้</button>
+          </div>
+        </div>
+        <div class="t4-bento">
+          <article class="t4-card t4-card--2 t4-card--rose">
+            <div class="t4-card__head">
+              <div><p class="t4-card__kicker">แนวโน้มงานแจ้งซ่อม</p><h3 class="t4-card__title">แจ้งใหม่ 8.5 งาน/วัน · ปิดได้ 6.4 งาน/วัน</h3></div>
+              <div class="t4-chart__key"><span style="--t4-dot:var(--t4-accent)"><i></i>แจ้งใหม่</span><span style="--t4-dot:var(--t4-ok)"><i></i>ปิดงาน</span></div>
+            </div>
+            <svg class="t4-chart" id="t4-trend" role="img" aria-label="กราฟเส้นงานแจ้งใหม่เทียบกับงานที่ปิดได้ วันที่ 1 ถึง 15 พฤษภาคม แจ้งใหม่รวม 128 ปิดงานรวม 96"></svg>
+          </article>
+          <article class="t4-card t4-card--mint">
+            <p class="t4-card__kicker">อัตราปิดงาน</p>
+            <p class="t4-card__big t4-num">75%</p>
+            <p class="t4-card__note">ปิดได้ 96 จาก 128 ใบ</p>
+            <div class="t4-meter" role="img" aria-label="75 เปอร์เซ็นต์"><i style="--t4-v:75%"></i></div>
+            <p class="t4-card__note">เป้าหมายเดือนนี้ 80%</p>
+          </article>
+          <article class="t4-card t4-card--lav">
+            <p class="t4-card__kicker">เวลาซ่อมเฉลี่ย (MTTR)</p>
+            <div class="t4-clock">
+              <span class="t4-clock__face" aria-hidden="true"></span>
+              <div><p class="t4-card__big t4-num">1.8 <small>วัน</small></p><p class="t4-card__note">เร็วขึ้น 32% จาก 2.65 วัน</p></div>
+            </div>
+          </article>
+          <article class="t4-card t4-card--2 t4-card--cream">
+            <p class="t4-card__kicker">ประเภทครุภัณฑ์ที่แจ้งซ่อมสูงสุด</p>
+            <div class="t4-bars">
+              <div class="t4-bar"><span class="t4-bar__label">คอมพิวเตอร์ / Notebook</span><span class="t4-bar__track"><i class="t4-bar__fill" style="--t4-v:100%"></i></span><span class="t4-bar__val t4-num">32 <small>25%</small></span></div>
+              <div class="t4-bar"><span class="t4-bar__label">เครื่องปรับอากาศ</span><span class="t4-bar__track"><i class="t4-bar__fill" style="--t4-v:75%"></i></span><span class="t4-bar__val t4-num">24 <small>19%</small></span></div>
+              <div class="t4-bar"><span class="t4-bar__label">เครื่องพิมพ์</span><span class="t4-bar__track"><i class="t4-bar__fill" style="--t4-v:56%"></i></span><span class="t4-bar__val t4-num">18 <small>14%</small></span></div>
+              <div class="t4-bar"><span class="t4-bar__label">เฟอร์นิเจอร์</span><span class="t4-bar__track"><i class="t4-bar__fill" style="--t4-v:47%"></i></span><span class="t4-bar__val t4-num">15 <small>12%</small></span></div>
+              <div class="t4-bar"><span class="t4-bar__label">ระบบไฟฟ้า</span><span class="t4-bar__track"><i class="t4-bar__fill" style="--t4-v:38%"></i></span><span class="t4-bar__val t4-num">12 <small>9%</small></span></div>
+              <div class="t4-bar"><span class="t4-bar__label">อื่น ๆ</span><span class="t4-bar__track"><i class="t4-bar__fill" style="--t4-v:84%"></i></span><span class="t4-bar__val t4-num">27 <small>21%</small></span></div>
+            </div>
+          </article>
+          <a class="t4-card t4-card--2 t4-card--accent t4-card--link" href="#t4-follow">
+            <div><p class="t4-card__kicker">ต้องเร่งวันนี้</p><p class="t4-card__arrow">งานเกินกำหนด 9 รายการ →</p></div>
+            <p class="t4-card__note">เก่าที่สุดเกินมา 3 วัน · เปิดดูแล้วมอบหมายช่างใหม่ได้ทันที</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- ===== FOLLOW-UP: filter pills + rows ===== -->
+      <section class="t4-sec" id="t4-follow" aria-labelledby="t4-fu-title">
+        <div class="t4-sec__head">
+          <div><h2 class="t4-sec__title" id="t4-fu-title">งานที่ต้องติดตาม <em>วันนี้</em></h2><p class="t4-sec__sub">เรียงตามกำหนดเสร็จ งานที่เกินกำหนดอยู่บนสุด</p></div>
+          <div class="t4-pills" role="group" aria-label="กรองงาน" data-t4-filters="t4-rows">
+            <button type="button" class="t4-pill" aria-pressed="true" data-t4-filter="all">ทั้งหมด <span class="t4-pill__n t4-num">17</span></button>
+            <button type="button" class="t4-pill" aria-pressed="false" data-t4-filter="late">เกินกำหนด <span class="t4-pill__n t4-num">9</span></button>
+            <button type="button" class="t4-pill" aria-pressed="false" data-t4-filter="today">ครบกำหนดวันนี้ <span class="t4-pill__n t4-num">8</span></button>
+          </div>
+        </div>
+        <div class="t4-rows" id="t4-rows">
+          <a class="t4-row t4-tile--grey" href="detail.html" data-t4-kind="late">
+            <span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-box"></use></svg></span>
+            <span class="t4-row__main"><span class="t4-row__title">ประตูกระจก บานเลื่อนติด <span class="t4-tag t4-tag--late t4-tag--flat">เกิน 3 วัน</span></span><span class="t4-row__sub">SR-202505-0089 · ปวีณา ใจงาม · ฝ่ายบุคคล</span></span>
+            <span class="t4-row__meta"><span class="t4-tag t4-tag--pending">รอดำเนินการ</span><span class="t4-num">ครบ 12/05/2568</span></span>
+          </a>
+          <a class="t4-row t4-tile--blue" href="detail.html" data-t4-kind="late">
+            <span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-snow"></use></svg></span>
+            <span class="t4-row__main"><span class="t4-row__title">เครื่องปรับอากาศ ชั้น 3 ไม่เย็น <span class="t4-tag t4-tag--late t4-tag--flat">เกิน 2 วัน</span></span><span class="t4-row__sub">SR-202505-0098 · สุภาวดี สิทธิ์ · สำนักงานกลาง</span></span>
+            <span class="t4-row__meta"><span class="t4-tag t4-tag--progress">กำลังดำเนินการ</span><span class="t4-num">ครบ 13/05/2568</span></span>
+          </a>
+          <a class="t4-row t4-tile--violet" href="detail.html" data-t4-kind="late">
+            <span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-monitor"></use></svg></span>
+            <span class="t4-row__main"><span class="t4-row__title">ระบบเครือข่าย ชั้น 2 ช้า <span class="t4-tag t4-tag--late t4-tag--flat">เกิน 2 วัน</span></span><span class="t4-row__sub">SR-202505-0094 · อนุชา พรหมมา · ฝ่ายไอที</span></span>
+            <span class="t4-row__meta"><span class="t4-tag t4-tag--progress">กำลังดำเนินการ</span><span class="t4-num">ครบ 13/05/2568</span></span>
+          </a>
+          <a class="t4-row t4-tile--gold" href="detail.html" data-t4-kind="late">
+            <span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-printer"></use></svg></span>
+            <span class="t4-row__main"><span class="t4-row__title">เครื่องพิมพ์ กระดาษติด <span class="t4-tag t4-tag--late t4-tag--flat">เกิน 1 วัน</span></span><span class="t4-row__sub">SR-202505-0107 · เอกชัย นามวง · ฝ่ายบัญชี</span></span>
+            <span class="t4-row__meta"><span class="t4-tag t4-tag--pending">รอดำเนินการ</span><span class="t4-num">ครบ 14/05/2568</span></span>
+          </a>
+          <a class="t4-row t4-tile--violet" href="detail.html" data-t4-kind="today">
+            <span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-laptop"></use></svg></span>
+            <span class="t4-row__main"><span class="t4-row__title">Notebook จอดับ <span class="t4-tag t4-tag--pending t4-tag--flat">ครบวันนี้</span></span><span class="t4-row__sub">SR-202505-0115 · ธนพล รุ่งเรือง · ฝ่ายไอที</span></span>
+            <span class="t4-row__meta"><span class="t4-tag t4-tag--pending">รอดำเนินการ</span><span class="t4-num">ครบ 15/05/2568</span></span>
+          </a>
+          <a class="t4-row t4-tile--violet" href="detail.html" data-t4-kind="today">
+            <span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-monitor"></use></svg></span>
+            <span class="t4-row__main"><span class="t4-row__title">คอมพิวเตอร์ เปิดไม่ติด <span class="t4-tag t4-tag--pending t4-tag--flat">ครบวันนี้</span></span><span class="t4-row__sub">SR-202505-0116 · วิทยา ทองแก้ว · ฝ่ายบุคคล</span></span>
+            <span class="t4-row__meta"><span class="t4-tag t4-tag--pending">รอดำเนินการ</span><span class="t4-num">ครบ 15/05/2568</span></span>
+          </a>
+          <a class="t4-row t4-tile--gold" href="detail.html" data-t4-kind="today">
+            <span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-bulb"></use></svg></span>
+            <span class="t4-row__main"><span class="t4-row__title">ไฟห้องประชุม ไม่ติด <span class="t4-tag t4-tag--pending t4-tag--flat">ครบวันนี้</span></span><span class="t4-row__sub">SR-202505-0123 · กัลยา แสงดี · สำนักงานกลาง</span></span>
+            <span class="t4-row__meta"><span class="t4-tag t4-tag--progress">กำลังดำเนินการ</span><span class="t4-num">ครบ 15/05/2568</span></span>
+          </a>
+          <a class="t4-row t4-tile--green" href="detail.html" data-t4-kind="today">
+            <span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-chair"></use></svg></span>
+            <span class="t4-row__main"><span class="t4-row__title">เก้าอี้สำนักงาน ล้อชำรุด <span class="t4-tag t4-tag--pending t4-tag--flat">ครบวันนี้</span></span><span class="t4-row__sub">SR-202505-0125 · ชนกานต์ มีศรี · ฝ่ายการตลาด</span></span>
+            <span class="t4-row__meta"><span class="t4-tag t4-tag--pending">รอดำเนินการ</span><span class="t4-num">ครบ 15/05/2568</span></span>
+          </a>
+        </div>
+        <div class="t4-rows__foot"><span>แสดง <b class="t4-num" data-t4-filter-count="t4-rows">8</b> จาก 17 รายการ</span><a class="t4-link" href="list.html">ดูทั้งหมด <svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-arrow-right"></use></svg></a></div>
+      </section>
+
+      <!-- ===== PIPELINE: step cards with big faint numbers ===== -->
+      <section class="t4-sec" aria-labelledby="t4-pipe-title">
+        <div class="t4-sec__head"><div><h2 class="t4-sec__title" id="t4-pipe-title">เส้นทางงานซ่อม <em>ตอนนี้</em></h2><p class="t4-sec__sub">จำนวนใบแจ้งซ่อมที่อยู่ในแต่ละขั้น</p></div></div>
+        <ol class="t4-steps">
+          <li class="t4-step"><span class="t4-step__n" aria-hidden="true">1</span><span class="t4-step__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-inbox"></use></svg></span><p class="t4-step__title">รับเรื่องใหม่</p><p class="t4-step__v t4-num">4 <small>ใบ</small></p><p class="t4-step__note">รอหัวหน้ามอบหมายช่าง</p></li>
+          <li class="t4-step"><span class="t4-step__n" aria-hidden="true">2</span><span class="t4-step__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-users"></use></svg></span><p class="t4-step__title">มอบหมายแล้ว</p><p class="t4-step__v t4-num">18 <small>ใบ</small></p><p class="t4-step__note">ช่างยังไม่เริ่มงาน</p></li>
+          <li class="t4-step"><span class="t4-step__n" aria-hidden="true">3</span><span class="t4-step__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-wrench"></use></svg></span><p class="t4-step__title">กำลังซ่อม</p><p class="t4-step__v t4-num">8 <small>ใบ</small></p><p class="t4-step__note">เฉลี่ย 1.8 วันต่องาน</p></li>
+          <li class="t4-step"><span class="t4-step__n" aria-hidden="true">4</span><span class="t4-step__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-check"></use></svg></span><p class="t4-step__title">ปิดงานแล้ว</p><p class="t4-step__v t4-num">96 <small>ใบ</small></p><p class="t4-step__note">ตั้งแต่ 1 พ.ค. 2568</p></li>
+        </ol>
+      </section>
+
+      <!-- ===== DEPARTMENTS + NOTIFICATIONS ===== -->
+      <section class="t4-split" aria-label="หน่วยงานและการแจ้งเตือน">
+        <article class="t4-card">
+          <p class="t4-card__kicker">สัดส่วนงานตามหน่วยงาน</p>
+          <h3 class="t4-card__title">สำนักงานกลางแจ้งเข้ามามากที่สุด 28%</h3>
+          <div class="t4-stack" role="img" aria-label="สำนักงานกลาง 36 ฝ่ายไอที 26 ฝ่ายบัญชี 19 ฝ่ายบุคคล 15 ฝ่ายการตลาด 13 อื่น ๆ 19">
+            <i style="--t4-v:28%;--t4-dot:var(--t4-accent)"></i><i style="--t4-v:20%;--t4-dot:var(--t4-info)"></i><i style="--t4-v:15%;--t4-dot:var(--t4-gold)"></i><i style="--t4-v:12%;--t4-dot:var(--t4-ok)"></i><i style="--t4-v:10%;--t4-dot:var(--t4-violet)"></i><i style="--t4-v:15%;--t4-dot:var(--t4-grey)"></i>
+          </div>
+          <ul class="t4-keys">
+            <li style="--t4-dot:var(--t4-accent)"><i></i><span>สำนักงานกลาง</span><b class="t4-num">36</b></li>
+            <li style="--t4-dot:var(--t4-info)"><i></i><span>ฝ่ายไอที</span><b class="t4-num">26</b></li>
+            <li style="--t4-dot:var(--t4-gold)"><i></i><span>ฝ่ายบัญชี</span><b class="t4-num">19</b></li>
+            <li style="--t4-dot:var(--t4-ok)"><i></i><span>ฝ่ายบุคคล</span><b class="t4-num">15</b></li>
+            <li style="--t4-dot:var(--t4-violet)"><i></i><span>ฝ่ายการตลาด</span><b class="t4-num">13</b></li>
+            <li style="--t4-dot:var(--t4-grey)"><i></i><span>อื่น ๆ</span><b class="t4-num">19</b></li>
+          </ul>
+        </article>
+        <article class="t4-card">
+          <div class="t4-card__head"><p class="t4-card__kicker">แจ้งเตือนล่าสุด</p><a class="t4-link" href="#" data-t4-demo="หน้าการแจ้งเตือน (ยังไม่รวมในตัวอย่าง)">ดูทั้งหมด</a></div>
+          <ul class="t4-notes">
+            <li class="t4-note t4-tile--rose"><span class="t4-note__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-alert"></use></svg></span><p class="t4-note__t">มีงานค้างเกินกำหนด 9 รายการ<span class="t4-note__time t4-num">15/05/2568 09:00 น.</span></p></li>
+            <li class="t4-note t4-tile--gold"><span class="t4-note__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-laptop"></use></svg></span><p class="t4-note__t">คอมพิวเตอร์ / Notebook แจ้งซ่อมบ่อย (32 ครั้ง)<span class="t4-note__time t4-num">14/05/2568 16:30 น.</span></p></li>
+            <li class="t4-note t4-tile--blue"><span class="t4-note__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-box"></use></svg></span><p class="t4-note__t">อัปเดตข้อมูลครุภัณฑ์ 12 รายการ<span class="t4-note__time t4-num">12/05/2568 10:15 น.</span></p></li>
+          </ul>
+        </article>
+      </section>
+
+      <!-- ===== ANNOUNCEMENT (gold callout) ===== -->
+      <aside class="t4-callout" aria-label="ประกาศ">
+        <span class="t4-callout__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-megaphone"></use></svg></span>
+        <p class="t4-callout__t"><b>ปิดปรับปรุงระบบ 20/05/2568 เวลา 18:00–20:00 น.</b>บันทึกงานที่ค้างอยู่ให้เรียบร้อยก่อนเวลาดังกล่าว</p>
+        <button type="button" class="t4-btn t4-btn--ghost t4-btn--sm" data-t4-demo="รับทราบแล้ว (ตัวอย่าง)">รับทราบ</button>
+      </aside>
+    </div>
+
+    <footer class="t4-footer">
+      <span>SMMS ระบบแจ้งซ่อม · เวอร์ชัน 1.0.0</span><span>ต้นแบบ HTML · ข้อมูลทั้งหมดเป็นตัวอย่าง</span>
+      <span class="t4-footer__sp">© 2568 บริษัท ตัวอย่าง จำกัด</span>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* PAGE SCRIPT (ตัวอย่าง) — แทนที่ด้วยข้อมูลจากเซิร์ฟเวอร์ */
+(function () {
+  var days = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15'];
+  T4.chart.line('#t4-trend', {
+    labels: days, every: 2,
+    series: [
+      { values: [7,9,8,10,6,9,11,8,7,10,9,8,9,8,9], color: 'var(--t4-accent)', area: true },  /* แจ้งใหม่ รวม 128 */
+      { values: [5,6,7,6,5,7,8,6,6,7,7,6,8,6,6],   color: 'var(--t4-ok)' }                  /* ปิดงาน รวม 96 */
+    ]
+  });
+  T4.chart.ring('#t4-ring', [
+    { value: 18, color: 'var(--t4-gold)' }, { value: 8, color: 'var(--t4-info)' },
+    { value: 96, color: 'var(--t4-ok)' },   { value: 6, color: 'var(--t4-grey)' }
+  ]);
+})();
+</script>
+</body>
+</html>

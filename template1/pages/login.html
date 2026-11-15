@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เข้าสู่ระบบ | SMMS แจ้งซ่อม</title>
+<!-- =========================================================================
+  DS UI Kit : login.html (auth archetype: NO sidebar, NO topbar, NO footer)
+
+  VISUAL TEMPLATE ONLY. The demo script at the end of the body never reads,
+  stores or sends the username/password; it only checks that the fields are
+  not empty, shows a spinner and then opens dashboard.html.
+  In a real system:
+    - the form POSTs to the server (action="/login" or the framework route),
+      over HTTPS, with the framework CSRF token as a hidden field
+      (Laravel: the Blade csrf directive; plain PHP: a session token);
+    - the server validates the credentials, rate-limits failed attempts and
+      renders this page again with the error alert shown (remove [hidden])
+      and aria-invalid="true" on the fields; never echo the password back;
+    - delete the PAGE SCRIPT block (or keep only the show/hide password
+      toggle), never handle credentials in JavaScript.
+
+  Same <head> as starter.html (Kanit, ds-ui.css, ds-ui.js). Body layout
+  (ds-ui.css "AUTH" section):
+    div.ds-auth              2-column grid; <=900px stacks
+      aside.ds-auth__brand   navy brand panel; <=900px compact top banner
+      main.ds-auth__card     white card with the form (#ds-main)
+  These comments intentionally contain no PHP tags and no Blade directives,
+  so the file stays inert when copied into a .php or .blade.php file.
+========================================================================== -->
+<!-- Kanit web font: the kit standard font (same request as the original).
+     The preconnects only speed it up. No color-scheme meta on purpose:
+     native widgets stay light in both themes, like the original. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap">
+<link rel="stylesheet" href="../assets/ds-ui.css">
+<!-- ds-ui.js stays in <head> WITHOUT defer/async: it applies the saved theme
+     (html[data-theme], localStorage "ds-theme") before first paint, then on
+     DOMContentLoaded injects the icon sprite and wires sidebar, tooltips,
+     dialogs, tabs and the theme toggle. -->
+<script src="../assets/ds-ui.js"></script>
+</head>
+<!-- class="ds-body" is part of the shell: margin 0 + page background
+     (needed by browsers without :has(), e.g. Firefox ESR 115). -->
+<body class="ds-body">
+
+<!-- ===== AUTH LAYOUT =====
+     ds-auth = full-height 2-column grid (brand panel | form card).
+     <=900px: one column, the brand panel becomes a compact top banner
+     (logo + headline); <=620px: logo only. No skip link: the form is the
+     first focusable content after the logo. -->
+<div class="ds-auth">
+
+  <!-- ===== BRAND PANEL =====
+       Navy panel = sidebar gradient + grid-line decoration (CSS ::after).
+       Replace the logo, name, tagline, headline and points per system. -->
+  <aside class="ds-auth__brand" aria-label="เกี่ยวกับระบบ">
+
+    <!-- Brand: same cleaned gear + check mark as the sidebar in starter.html -->
+    <div class="ds-sidebar__brand">
+      <svg class="ds-sidebar__logo" width="50" height="50" viewBox="0 0 48 48" aria-hidden="true">
+        <path style="fill:var(--ds-logo)" d="M20.5 2h7l1.1 5.4 3.2 1.3 4.6-3 5 4.9-3.1 4.6 1.3 3.2L45 19.5v7l-5.4 1.1-1.3 3.2 3.1 4.6-5 5-4.6-3.1-3.2 1.3L27.5 44h-7l-1.1-5.4-3.2-1.3-4.6 3.1-5-5 3.1-4.6-1.3-3.2L3 26.5v-7l5.4-1.1 1.3-3.2-3.1-4.6 5-4.9 4.6 3 3.2-1.3z"/>
+        <circle style="fill:var(--ds-navy-950)" cx="24" cy="23" r="10.5"/>
+        <path style="stroke:var(--ds-on-color)" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M18.5 23.5l4 4 7.5-8.5"/>
+      </svg>
+      <div>
+        <b class="ds-sidebar__name">SMMS</b>
+        <small class="ds-sidebar__tagline">Smart Maintenance &amp;<br>Asset Service Management</small>
+      </div>
+    </div>
+
+    <!-- ===== BRAND INTRO (hidden <=620px) =====
+         Headline + lead + feature points, with the dashboard hero building
+         art behind them (ds-hero__art: absolute, right 62%, opacity .5;
+         it is positioned inside ds-auth__intro). Gradient stops come from
+         tokens, so the art follows light/dark like the original hero. -->
+    <div class="ds-auth__intro">
+      <svg class="ds-hero__art" viewBox="0 0 600 160" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="dsAuthGlow" x1="0" x2="1">
+            <stop offset="0" style="stop-color:var(--ds-navy-800)" stop-opacity="0"/>
+            <stop offset=".5" style="stop-color:var(--ds-hero-glow-a)" stop-opacity=".55"/>
+            <stop offset="1" style="stop-color:var(--ds-hero-glow-b)" stop-opacity=".8"/>
+          </linearGradient>
+          <pattern id="dsAuthWin" width="26" height="20" patternUnits="userSpaceOnUse">
+            <rect width="26" height="20" fill="none" style="stroke:var(--ds-navy-950)" stroke-width="2.5"/>
+          </pattern>
+          <!-- Soft vignette (luminance mask) so the art has no hard edges in
+               the middle of the panel; the mask colour is not visible. -->
+          <radialGradient id="dsAuthFade" cx=".62" cy=".5" r=".62">
+            <stop offset=".3" style="stop-color:var(--ds-on-color)" stop-opacity="1"/>
+            <stop offset="1" style="stop-color:var(--ds-on-color)" stop-opacity="0"/>
+          </radialGradient>
+          <mask id="dsAuthMask"><rect y="-40" width="600" height="200" fill="url(#dsAuthFade)"/></mask>
+        </defs>
+        <g mask="url(#dsAuthMask)">
+          <polygon points="250,160 330,-10 600,-40 600,160" fill="url(#dsAuthGlow)"/>
+          <polygon points="250,160 330,-10 600,-40 600,160" fill="url(#dsAuthWin)" opacity=".7"/>
+          <polygon points="120,160 200,40 300,20 260,160" fill="url(#dsAuthGlow)" opacity=".5"/>
+          <polygon points="120,160 200,40 300,20 260,160" fill="url(#dsAuthWin)" opacity=".45"/>
+        </g>
+      </svg>
+      <p class="ds-auth__headline">สินทรัพย์พร้อมใช้ งานต่อเนื่อง องค์กรเดินหน้า</p>
+      <p class="ds-auth__lead">ขับเคลื่อนการบริการงานซ่อมบำรุงรวดเร็ว แม่นยำ ตรวจสอบได้ทุกขั้นตอน</p>
+      <!-- Feature points: same four items and icons as the dashboard hero -->
+      <ul class="ds-hero__points">
+        <li><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-clock"></use></svg>ลดเวลาซ่อม</li>
+        <li><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-task"></use></svg>ติดตามได้ทุกขั้นตอน</li>
+        <li><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-db"></use></svg>ข้อมูลครบถ้วน</li>
+        <li><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-cal"></use></svg>รายงานแบบ Real-time</li>
+      </ul>
+    </div>
+
+    <!-- Quote (hidden <=900px): sky underline comes from CSS -->
+    <p class="ds-auth__quote">“ดูแลวันนี้<span>เพื่อพรุ่งนี้ที่ดีกว่า”</span></p>
+  </aside>
+  <!-- ===== /BRAND PANEL ===== -->
+
+  <!-- ===== LOGIN CARD ===== -->
+  <main class="ds-auth__card" id="ds-main">
+
+    <!-- ===== CARD HEAD =====
+         Title + sub on the left, theme toggle in the top-right corner
+         (ds-ui.js wires data-ds-theme-toggle: sun/moon icon + saved theme). -->
+    <div class="ds-auth__row">
+      <div>
+        <h1 class="ds-auth__title">เข้าสู่ระบบ</h1>
+        <p class="ds-auth__sub">ใช้บัญชีผู้ใช้ขององค์กรเพื่อเข้าใช้งาน</p>
+      </div>
+      <button type="button" class="ds-icon-btn" data-ds-theme-toggle aria-label="สลับโหมดสว่าง/มืด" data-ds-tip="สลับโหมดสว่าง / มืด"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-sun"></use></svg></button>
+    </div>
+
+    <!-- ===== LOGIN FORM =====
+         Real system: set action to the login route; keep method="post".
+         novalidate = the kit shows its own messages (alert + ds-field__error)
+         instead of the browser bubbles; the SERVER must validate anyway. -->
+    <form class="ds-auth__form" id="loginForm" action="#" method="post" novalidate>
+
+      <!-- CSRF token: the server fills the value (Laravel: the Blade csrf
+           directive renders this input; plain PHP: a per-session token). -->
+      <input type="hidden" name="_token" value="">
+
+      <!-- ===== ERROR ALERT =====
+           Hidden by default. Server-side: render it without [hidden] and put
+           the failure reason in the text (e.g. wrong username or password,
+           account locked). Keep the wording generic: never say which of the
+           two fields was wrong. -->
+      <div class="ds-alert ds-alert--danger" id="loginError" role="alert" hidden>
+        <svg class="ds-ic ds-alert__icon" aria-hidden="true"><use href="#ds-i-alert-triangle"></use></svg>
+        <div class="ds-alert__body">
+          <p class="ds-alert__title">เข้าสู่ระบบไม่สำเร็จ</p>
+          <p id="loginErrorText">กรุณากรอกชื่อผู้ใช้และรหัสผ่าน</p>
+        </div>
+      </div>
+
+      <!-- ===== FIELD: USERNAME ===== -->
+      <div class="ds-field">
+        <label class="ds-field__label" for="loginUser">ชื่อผู้ใช้ <span class="ds-field__req" aria-hidden="true">*</span></label>
+        <div class="ds-input-group">
+          <span class="ds-input-group__addon" aria-hidden="true"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-user"></use></svg></span>
+          <input class="ds-input" id="loginUser" name="username" type="text" required
+                 autocomplete="username" autocapitalize="none" spellcheck="false"
+                 placeholder="เช่น somchai.j" aria-describedby="loginUserErr">
+        </div>
+        <p class="ds-field__error" id="loginUserErr" hidden><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-alert"></use></svg>กรุณากรอกชื่อผู้ใช้</p>
+      </div>
+
+      <!-- ===== FIELD: PASSWORD =====
+           Show/hide toggle = a real toggle button: aria-pressed="true" while
+           the password is visible; the label stays the same. -->
+      <div class="ds-field">
+        <label class="ds-field__label" for="loginPass">รหัสผ่าน <span class="ds-field__req" aria-hidden="true">*</span></label>
+        <div class="ds-input-group">
+          <span class="ds-input-group__addon" aria-hidden="true"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-lock"></use></svg></span>
+          <input class="ds-input" id="loginPass" name="password" type="password" required
+                 autocomplete="current-password" aria-describedby="loginPassErr">
+          <button type="button" class="ds-btn ds-btn--ghost ds-btn--lg ds-btn--icon" id="loginPassToggle"
+                  aria-controls="loginPass" aria-pressed="false" aria-label="แสดงรหัสผ่าน"
+                  data-ds-tip="แสดง / ซ่อนรหัสผ่าน"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-eye"></use></svg></button>
+        </div>
+        <p class="ds-field__error" id="loginPassErr" hidden><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-alert"></use></svg>กรุณากรอกรหัสผ่าน</p>
+      </div>
+
+      <!-- ===== OPTIONS ROW: remember me + forgot password ===== -->
+      <div class="ds-auth__row">
+        <label class="ds-check"><input type="checkbox" name="remember" value="1"> จดจำฉันไว้</label>
+        <!-- Real system: a link to the password-reset page -->
+        <button type="button" class="ds-link-btn" id="loginForgot">ลืมรหัสผ่าน?</button>
+      </div>
+
+      <!-- ===== SUBMIT ===== -->
+      <button class="ds-btn ds-btn--lg ds-btn--block" type="submit" id="loginSubmit"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-login"></use></svg>เข้าสู่ระบบ</button>
+    </form>
+    <!-- ===== /LOGIN FORM ===== -->
+
+    <!-- ===== CARD FOOT: help + version / copyright (per system) ===== -->
+    <div class="ds-auth__foot">
+      ยังไม่มีบัญชี? <a href="#">ติดต่อผู้ดูแลระบบ</a><br>
+      SMMS Version 1.0.0 (MVP) · © 2025 บริษัท ตัวอย่าง จำกัด
+    </div>
+  </main>
+  <!-- ===== /LOGIN CARD ===== -->
+
+</div>
+<!-- ===== /AUTH LAYOUT ===== -->
+
+<!-- ===== PAGE SCRIPT (ตัวอย่าง) — แทนที่ด้วยข้อมูลจากเซิร์ฟเวอร์ =====
+     DEMO ONLY, NOT an authentication mechanism. It never reads the password
+     value beyond "is it empty", never stores or sends it. A real system
+     lets the browser POST the form to the server and deletes the submit
+     handler below (the show/hide password toggle may stay). -->
+<script>
+(function () {
+  'use strict';
+  var form = document.getElementById('loginForm');
+  if (!form) return;
+  var user = document.getElementById('loginUser');
+  var pass = document.getElementById('loginPass');
+  var toggle = document.getElementById('loginPassToggle');
+  var alertBox = document.getElementById('loginError');
+  var alertText = document.getElementById('loginErrorText');
+  var submit = document.getElementById('loginSubmit');
+  var submitHtml = submit.innerHTML;
+  var timer = 0;
+
+  // Mark one field valid/invalid: aria-invalid (red border) + its ds-field__error line
+  function setInvalid(input, bad) {
+    var err = document.getElementById(input.id + 'Err');
+    if (bad) input.setAttribute('aria-invalid', 'true');
+    else input.removeAttribute('aria-invalid');
+    if (err) err.hidden = !bad;
+  }
+
+  // Show / hide password (keeps working in the real system)
+  toggle.addEventListener('click', function () {
+    var show = pass.type === 'password';
+    pass.type = show ? 'text' : 'password';
+    toggle.setAttribute('aria-pressed', show ? 'true' : 'false');
+    var use = toggle.querySelector('use');                 // eye = hidden, eye-off = shown
+    if (use) use.setAttribute('href', show ? '#ds-i-eye-off' : '#ds-i-eye');
+    pass.focus();
+  });
+
+  // Clear the error state as soon as a field gets a value
+  [user, pass].forEach(function (input) {
+    input.addEventListener('input', function () {
+      if (input.value.trim()) setInvalid(input, false);
+      if (!form.querySelector('[aria-invalid="true"]')) alertBox.hidden = true;
+    });
+  });
+
+  document.getElementById('loginForgot').addEventListener('click', function () {
+    DS.toast('กรุณาติดต่อผู้ดูแลระบบ (ฝ่ายไอที) เพื่อรีเซ็ตรหัสผ่าน', { type: 'info' });
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault(); // DEMO: a real form is submitted to the server
+    var emptyUser = !user.value.trim();
+    var emptyPass = !pass.value;
+    setInvalid(user, emptyUser);
+    setInvalid(pass, emptyPass);
+    if (emptyUser || emptyPass) {
+      alertText.textContent = emptyUser && emptyPass ? 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน'
+        : emptyUser ? 'กรุณากรอกชื่อผู้ใช้' : 'กรุณากรอกรหัสผ่าน';
+      alertBox.hidden = false;
+      (emptyUser ? user : pass).focus();
+      return;
+    }
+    alertBox.hidden = true;
+    // Busy state: spinner in the button, then open the dashboard
+    submit.disabled = true;
+    submit.setAttribute('aria-busy', 'true');
+    submit.innerHTML = '<span class="ds-spinner" aria-hidden="true"></span>กำลังเข้าสู่ระบบ…';
+    timer = setTimeout(function () { window.location.href = 'dashboard.html'; }, 900);
+  });
+
+  // Back button (bfcache): restore the idle button
+  window.addEventListener('pageshow', function () {
+    clearTimeout(timer);
+    submit.disabled = false;
+    submit.removeAttribute('aria-busy');
+    submit.innerHTML = submitHtml;
+  });
+})();
+</script>
+</body>
+</html>

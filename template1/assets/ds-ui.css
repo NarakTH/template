@@ -1,0 +1,3892 @@
+/*! ==========================================================================
+   ds-ui.css  v1.0.2  -  DS UI Kit ("SMMS" look)
+   --------------------------------------------------------------------------
+   WHAT
+   The single source of truth for the kit: design tokens, scoped base styles,
+   the app shell (navy sidebar + topbar + content + footer) and every
+   component. It was extracted from template/smms-dashboard_2.html (the
+   visual reference, never edited). Plain CSS: no build step, no framework,
+   no dependencies. Companion script: ds-ui.js (window.DS).
+
+   HOW TO INCLUDE  (order matters)
+     <head>
+       <link rel="preconnect" href="https://fonts.googleapis.com">
+       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap">
+       <!-- 1. framework CSS first (Bootstrap / Tailwind / DaisyUI / DataTables ...) -->
+       <!-- 2. then the kit, so ds- rules win ties -->
+       <link rel="stylesheet" href="/template/assets/ds-ui.css?v=1.0.2">
+       <!-- 3. the script in <head>, NOT defer/async: it applies the saved
+              theme before first paint and wires the page on DOMContentLoaded -->
+       <script src="/template/assets/ds-ui.js?v=1.0.2"></script>
+     </head>
+   Tailwind v4 (Vite): import the kit into the components layer so utilities
+   can still override it:  @import url("/template/assets/ds-ui.css") layer(components);
+   Never wrap ds-ui.css itself in @layer (unlayered Bootstrap would beat it).
+
+   SCOPES  (the kit never styles bare host elements)
+     .ds-app    full app shell; sets page background, font and base rules
+     .ds-scope  wrapper for embedding ds components inside an existing page
+     .ds-auth   login / auth pages (no sidebar)
+     .ds-body   put class="ds-body" on <body> (margin 0 + page background;
+                required for Firefox < 121). Browsers with :has() also apply
+                it when <body> contains .ds-app/.ds-auth.
+   No <meta name="color-scheme"> and no color-scheme property: native
+   widgets (scrollbars, select popups, date pickers) stay light in both
+   themes, exactly like the original; the meta would also ignore a pinned
+   data-theme="light".
+
+   NAMING CONVENTIONS
+   - Every class starts with ds-.  BEM: block  ds-kpi,  element  ds-kpi__value,
+     modifier  ds-btn--ghost.  Never use bare words (.active, .open, .good).
+   - State: prefer ARIA/HTML attributes (aria-current="page", aria-selected,
+     aria-expanded, aria-invalid, aria-sort, hidden, disabled); otherwise
+     is-open / is-active / is-loading.
+   - JS hooks are data-ds-* attributes, never styling classes.
+   - Icons: <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-home"></use></svg>
+     (the sprite is injected by ds-ui.js).
+
+   TOKEN RULE
+   - Colors ONLY through var(--ds-*). Never hard-code a hex value in a page or
+     a component. Inline style is allowed only to pass a token to data-driven
+     elements:  style="--ds-accent:var(--ds-green)"  or  style="background:var(--ds-green)".
+   - Re-theme a system by overriding tokens on :root (light) and in the two
+     dark blocks - never by editing component rules. Composite tokens (the
+     --ds-grad-*) are resolved on :root, so override their parts on :root too.
+   - Theme: <html data-theme="light|dark">; no attribute = follow the OS.
+     Host pages that are not dark-ready should pin data-theme="light".
+
+   BREAKPOINTS (max-width, documented, not tokens): 1280 / 900 / 620 / 400
+     <=1280 dashboard grids -> 2 columns     <=900 off-canvas sidebar, 1 column
+     <=620  phones (2-col KPIs, 1-col forms) <=400 small phones
+   BROWSER BASELINE: Chrome/Edge >= 109, Firefox ESR >= 115, Safari >= 16.
+   VERSIONING: semver. Renaming or removing a class or token = new major.
+
+   SECTION INDEX
+   Part 01 - foundation (this part)
+     0  file header
+     1  design tokens (light)
+     2  dark tokens (keep both blocks in sync)
+     3  base (scoped): box-sizing, typography, controls, focus, [hidden],
+        skip link, reduced motion
+     4  icons (.ds-ic)
+     5  app shell: app, sidebar, nav, topbar, search, icon buttons, user,
+        content, footer, off-canvas
+     6  page layout: page head, breadcrumb, grids, stack
+     7  utilities
+     8  shell responsive, forced colors, print
+   Part 02 - dashboard, panel, data viz, lists (hero, date card, KPI,
+             chart, legend, bars, progress, quick, notes, recent)
+   Part 03 - data & forms (table, pager, pill, badge, buttons, fields,
+             form section, file, input group, form actions, filters)
+   Part 04 - tabs, alert, dl, timeline, empty, skeleton, spinner, dialog,
+             toast, tooltip, auth; component print rules
+   Each part starts with its own banner and ends with its own responsive,
+   forced-colors and print rules.
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. DESIGN TOKENS (light theme + fixed values)
+   --------------------------------------------------------------------------
+   Usage:  .my-thing{ color:var(--ds-ink-2); border:1px solid var(--ds-line) }
+   Values come from the original dashboard. Palette, navy/brand, overlay and
+   tooltip tokens are the same in both themes; only section-2 tokens change.
+   ========================================================================== */
+:root{
+  /* -- surfaces & text (theme-dependent) -------------------------------- */
+  --ds-bg:#eef2f9;            /* page background */
+  --ds-surface:#ffffff;       /* cards, panels, topbar, footer, dialog */
+  --ds-surface-2:#f4f7fc;     /* table head, search field, hover */
+  --ds-line:#e1e7f1;          /* borders, dividers */
+  --ds-line-strong:#808ca4;   /* form control borders (>= 3:1 vs bg/surface/surface-2) */
+  --ds-ink:#10203d;           /* main text */
+  --ds-ink-2:#44526d;         /* secondary text */
+  --ds-ink-3:#636f87;         /* muted text, meta (AA: was #7b879e) */
+  --ds-link:#1b62d6;          /* links, link buttons */
+  --ds-track:#e8edf5;         /* progress / bar tracks */
+  --ds-good:#0c8249;          /* positive delta text (AA: was #0f9d58) */
+  --ds-bad:#d91d1d;           /* negative delta / error text (AA: was #e53e3e) */
+  --ds-shadow:0 1px 2px rgba(16,32,61,.05),0 6px 18px rgba(16,32,61,.06);
+  --ds-shadow-up:0 -1px 2px rgba(16,32,61,.05),0 -6px 18px rgba(16,32,61,.06); /* --ds-shadow flipped up (sticky ds-form-actions) */
+  --ds-shadow-pop:0 10px 30px rgba(16,32,61,.18); /* floating popovers (date picker) */
+
+  /* -- status pairs (pills, alerts, tags) -------------------------------- */
+  --ds-pending-bg:#fff1d6;   --ds-pending-ink:#a25e00;
+  --ds-progress-bg:#dfeafc;  --ds-progress-ink:#1652b5;
+  --ds-done-bg:#d9f4e6;      --ds-done-ink:#0b7a47;
+  --ds-cancel-bg:#fde0e0;    --ds-cancel-ink:#b42323;
+  --ds-info-bg:#dff1fd;      --ds-info-ink:#0b64a0;
+  --ds-neutral-bg:#eceff5;   --ds-neutral-ink:#44526d;
+
+  /* -- palette (fixed in both themes; charts, KPI tiles, quick actions) - */
+  --ds-blue:#1f6fe5;
+  --ds-sky:#3d9bf2;
+  --ds-green:#16a765;
+  --ds-yellow:#f5b91f;
+  --ds-orange:#f58220;
+  --ds-red:#e53e3e;
+  --ds-purple:#6c4fe0;
+  --ds-gray:#9aa5b8;
+  /* -strong = fills for WHITE text/icons (WCAG AA 4.5:1 at 12.5px/400,
+     same hue, just darker). The base palette above stays for charts, dots,
+     bars and timeline. Components with white content (ds-btn, ds-quick__btn,
+     ds-kpi__icon, ds-notes__icon, ds-error__icon) remap the base names to
+     these inside themselves, so existing markup such as
+     style="background:var(--ds-green)" is AA without changes. */
+  --ds-blue-strong:#1f6fe5;
+  --ds-green-strong:#0e7f4b;   /* 5.0:1 with white */
+  --ds-orange-strong:#bc5b08;  /* 4.5:1 with white */
+  --ds-purple-strong:#6c4fe0;
+  --ds-red-strong:#c53030;     /* 5.5:1 with white (badges, counts, danger) */
+  /* aliases */
+  --ds-primary:var(--ds-blue);
+  --ds-danger:var(--ds-red);
+  --ds-focus:var(--ds-blue);
+
+  /* -- brand / navy (fixed in both themes) ------------------------------ */
+  --ds-navy-950:#0a1f44;
+  --ds-navy-900:#0d2a5c;
+  --ds-navy-800:#123a7c;
+  --ds-navy-600:#2b6fc7;
+  --ds-nav-active-a:#1b62d6;
+  --ds-nav-active-b:#1a52b3;
+  --ds-nav-active-edge:#7db4ff;
+  --ds-logo:#2f7df0;
+  --ds-on-color:#ffffff;       /* text/icons on filled color or navy */
+  --ds-on-navy:#e4ecfa;        /* sidebar text */
+  --ds-on-navy-2:#a9bde0;      /* sidebar tagline, quote signature */
+  --ds-on-navy-3:#c9d8f2;      /* sidebar quote second line */
+  --ds-on-navy-lead:#e1ebfb;   /* hero lead paragraph */
+  --ds-on-navy-date:#d5e2f8;   /* date card date line */
+  --ds-on-navy-muted:#c3d3ef;  /* date card place / condition */
+  --ds-nav-hover:rgba(255,255,255,.07);
+  --ds-nav-sep:rgba(255,255,255,.14);
+  --ds-nav-sub-bg:rgba(0,0,0,.16);         /* open sidebar sub-menu (ds-nav__sub) */
+  --ds-sidebar-grid:rgba(140,180,255,.5);  /* sidebar grid-line decoration */
+  --ds-hero-glow-a:#7fb2f5;    /* hero building art gradient stops */
+  --ds-hero-glow-b:#cfe3ff;
+  --ds-sun:#ffc83d;            /* weather icon */
+  --ds-cloud:#f2f6fd;
+
+  /* -- gradients (composites; override their parts on :root) ----------- */
+  --ds-grad-sidebar:linear-gradient(180deg,var(--ds-navy-950) 0%,var(--ds-navy-900) 55%,var(--ds-navy-950) 100%);
+  --ds-grad-nav-active:linear-gradient(90deg,var(--ds-nav-active-a),var(--ds-nav-active-b));
+  --ds-grad-avatar:linear-gradient(135deg,var(--ds-blue),var(--ds-navy-900));
+  --ds-grad-hero:linear-gradient(95deg,var(--ds-navy-950) 0%,var(--ds-navy-800) 48%,var(--ds-navy-600) 100%);
+  --ds-grad-datecard:linear-gradient(160deg,var(--ds-navy-900),var(--ds-navy-950));
+
+  /* -- overlay / floating layers ---------------------------------------- */
+  --ds-overlay:rgba(8,18,38,.55);  /* dialog backdrop */
+  --ds-scrim:rgba(8,18,38,.5);     /* off-canvas sidebar scrim */
+  --ds-tooltip-bg:#10203d;         /* tooltip + toast */
+  --ds-float-edge:transparent;     /* 1px edge of the auth card; visible in dark only */
+
+  /* -- typography -------------------------------------------------------- */
+  --ds-font:"Kanit","Noto Sans Thai","Leelawadee UI",Tahoma,sans-serif;
+  /* named steps of the existing px scale (component rules use the same px) */
+  --ds-fs-2xs:10.5px;
+  --ds-fs-xs:11.5px;
+  --ds-fs-sm:12.5px;
+  --ds-fs-md:14px;             /* body */
+  --ds-fs-lg:16px;             /* panel title */
+  --ds-fs-xl:17px;             /* dialog title */
+  --ds-fs-2xl:19px;            /* topbar logo */
+  --ds-fs-3xl:28px;            /* hero title, KPI value */
+  --ds-fw-light:300;           /* body */
+  --ds-fw-regular:400;
+  --ds-fw-medium:500;          /* strong, headings, th */
+  --ds-fw-bold:600;            /* brand wordmarks only */
+  --ds-lh:1.5;
+
+  /* -- A4 print document (ds-doc): ALWAYS black on white paper, in both
+     themes and in print. The only hard colors outside the palette; used
+     by ds-doc only. print.html loads Sarabun 300/400/600. ------------- */
+  --ds-font-doc:"Sarabun","TH Sarabun New","Kanit",Tahoma,sans-serif;
+  --ds-doc-paper:#fff;
+  --ds-doc-ink:#000;
+  --ds-doc-line:#000;
+  --ds-doc-fill:#f2f2f2;       /* label cells */
+
+  /* -- radius ------------------------------------------------------------ */
+  --ds-r-xs:3px;               /* decorative accent bars */
+  --ds-r-sm:6px;               /* buttons, tooltip */
+  --ds-r-md:8px;               /* inputs, icon buttons, quick actions */
+  --ds-r-lg:10px;              /* panels, KPI cards, hero */
+  --ds-r-xl:14px;              /* dialogs */
+  --ds-r-pill:99px;            /* pills, badges, search, tracks */
+
+  /* -- spacing & layout -------------------------------------------------- */
+  --ds-gap:12px;                    /* the one gap used everywhere */
+  --ds-sidebar-w:225px;             /* desktop sidebar column */
+  --ds-sidebar-w-offcanvas:240px;   /* <=900px drawer width */
+  --ds-aside-w:320px;               /* ds-grid--aside side column */
+
+  /* -- layering & motion -------------------------------------------------- */
+  --ds-z-topbar:1020;
+  --ds-z-dropdown:1030;             /* ds-menu / ds-popover (inside the topbar they stack in its layer) */
+  --ds-z-sidebar:1045;
+  --ds-z-tip:1080;
+  --ds-z-toast:1090;
+  --ds-z-skip:1100;
+  --ds-dur-fast:.15s;
+  --ds-dur:.2s;
+  --ds-dur-slide:.28s;             /* sidebar collapse, chevron turn */
+  --ds-ease-out:cubic-bezier(.2,.8,.2,1);
+}
+
+
+/* ==========================================================================
+   2. DARK TOKENS
+   --------------------------------------------------------------------------
+   Usage:  <html data-theme="dark">  (forced dark)
+           <html data-theme="light"> (forced light)
+           <html>                    (follow the OS setting)
+   KEEP BOTH BLOCKS IN SYNC: the media-query block (OS dark, not pinned to
+   light) and the attribute block (forced dark) must carry identical values.
+   Only theme-dependent tokens are redefined; palette, navy, overlay and
+   tooltip tokens stay fixed.
+   Both blocks are screen-only, so print always uses the light tokens of
+   :root - including a system's own :root overrides.
+   ========================================================================== */
+@media screen and (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ds-bg:#0b1220; --ds-surface:#131c2f; --ds-surface-2:#19243a; --ds-line:#26334d; --ds-line-strong:#5f6e8c;
+    --ds-ink:#f0f4fb; --ds-ink-2:#b7c3d9; --ds-ink-3:#8593ae; --ds-link:#6ea8ff;
+    --ds-track:#222e46; --ds-good:#4fd095; --ds-bad:#ff7b7b; --ds-shadow:none;
+    --ds-pending-bg:#3b2f10;  --ds-pending-ink:#f5c966;
+    --ds-progress-bg:#16315c; --ds-progress-ink:#9dc4fa;
+    --ds-done-bg:#0f3728;     --ds-done-ink:#7bdcb4;
+    --ds-cancel-bg:#451d1d;   --ds-cancel-ink:#f5a5a5;
+    --ds-info-bg:#0f3348;     --ds-info-ink:#8fd3fb;
+    --ds-neutral-bg:#222e46;  --ds-neutral-ink:#b7c3d9;
+    --ds-shadow-up:none; --ds-float-edge:rgba(255,255,255,.12); --ds-shadow-pop:0 10px 30px rgba(0,0,0,.55);
+  }
+}
+@media screen{
+  :root[data-theme="dark"]{
+    --ds-bg:#0b1220; --ds-surface:#131c2f; --ds-surface-2:#19243a; --ds-line:#26334d; --ds-line-strong:#5f6e8c;
+    --ds-ink:#f0f4fb; --ds-ink-2:#b7c3d9; --ds-ink-3:#8593ae; --ds-link:#6ea8ff;
+    --ds-track:#222e46; --ds-good:#4fd095; --ds-bad:#ff7b7b; --ds-shadow:none;
+    --ds-pending-bg:#3b2f10;  --ds-pending-ink:#f5c966;
+    --ds-progress-bg:#16315c; --ds-progress-ink:#9dc4fa;
+    --ds-done-bg:#0f3728;     --ds-done-ink:#7bdcb4;
+    --ds-cancel-bg:#451d1d;   --ds-cancel-ink:#f5a5a5;
+    --ds-info-bg:#0f3348;     --ds-info-ink:#8fd3fb;
+    --ds-neutral-bg:#222e46;  --ds-neutral-ink:#b7c3d9;
+    --ds-shadow-up:none; --ds-float-edge:rgba(255,255,255,.12); --ds-shadow-pop:0 10px 30px rgba(0,0,0,.55);
+  }
+}
+
+
+/* ==========================================================================
+   3. BASE (scoped - nothing here touches host elements outside a ds scope)
+   --------------------------------------------------------------------------
+   Usage:
+     <body class="ds-body">                   (margin 0 + page background)
+       <a class="ds-skip-link" href="#ds-main">ข้ามไปยังเนื้อหาหลัก</a>
+       <div class="ds-app"> ... <main class="ds-content" id="ds-main" tabindex="-1">
+     id ds-main sits on <main class="ds-content">, not on div.ds-main.
+     Embedding in a legacy page:  <div class="ds-scope"> ...ds components... </div>
+   Scope roots: .ds-app .ds-scope .ds-body .ds-auth, plus the floating
+   components that JS may append to <body> (.ds-dialog .ds-tip .ds-toast).
+   ========================================================================== */
+
+/* page body: only when the page actually uses the kit shell (or opts in) */
+:is(body.ds-body, body:has(.ds-app), body:has(.ds-auth)){
+  margin:0;
+  /* never a sideways page scroll on phones: anything wider (a long word,
+     hidden screen-reader text, a third-party widget) is clipped instead of
+     making mobile browsers lay the page out wider than the screen.
+     clip (not hidden) keeps the sticky topbar working. */
+  overflow-x:clip;
+  background:var(--ds-bg);
+  color:var(--ds-ink);
+  font-family:var(--ds-font);
+  font-weight:300;
+  font-size:14px;
+  line-height:1.5;
+}
+
+/* box model */
+:where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog,.ds-tip,.ds-toast),
+:where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog,.ds-tip,.ds-toast)::before,
+:where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog,.ds-tip,.ds-toast)::after,
+:where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog,.ds-tip,.ds-toast) *,
+:where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog,.ds-tip,.ds-toast) *::before,
+:where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog,.ds-tip,.ds-toast) *::after{
+  box-sizing:border-box;
+}
+
+/* typography on every scope root (zero specificity: components override) */
+:where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog,.ds-tip,.ds-toast){
+  font-family:var(--ds-font);
+  font-weight:300;
+  font-size:14px;
+  line-height:1.5;
+  color:var(--ds-ink);
+  accent-color:var(--ds-primary);
+}
+
+/* form controls inherit the kit font; buttons show a pointer */
+:where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog) :is(button,input,select,textarea){
+  font:inherit;
+  color:inherit;
+}
+:where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog) button{ cursor:pointer; }
+
+/* emphasis weight (components also set their own weights explicitly) */
+:where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog) :is(b,strong,h1,h2,h3,h4,h5,h6,th){
+  font-weight:500;
+}
+
+/* focus ring (components with a special ring override it) */
+:where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog) :focus-visible{
+  outline:2px solid var(--ds-focus);
+  outline-offset:2px;
+}
+
+/* [hidden] always wins over a component's display value (specificity 0,3,0) */
+:is([class^="ds-"],[class*=" ds-"])[hidden][hidden]{ display:none; }
+
+/* skip link: first child of <body>, visible only while focused */
+.ds-skip-link{
+  position:fixed; top:8px; left:8px; z-index:var(--ds-z-skip);
+  padding:8px 14px; border:1px solid var(--ds-line); border-radius:var(--ds-r-md);
+  background:var(--ds-surface); color:var(--ds-link); box-shadow:var(--ds-shadow);
+  font-family:var(--ds-font); font-size:14px; font-weight:500; line-height:1.5;
+  text-decoration:none;
+}
+.ds-skip-link:not(:focus){
+  width:1px; height:1px; margin:-1px; padding:0; border:0; overflow:hidden;
+  clip-path:inset(50%); white-space:nowrap;
+}
+.ds-skip-link:focus-visible{ outline:2px solid var(--ds-focus); outline-offset:2px; }
+
+/* reduced motion: scoped to the kit, never to the host page */
+@media (prefers-reduced-motion:reduce){
+  :where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog,.ds-tip,.ds-toast),
+  :where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog,.ds-tip,.ds-toast)::before,
+  :where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog,.ds-tip,.ds-toast)::after,
+  :where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog,.ds-tip,.ds-toast) *,
+  :where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog,.ds-tip,.ds-toast) *::before,
+  :where(.ds-app,.ds-scope,.ds-body,.ds-auth,.ds-dialog,.ds-tip,.ds-toast) *::after{
+    transition-duration:.01ms !important;
+    transition-delay:0s !important;
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    scroll-behavior:auto !important;
+  }
+}
+
+
+/* ==========================================================================
+   4. ICONS
+   --------------------------------------------------------------------------
+   Usage:  <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-home"></use></svg>
+           <svg class="ds-ic ds-ic--sm" ...>  16px   (inline, notes)
+           <svg class="ds-ic ds-ic--lg" ...>  30px   (KPI tiles)
+   24x24 outline icons, stroke 1.8, round caps/joins, colored by currentColor.
+   Context sizes (18 search, 24 hero points, 26 quick actions) are set by the
+   owning component, never by descendant svg selectors.
+   ========================================================================== */
+.ds-ic{
+  display:inline-block;
+  vertical-align:middle;
+  width:22px;
+  height:22px;
+  flex:none;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.ds-ic--sm{ width:16px; height:16px; }
+.ds-ic--lg{ width:30px; height:30px; stroke-width:2; }
+/* sprite container injected by ds-ui.js. The HTML `hidden` attribute does
+   NOT hide an <svg> element (it would take 300x150px), so collapse it here -
+   without display:none, so <use> and any paint servers keep working. */
+#ds-sprite{
+  position:absolute;
+  width:0;
+  height:0;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+
+/* ==========================================================================
+   5. APP SHELL
+   --------------------------------------------------------------------------
+   Usage (copy the full shell from pages/starter.html):
+   <div class="ds-app">
+     <aside class="ds-sidebar" id="ds-sidebar" aria-label="แถบด้านข้าง">
+       <div class="ds-sidebar__brand">          (or <a class="ds-sidebar__brand" href="...">)
+         <svg class="ds-sidebar__logo" width="50" height="50" viewBox="0 0 48 48" aria-hidden="true">...</svg>
+         <div><b class="ds-sidebar__name">SMMS</b>
+           <small class="ds-sidebar__tagline">Smart Maintenance &amp;<br>Asset Service Management</small></div>
+       </div>
+       <nav class="ds-nav" aria-label="เมนูหลัก">
+         <span class="ds-nav__label">งานหลัก</span>
+         <a class="ds-nav__item" href="dashboard.html" aria-current="page"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-home"></use></svg>แดชบอร์ดภาพรวม</a>
+         <a class="ds-nav__item" href="list.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-doc"></use></svg>รายการแจ้งซ่อม <span class="ds-nav__count ds-num">9</span></a>
+         <hr class="ds-nav__sep">
+       </nav>
+       <div class="ds-sidebar__quote"><p>“ดูแลทุกสินทรัพย์<br>ให้พร้อมใช้งาน<small>เพื่อองค์กรที่เดินหน้าได้ไกลกว่า”</small></p><em>Maintain Today<br>for a Better Tomorrow</em></div>
+     </aside>
+     <div class="ds-main">
+       <header class="ds-topbar">
+         <button class="ds-icon-btn ds-menu-btn" data-ds-sidebar-toggle aria-controls="ds-sidebar" aria-expanded="false" aria-label="เปิดเมนู">...</button>
+         <span class="ds-topbar__logo"><svg class="ds-ic">...gear...</svg>SMMS</span>
+         <h1 class="ds-topbar__title">ชื่อระบบ</h1>
+         <label class="ds-search"><input type="search" name="q" aria-label="ค้นหา" placeholder="ค้นหา..."><svg class="ds-ic">...</svg></label>
+         <button class="ds-icon-btn" data-ds-theme-toggle aria-label="สลับโหมดสว่าง/มืด">...</button>
+         <button class="ds-icon-btn" aria-label="การแจ้งเตือน 5 รายการใหม่">...<span class="ds-icon-btn__dot ds-num">5</span></button>
+         <div class="ds-user"><span class="ds-avatar" aria-hidden="true">ส</span><div class="ds-user__meta"><b>สมชาย ใจดี</b><small>ผู้จัดการ</small></div></div>
+       </header>
+       <main class="ds-content" id="ds-main" tabindex="-1"> ... </main>
+       <footer class="ds-footer">...</footer>
+     </div>
+   </div>
+   ========================================================================== */
+
+/* -- 5.1 app grid ---------------------------------------------------------- */
+.ds-app{
+  overflow-x:clip;   /* same guard as the body (host pages without .ds-body) */
+  display:grid;
+  grid-template-columns:var(--ds-sidebar-w) minmax(0,1fr);
+  min-height:100vh;
+  min-height:100dvh;
+  background:var(--ds-bg);
+  color:var(--ds-ink);
+}
+
+/* -- 5.2 sidebar (fixed navy in both themes) ------------------------------ */
+.ds-sidebar{
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  overflow:hidden;
+  background:var(--ds-grad-sidebar);
+  color:var(--ds-on-navy);
+}
+/* decorative perspective grid at the bottom of the sidebar */
+.ds-sidebar::after{
+  content:"";
+  position:absolute;
+  inset:auto 0 0 0;
+  height:260px;
+  pointer-events:none;
+  opacity:.22;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 22px,var(--ds-sidebar-grid) 22px 23px),
+    repeating-linear-gradient(0deg,transparent 0 30px,var(--ds-sidebar-grid) 30px 31px);
+  transform:skewY(-14deg) translateY(60px);
+  /* mask uses alpha only; #000 is not a visible color */
+  -webkit-mask-image:linear-gradient(0deg,#000,transparent);
+  mask-image:linear-gradient(0deg,#000,transparent);
+}
+/* any focus ring on navy is white */
+.ds-sidebar :focus-visible{ outline-color:var(--ds-on-color); }
+
+.ds-sidebar__brand{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding:18px 20px 16px;
+  color:inherit;
+  text-decoration:none;
+}
+.ds-sidebar__brand:hover{ color:inherit; text-decoration:none; }
+.ds-sidebar__logo{ width:50px; height:50px; flex:none; color:var(--ds-logo); }
+.ds-sidebar__name{
+  display:block;
+  margin:0;
+  font-size:30px;
+  font-weight:600;
+  line-height:1;
+  letter-spacing:.02em;
+  color:inherit;
+}
+.ds-sidebar__tagline{
+  display:block;
+  margin-top:3px;
+  font-size:10.5px;
+  font-weight:300;
+  line-height:1.25;
+  color:var(--ds-on-navy-2);
+}
+
+/* -- 5.3 navigation --------------------------------------------------------- */
+.ds-nav{
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  z-index:1;
+}
+/* <a href> (preferred) or <button>; explicit reset instead of all:unset */
+.ds-nav__item{
+  appearance:none;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  width:100%;
+  margin:0;
+  padding:12px 22px;
+  border:0;
+  border-left:4px solid transparent;
+  border-radius:0;
+  background:none;
+  color:var(--ds-on-navy);
+  font:inherit;
+  font-size:14.5px;
+  font-weight:300;
+  line-height:1.5;
+  text-align:start;
+  text-decoration:none;
+  cursor:pointer;
+}
+.ds-nav__item:hover{ background:var(--ds-nav-hover); color:var(--ds-on-navy); text-decoration:none; }
+.ds-nav__item:focus-visible{ outline:2px solid var(--ds-on-color); outline-offset:-3px; }
+.ds-nav__item[aria-current="page"]{
+  background:var(--ds-grad-nav-active);
+  border-left-color:var(--ds-nav-active-edge);
+  font-weight:500;
+  color:var(--ds-on-color);
+}
+.ds-nav__count{
+  margin-left:auto;
+  min-width:20px;
+  padding:0 6px;
+  border-radius:var(--ds-r-pill);
+  background:var(--ds-red-strong); /* stays red in dark mode (not --ds-bad); -strong = AA with white */
+  color:var(--ds-on-color);
+  font-size:11.5px;
+  font-weight:500;
+  line-height:1.5;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+.ds-nav__count:empty{ display:none; }
+.ds-nav__sep{
+  height:0;
+  margin:8px 20px;
+  border:0;
+  border-top:1px solid var(--ds-nav-sep);
+  background:none;
+  opacity:1;
+}
+/* small section heading between groups of items (new) */
+.ds-nav__label{
+  display:block;
+  margin:0;
+  padding:12px 22px 4px;
+  font-size:12px;
+  font-weight:500;
+  line-height:1.5;
+  letter-spacing:.02em;
+  color:var(--ds-on-navy-2);
+}
+
+/* -- 5.3b nav groups (sub-menus) --------------------------------------------
+   <div class="ds-nav__group">
+     <button type="button" class="ds-nav__item ds-nav__toggle" aria-expanded="false" aria-controls="ds-nav-settings">
+       <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-gear"></use></svg>ตั้งค่า<svg class="ds-ic ds-ic--sm ds-nav__caret" aria-hidden="true"><use href="#ds-i-chevron-down"></use></svg></button>
+     <div class="ds-nav__sub" id="ds-nav-settings" hidden>
+       <a class="ds-nav__item ds-nav__subitem" href="#">ตั้งค่าบริษัท</a> ...
+     </div>
+   </div>
+   ds-ui.js toggles aria-expanded + [hidden]; a group that contains
+   aria-current="page" opens on load and its toggle gets .has-current.
+   Sub items have no icon: 58px start padding aligns their text with the
+   parent label (4px edge + 22px padding + 22px icon + 14px gap = 62px).
+   Icon rail (5.8b): sub-menus and carets are hidden; a group with the
+   current page shows the active look on its toggle.
+   ------------------------------------------------------------------------- */
+.ds-nav__group{ display:flex; flex-direction:column; }
+.ds-nav__caret{
+  margin-left:auto;
+  color:var(--ds-on-navy-2);
+  transition:transform var(--ds-dur) ease;
+}
+.ds-nav__toggle[aria-expanded="true"] .ds-nav__caret{ transform:rotate(180deg); }
+.ds-nav__toggle.has-current{ font-weight:500; }
+.ds-nav__sub{
+  display:flex;
+  flex-direction:column;
+  padding:2px 0 6px;
+  background:var(--ds-nav-sub-bg);
+}
+.ds-nav__subitem{
+  padding:9px 22px 9px 58px;
+  font-size:14px;
+  font-weight:300;
+}
+/* current sub item: white + edge + hover tint, NOT the full active gradient
+   (0,2,0 after the .ds-nav__item[aria-current] rule, so it wins) */
+.ds-nav__subitem[aria-current="page"]{
+  background:var(--ds-nav-hover);
+  border-left-color:var(--ds-nav-active-edge);
+  color:var(--ds-on-color);
+  font-weight:500;
+}
+
+/* -- 5.4 sidebar quote (pinned to the bottom) ------------------------------ */
+.ds-sidebar__quote{
+  position:relative;
+  z-index:1;
+  margin-top:auto;
+  padding:24px 22px 26px;
+}
+.ds-sidebar__quote::before{
+  content:"";
+  display:block;
+  width:60px;
+  height:3px;
+  margin-bottom:12px;
+  border-radius:var(--ds-r-xs);
+  background:var(--ds-sky);
+}
+.ds-sidebar__quote p{
+  margin:0;
+  font-size:17px;
+  font-style:italic;
+  font-weight:400;
+  line-height:1.5;
+  color:var(--ds-on-color);
+}
+.ds-sidebar__quote p small{
+  display:block;
+  font-size:13px;
+  font-weight:300;
+  color:var(--ds-on-navy-3);
+}
+.ds-sidebar__quote em{
+  display:block;
+  margin-top:12px;
+  font-size:12px;
+  font-style:italic;
+  font-weight:300;
+  text-align:right;
+  color:var(--ds-on-navy-2);
+  transform:rotate(-4deg);
+}
+
+/* Modifier .ds-sidebar--sticky (opt-in, desktop only) keeps the sidebar in
+   view on long pages - defined in section 8. Not the default because it
+   moves the quote into the first screen. */
+
+/* -- 5.5 main column --------------------------------------------------------- */
+.ds-main{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
+
+/* -- 5.6 topbar (sticky) ------------------------------------------------------ */
+.ds-topbar{
+  position:sticky;
+  top:env(safe-area-inset-top,0px);
+  z-index:var(--ds-z-topbar);
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:14px;
+  padding:10px 20px;
+  background:var(--ds-surface);
+  border-bottom:1px solid var(--ds-line);
+}
+.ds-topbar__logo{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:19px;
+  font-weight:600;
+  line-height:1.5;
+  color:var(--ds-ink);
+  text-decoration:none;
+}
+.ds-topbar__logo:hover{ color:var(--ds-ink); text-decoration:none; }
+.ds-topbar__logo .ds-ic{ color:var(--ds-blue); }
+.ds-topbar__title{
+  flex:1 1 260px;
+  min-width:0;
+  margin:0;
+  padding-left:14px;
+  border-left:1px solid var(--ds-line);
+  font-size:15px;
+  font-weight:400;
+  line-height:1.5;
+  color:var(--ds-ink);
+}
+
+/* -- 5.7 search pill ---------------------------------------------------------- */
+/* <label class="ds-search"> or <form class="ds-search" role="search"> */
+.ds-search{
+  flex:1 1 220px;
+  max-width:290px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin:0;
+  padding:0 14px;
+  border:1px solid var(--ds-line-strong);   /* AA: a text field boundary needs 3:1 */
+  border-radius:var(--ds-r-pill);
+  background:var(--ds-surface-2);
+  color:var(--ds-ink-3);
+}
+.ds-search:focus-within{ outline:2px solid transparent; border-color:var(--ds-focus); box-shadow:0 0 0 1px var(--ds-focus); }   /* one ring, same as inputs */
+.ds-search input{
+  appearance:none;
+  -webkit-appearance:none;
+  flex:1;
+  min-width:0;
+  width:auto;
+  height:auto;
+  margin:0;
+  padding:8px 0;
+  border:0;
+  border-radius:0;
+  background:none;
+  box-shadow:none;
+  outline:0;
+  font:inherit;
+  font-size:13px;
+  line-height:1.5;
+  color:var(--ds-ink);
+}
+.ds-search .ds-ic{ width:18px; height:18px; }
+/* compact search button, shown <=620px only (section 8). Put it BEFORE the
+   .ds-search in the topbar; ds-ui.js [data-ds-search-toggle] opens the field
+   as a full-width row under the topbar:
+   <button type="button" class="ds-icon-btn ds-search-btn" data-ds-search-toggle
+     aria-controls="ds-search" aria-expanded="false" aria-label="ค้นหา">search icon</button>
+   <label class="ds-search" id="ds-search">...</label> */
+.ds-search-btn,
+.ds-icon-btn.ds-search-btn{ display:none; }
+.ds-search-btn[aria-expanded="true"]{ background:var(--ds-surface-2); color:var(--ds-ink); }
+
+/* -- 5.8 icon buttons (theme, bell, hamburger) ------------------------------ */
+.ds-icon-btn{
+  appearance:none;
+  position:relative;
+  display:grid;
+  place-items:center;
+  flex:none;
+  width:38px;
+  height:38px;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:var(--ds-r-md);
+  background:none;
+  color:var(--ds-ink);
+  font:inherit;
+  text-decoration:none;
+  cursor:pointer;
+}
+.ds-icon-btn:hover{ background:var(--ds-surface-2); color:var(--ds-ink); }
+.ds-icon-btn:focus-visible{ outline:2px solid var(--ds-focus); outline-offset:0; }
+.ds-icon-btn__dot{
+  position:absolute;
+  top:0;
+  right:0;
+  display:grid;
+  place-items:center;
+  min-width:17px;
+  height:17px;
+  border-radius:var(--ds-r-pill);
+  background:var(--ds-red-strong); /* stays red in dark mode; -strong = AA with white */
+  color:var(--ds-on-color);
+  font-size:10.5px;
+  font-weight:500;
+  line-height:1.5;
+  font-variant-numeric:tabular-nums;
+}
+.ds-icon-btn__dot:empty{ display:none; }
+/* hamburger: hidden on desktop, shown <=900px (section 8). Own rule with
+   higher specificity so it never depends on source order vs .ds-icon-btn */
+.ds-menu-btn,
+.ds-icon-btn.ds-menu-btn{ display:none; }
+
+/* -- 5.8b collapsible sidebar on desktop (>900px) ----------------------------
+   The same hamburger (data-ds-sidebar-toggle) is shown on desktop too; there
+   it collapses the sidebar instead of opening the drawer. State lives on
+   <html data-ds-sidebar="collapsed|hidden"> (saved in localStorage
+   'ds-sidebar' and applied in <head>, so there is no flash):
+     collapsed = icon rail (--ds-sidebar-w-rail), labels become tooltips
+     hidden    = sidebar fully hidden (DS.config.sidebarCollapse = 'hide')
+   A server may print the attribute itself (e.g. from a cookie).
+   ------------------------------------------------------------------------- */
+:root{ --ds-sidebar-w-rail:72px; }
+.ds-app{ transition:grid-template-columns var(--ds-dur-slide,.28s) var(--ds-ease-out,ease); }
+.ds-nav__item{ position:relative; }
+@media (min-width:901px){
+  /* desktop: the toggle becomes a round "edge" button sitting on the line
+     between the navy sidebar and the page, level with the topbar
+     (‹ = collapse, › = expand; ds-ui.js swaps the chevron + tooltip).
+     It lives in the sticky topbar, so it stays put while the page scrolls. */
+  .ds-menu-btn,
+  .ds-icon-btn.ds-menu-btn{
+    display:grid; position:absolute; z-index:2;
+    left:-14px; top:50%; transform:translateY(-50%);
+    width:28px; height:28px; padding:0; border-radius:50%;
+    border:1px solid var(--ds-line-strong); background:var(--ds-surface); color:var(--ds-ink-2);
+    box-shadow:var(--ds-shadow);
+    transition:background-color var(--ds-dur-fast) ease, color var(--ds-dur-fast) ease;
+  }
+  .ds-icon-btn.ds-menu-btn .ds-ic{ width:16px; height:16px; stroke-width:2.4; }
+  .ds-icon-btn.ds-menu-btn:hover{ background:var(--ds-blue); border-color:var(--ds-blue); color:var(--ds-on-color); }
+  .ds-icon-btn.ds-menu-btn:focus-visible{ outline:2px solid var(--ds-focus); outline-offset:2px; }
+  .ds-topbar{ padding-left:30px; }   /* room for the half of the edge button that sits on the page */
+  /* bigger hit area than the 28px circle */
+  .ds-icon-btn.ds-menu-btn::after{ content:""; position:absolute; inset:-8px; border-radius:50%; }
+
+  :root[data-ds-sidebar="collapsed"] .ds-app{ grid-template-columns:var(--ds-sidebar-w-rail) minmax(0,1fr); }
+  /* ANIMATED rail: the column narrows (grid transition above) while labels
+     fade out and are clipped - nothing reflows. The icons already sit at
+     the rail centre (4px edge + 22px padding + 22px icon = 26..48 of 72).
+     Labels stay in the DOM as the accessible name (colour, not display). */
+  .ds-sidebar__brand{ transition:padding var(--ds-dur-slide) var(--ds-ease-out); }
+  .ds-sidebar__brand > :not(.ds-sidebar__logo){ white-space:nowrap; transition:opacity var(--ds-dur) ease; }
+  .ds-sidebar__logo{ transition:width var(--ds-dur-slide) var(--ds-ease-out), height var(--ds-dur-slide) var(--ds-ease-out); }
+  .ds-nav__item{ white-space:nowrap; transition:background-color var(--ds-dur-fast) ease, color var(--ds-dur) ease; }
+  .ds-nav__item > .ds-ic:first-child{ color:var(--ds-on-navy); }
+  .ds-nav__item[aria-current="page"] > .ds-ic:first-child,
+  .ds-nav__toggle.has-current > .ds-ic:first-child{ color:var(--ds-on-color); }
+  .ds-nav__sep{ transition:margin var(--ds-dur-slide) var(--ds-ease-out); }
+  .ds-sidebar__quote{ min-width:var(--ds-sidebar-w); transition:opacity var(--ds-dur) ease, visibility 0s; }
+
+  :root[data-ds-sidebar="collapsed"] .ds-sidebar__brand{ padding-left:16px; overflow:hidden; }
+  :root[data-ds-sidebar="collapsed"] .ds-sidebar__brand > :not(.ds-sidebar__logo){ opacity:0; }
+  :root[data-ds-sidebar="collapsed"] .ds-sidebar__logo{ width:40px; height:40px; }
+  :root[data-ds-sidebar="collapsed"] .ds-nav__item{ color:transparent; overflow:hidden; }
+  :root[data-ds-sidebar="collapsed"] .ds-nav__count{
+    position:absolute; top:5px; left:38px; right:auto; min-width:17px; margin:0; padding:0 4px;
+    font-size:10.5px; line-height:17px;
+  }
+  :root[data-ds-sidebar="collapsed"] .ds-nav__sep{ margin:8px 14px; }
+  :root[data-ds-sidebar="collapsed"] .ds-nav__label{ display:none; }
+  :root[data-ds-sidebar="collapsed"] .ds-sidebar__quote{
+    opacity:0; visibility:hidden; transition:opacity var(--ds-dur-fast) ease, visibility 0s var(--ds-dur-fast);
+  }
+  /* the edge button's chevron turns around instead of being swapped */
+  .ds-icon-btn.ds-menu-btn .ds-ic{ transition:transform var(--ds-dur-slide) var(--ds-ease-out); }
+  :root[data-ds-sidebar] .ds-icon-btn.ds-menu-btn .ds-ic{ transform:rotate(180deg); }
+  /* nav groups (5.3b) in the rail: no sub-menus, no caret (ds-ui.js expands
+     the sidebar first when a group toggle is clicked); a group that holds
+     the current page shows the active look on its toggle icon */
+  :root[data-ds-sidebar="collapsed"] .ds-nav__sub,
+  :root[data-ds-sidebar="collapsed"] .ds-nav__caret{ display:none; }
+  :root[data-ds-sidebar="collapsed"] .ds-nav__toggle.has-current{
+    background:var(--ds-grad-nav-active); border-left-color:var(--ds-nav-active-edge);   /* label stays transparent; the icon is white */
+  }
+
+  :root[data-ds-sidebar="hidden"] .ds-app{ grid-template-columns:0 minmax(0,1fr); }
+  :root[data-ds-sidebar="hidden"] .ds-sidebar{ visibility:hidden; }
+  /* no duplicate system name: while the full sidebar (with its brand) is
+     visible, the topbar shows only the long name; the short logo returns
+     when the sidebar is collapsed/hidden (and on phones) */
+  :root:not([data-ds-sidebar]) .ds-app:has(> .ds-sidebar) .ds-topbar__logo{ display:none; }
+  :root:not([data-ds-sidebar]) .ds-app:has(> .ds-sidebar) .ds-topbar__title{ border-left:0; padding-left:0; }
+  /* collapsed rail already shows the brand mark: the topbar keeps only the name */
+  :root[data-ds-sidebar="collapsed"] .ds-topbar__logo > .ds-ic{ display:none; }
+  /* the long system name stays on one line */
+  .ds-topbar__title{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+}
+
+/* topbar stays ONE row from tablet width up: the long title truncates with
+   an ellipsis and the search pill shrinks instead of pushing the user block
+   onto a second row (the original wrapped at ~960-1100px) */
+@media (min-width:621px){
+  .ds-topbar{ flex-wrap:nowrap; }
+  .ds-topbar .ds-search{ min-width:150px; }
+  .ds-user{ flex:none; }
+}
+
+/* -- 5.9 user block & avatar ----------------------------------------------- */
+/* .ds-user may be a <div>, or a <button>/<a> that opens a user menu.
+   .ds-user__meta: first child = name, following children = role/unit. */
+.ds-user{
+  position:relative;   /* anchors the visually-hidden name on phones */
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:0;
+  padding:0;
+  border:0;
+  background:none;
+  color:inherit;
+  font:inherit;
+  text-align:start;
+  text-decoration:none;
+}
+button.ds-user,
+a.ds-user{ cursor:pointer; border-radius:var(--ds-r-md); }
+.ds-user__meta{ min-width:0; }
+.ds-user__meta > :first-child{
+  display:block;
+  font-size:14px;
+  font-weight:500;
+  line-height:1.2;
+  color:var(--ds-ink);
+}
+.ds-user__meta > :not(:first-child){
+  font-size:11.5px;
+  font-weight:300;
+  color:var(--ds-ink-3);
+}
+.ds-avatar{
+  display:grid;
+  place-items:center;
+  flex:none;
+  width:42px;
+  height:42px;
+  overflow:hidden;
+  border-radius:50%;
+  background:var(--ds-grad-avatar);
+  color:var(--ds-on-color);
+  font-size:17px;
+  font-weight:500;
+  line-height:1.5;
+}
+.ds-avatar > img{ width:100%; height:100%; object-fit:cover; }
+
+/* -- 5.9b dropdown: user menu + notifications popover -----------------------
+   <div class="ds-dropdown">
+     <button type="button" class="ds-user" data-ds-dropdown aria-controls="ds-user-menu" aria-expanded="false" aria-haspopup="menu">
+       <span class="ds-avatar" aria-hidden="true">ส</span>
+       <span class="ds-user__meta"><b>สมชาย ใจดี</b><small>ผู้จัดการ (SUPERVISOR)</small></span>
+       <svg class="ds-ic ds-ic--sm ds-user__caret" aria-hidden="true"><use href="#ds-i-chevron-down"></use></svg></button>
+     <div class="ds-menu" id="ds-user-menu" role="menu" aria-label="เมนูผู้ใช้" hidden>
+       <div class="ds-menu__header" role="none"><b>สมชาย ใจดี</b><small>somchai.j@example.go.th</small></div>
+       <a class="ds-menu__item" role="menuitem" href="#">icon ข้อมูลส่วนตัว</a>
+       <hr class="ds-menu__sep">
+       <a class="ds-menu__item ds-menu__item--danger" role="menuitem" href="login.html">icon ออกจากระบบ</a>
+     </div>
+   </div>
+   Notifications: <div class="ds-dropdown"><button class="ds-icon-btn" data-ds-dropdown
+     aria-controls="ds-notif-panel" aria-expanded="false" aria-haspopup="true" aria-label="…">bell + dot</button>
+     <div class="ds-popover" id="ds-notif-panel" hidden>
+       <div class="ds-popover__head"><h2 class="ds-popover__title">การแจ้งเตือน</h2> ds-link-btn</div>
+       <ul class="ds-notes ds-popover__body"> ds-notes__item (is-unread) ... </ul>
+       <div class="ds-popover__foot"><a class="ds-link-btn" href="#">ดูการแจ้งเตือนทั้งหมด →</a></div></div></div>
+   ds-ui.js ([data-ds-dropdown], DS.dropdown) toggles [hidden] + aria-expanded,
+   one open at a time; Esc / outside click / Tab out close it. The panel
+   hangs under the trigger, right-aligned; <=620px it becomes a full-width
+   sheet under the topbar. Print never shows it.
+   ------------------------------------------------------------------------- */
+.ds-dropdown{
+  position:relative;
+  display:flex;
+  align-items:center;
+  flex:none;
+  min-width:0;
+}
+/* user block as a menu button (reset in 5.9); hover tint without changing
+   the topbar height (2px padding eaten by a -2px margin) */
+button.ds-user{ padding:2px 6px 2px 2px; margin-block:-2px; }
+button.ds-user:hover,
+button.ds-user[aria-expanded="true"]{ background:var(--ds-surface-2); }
+.ds-user:focus-visible{ outline:2px solid var(--ds-focus); outline-offset:2px; }
+.ds-user__caret{
+  color:var(--ds-ink-3);
+  transition:transform var(--ds-dur-fast) ease;
+}
+.ds-user[aria-expanded="true"] .ds-user__caret{ transform:rotate(180deg); }
+/* bell (or any icon button) while its panel is open */
+.ds-icon-btn[data-ds-dropdown][aria-expanded="true"]{ background:var(--ds-surface-2); color:var(--ds-ink); }
+
+/* shared floating panel */
+.ds-menu,
+.ds-popover{
+  position:absolute;
+  top:calc(100% + 6px);
+  right:0;
+  z-index:var(--ds-z-dropdown);
+  box-sizing:border-box;
+  max-width:calc(100vw - 16px);
+  margin:0;
+  border:1px solid var(--ds-line);
+  border-radius:var(--ds-r-lg);
+  background:var(--ds-surface);
+  color:var(--ds-ink);
+  box-shadow:var(--ds-shadow-pop);
+  font-family:var(--ds-font);
+  font-size:14px;
+  font-weight:300;
+  line-height:1.5;
+  text-align:start;
+  animation:ds-pop-in var(--ds-dur-fast) ease-out;
+}
+@keyframes ds-pop-in{ from{ opacity:0; transform:translateY(-4px); } }
+
+/* menu (role="menu") */
+.ds-menu{ min-width:220px; padding:6px; }
+.ds-menu__header{
+  display:flex;
+  flex-direction:column;
+  margin:-6px -6px 6px;
+  padding:12px 16px 10px;
+  border-bottom:1px solid var(--ds-line);
+}
+.ds-menu__header > b{ font-size:14px; font-weight:500; line-height:1.35; color:var(--ds-ink); }
+.ds-menu__header > small{ font-size:12px; font-weight:300; line-height:1.5; color:var(--ds-ink-3); overflow-wrap:anywhere; }
+.ds-menu__item{
+  -webkit-appearance:none;
+  appearance:none;
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  min-height:40px;
+  margin:0;
+  padding:8px 10px;
+  border:0;
+  border-radius:var(--ds-r-sm);
+  background:none;
+  color:var(--ds-ink);
+  font:inherit;
+  text-align:start;
+  text-decoration:none;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.ds-menu__item:hover{ background:var(--ds-surface-2); color:var(--ds-ink); text-decoration:none; }
+.ds-menu__item:focus-visible{ outline:2px solid var(--ds-focus); outline-offset:-2px; background:var(--ds-surface-2); }
+.ds-menu__item .ds-ic{ width:18px; height:18px; color:var(--ds-ink-2); }
+.ds-menu__item--danger,
+.ds-menu__item--danger:hover,
+.ds-menu__item--danger .ds-ic{ color:var(--ds-bad); }   /* --ds-bad is AA on surface + surface-2 */
+.ds-menu__sep{
+  height:0;
+  margin:6px -6px;
+  border:0;
+  border-top:1px solid var(--ds-line);
+  background:none;
+  color:inherit;
+  opacity:1;
+}
+
+/* popover (notifications) */
+.ds-popover{
+  display:flex;
+  flex-direction:column;
+  width:360px;
+  max-height:min(70vh,520px);
+  overflow:hidden;
+}
+.ds-popover__head{
+  display:flex;
+  flex:none;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:10px 16px;
+  border-bottom:1px solid var(--ds-line);
+}
+.ds-popover__title{ margin:0; font-size:16px; font-weight:500; line-height:1.5; color:var(--ds-ink); }
+.ds-popover__body{
+  flex:1 1 auto;
+  min-height:0;
+  margin:0;
+  padding:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+.ds-popover__foot{
+  display:flex;
+  flex:none;
+  justify-content:center;
+  padding:10px 16px;
+  border-top:1px solid var(--ds-line);
+}
+/* ds-notes inside the popover: full-width rows with dividers + hover */
+.ds-popover .ds-notes{ gap:0; }
+.ds-popover .ds-notes__item{ padding:10px 16px; border-bottom:1px solid var(--ds-line); }
+.ds-popover .ds-notes__item:last-child{ border-bottom:0; }
+.ds-popover .ds-notes__item:has(.ds-notes__link):hover{ background:var(--ds-surface-2); }
+.ds-popover .ds-notes__link:focus-visible{ outline-offset:1px; }
+
+/* -- 5.10 content area --------------------------------------------------------- */
+.ds-content{
+  display:flex;
+  flex-direction:column;
+  gap:var(--ds-gap);
+  min-width:0;
+  padding-block:12px 18px;
+  padding-inline:16px;
+}
+/* focus target of the skip link: no ring around the whole content */
+.ds-content[tabindex="-1"]:focus{ outline:none; }
+
+/* -- 5.11 footer --------------------------------------------------------------- */
+/* <footer class="ds-footer">
+     <span class="ds-footer__brand"><svg class="ds-ic">gear</svg>SMMS</span>
+     <span>Version 1.0.0</span> ...
+     <span class="ds-footer__spacer">© 2025 ...</span>
+   </footer> */
+.ds-footer{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:6px 14px;
+  margin-top:auto;
+  padding:10px 20px;
+  background:var(--ds-surface);
+  border-top:1px solid var(--ds-line);
+  color:var(--ds-ink-3);
+  font-size:11.5px;
+  line-height:1.5;
+}
+.ds-footer__brand{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:16px;
+  font-weight:600;
+  color:var(--ds-ink);
+  text-decoration:none;
+}
+.ds-footer__brand .ds-ic{ color:var(--ds-blue); }
+.ds-footer__spacer{ margin-left:auto; }
+
+
+/* ==========================================================================
+   6. PAGE LAYOUT
+   --------------------------------------------------------------------------
+   Usage:
+   <div class="ds-page-head">
+     <div class="ds-page-head__main">
+       <nav class="ds-breadcrumb" aria-label="เส้นทาง">
+         <ol><li><a href="dashboard.html">หน้าหลัก</a></li><li aria-current="page">รายการแจ้งซ่อม</li></ol>
+       </nav>
+       <h2 class="ds-page-head__title">รายการแจ้งซ่อม</h2>
+       <p class="ds-page-head__sub">ทั้งหมด 128 รายการ</p>
+     </div>
+     <div class="ds-page-head__actions"><a class="ds-btn" href="form.html">แจ้งซ่อมใหม่</a></div>
+   </div>
+   <section class="ds-grid ds-grid--dash-a"> <div class="ds-panel">wide first</div> ... </section>
+   <div class="ds-grid ds-grid--aside"> <div class="ds-stack">main</div> <aside class="ds-stack">side</aside> </div>
+   ds-grid--2/--3/--4  equal columns      ds-grid--dash-a  1.22fr 1fr 1fr
+   ds-grid--dash-b     1.7fr 1.12fr 1fr   ds-grid--aside   main + 320px
+   In dash-a / dash-b the FIRST child spans the full row at <=1280px.
+   ========================================================================== */
+
+/* -- 6.1 page head ----------------------------------------------------------- */
+.ds-page-head{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:8px var(--ds-gap);
+}
+.ds-page-head__main{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  flex:1 1 320px;
+  min-width:0;
+}
+.ds-page-head__title{
+  margin:0;
+  font-size:22px;
+  font-weight:500;
+  line-height:1.35;
+  color:var(--ds-ink);
+}
+.ds-page-head__sub{
+  margin:0;
+  font-size:13px;
+  font-weight:300;
+  line-height:1.5;
+  color:var(--ds-ink-2);
+}
+.ds-page-head__actions{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:8px;
+  margin-left:auto;
+}
+
+/* -- 6.2 breadcrumb ---------------------------------------------------------- */
+/* <nav class="ds-breadcrumb"><ol><li><a>..</a></li><li aria-current="page">..</li></ol></nav> */
+.ds-breadcrumb{
+  display:block;
+  margin:0;
+  font-size:12.5px;
+  font-weight:300;
+  line-height:1.5;
+  color:var(--ds-ink-2);
+}
+.ds-breadcrumb > ol,
+.ds-breadcrumb > ul{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+.ds-breadcrumb li{ display:inline-flex; align-items:center; min-width:0; margin:0; }
+.ds-breadcrumb li + li::before{
+  content:"/";
+  content:"/" / "";
+  margin:0 8px;
+  color:var(--ds-ink-3);
+}
+.ds-breadcrumb a{ color:var(--ds-link); text-decoration:none; border-radius:2px; }
+.ds-breadcrumb a:hover{ color:var(--ds-link); text-decoration:underline; }
+.ds-breadcrumb a:focus-visible{ outline:2px solid var(--ds-focus); outline-offset:2px; }
+.ds-breadcrumb [aria-current="page"]{ color:var(--ds-ink); font-weight:400; }
+
+/* -- 6.3 grids --------------------------------------------------------------- */
+.ds-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:var(--ds-gap);
+  min-width:0;
+}
+.ds-grid > *{ min-width:0; }
+.ds-grid--2{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+.ds-grid--3{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+.ds-grid--4{ grid-template-columns:repeat(4,minmax(0,1fr)); }
+.ds-grid--dash-a{ grid-template-columns:1.22fr 1fr 1fr; }      /* donut | bars | pie */
+.ds-grid--dash-b{ grid-template-columns:1.7fr 1.12fr 1fr; }    /* table | recent | stack */
+.ds-grid--aside{ grid-template-columns:minmax(0,1fr) var(--ds-aside-w); }
+
+/* -- 6.4 stack (vertical column of panels) ---------------------------------- */
+/* <div class="ds-stack"><div class="ds-panel">..</div><div class="ds-panel">..</div></div> */
+.ds-stack{
+  display:flex;
+  flex-direction:column;
+  gap:var(--ds-gap);
+  min-width:0;
+}
+
+
+/* -- 6.5 action row + sub-heading ------------------------------------------ */
+/* inline button row (form submit area, alert/panel buttons, pills):
+   <div class="ds-actions"> ..buttons.. </div>   right-aligned: ds-actions ds-actions--end */
+.ds-actions{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.ds-actions--end{ justify-content:flex-end; }
+/* heading inside a panel or tab panel (below ds-panel__title level):
+   <h4 class="ds-subhead">รายละเอียดปัญหา</h4> */
+.ds-subhead{
+  margin:0 0 6px;
+  font-size:14px;
+  font-weight:500;
+  line-height:1.5;
+  color:var(--ds-ink);
+}
+* + .ds-subhead{ margin-top:14px; }
+
+
+/* ==========================================================================
+   7. UTILITIES (keep this list tiny)
+   --------------------------------------------------------------------------
+   Usage:  <td class="ds-num ds-nowrap">15/05/2568</td>
+           <span class="ds-truncate" title="ชื่อเต็ม">ชื่อยาว...</span>  (block/flex item)
+           <span class="ds-sr-only">เพิ่มขึ้น</span>
+   Each class is doubled (.x.x) on purpose: specificity 0,2,0 lets a utility
+   beat single-class component rules regardless of where it sits in the file.
+   ========================================================================== */
+.ds-num.ds-num{ font-variant-numeric:tabular-nums; }
+.ds-nowrap.ds-nowrap{ white-space:nowrap; }
+/* line-height >= 1.5 so Thai stacked marks are not clipped */
+.ds-truncate.ds-truncate{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  line-height:1.5;
+}
+.ds-muted.ds-muted{ color:var(--ds-ink-3); }
+.ds-text-good.ds-text-good{ color:var(--ds-good); }
+.ds-text-bad.ds-text-bad{ color:var(--ds-bad); }
+.ds-sr-only.ds-sr-only{
+  position:absolute;
+  width:1px;
+  height:1px;
+  margin:-1px;
+  padding:0;
+  border:0;
+  overflow:hidden;
+  clip:rect(0 0 0 0);
+  clip-path:inset(50%);
+  white-space:nowrap;
+}
+
+
+/* <div class="ds-no-print"> : left out of the printout (forms, hints, toolbars) */
+@media print{
+  .ds-no-print.ds-no-print{ display:none !important; }
+}
+
+
+/* ==========================================================================
+   8. SHELL RESPONSIVE, FORCED COLORS, PRINT
+   --------------------------------------------------------------------------
+   Reproduces the original behaviour:
+   >1280   sidebar 225px in the grid; dash-a 3 cols; dash-b 3 cols
+   <=1280  dash-a and dash-b -> 2 cols, their FIRST child spans the row
+   <=900   one column; sidebar becomes an off-canvas drawer (240px) opened by
+           [data-ds-sidebar-toggle] (.ds-sidebar.is-open), hamburger shown,
+           topbar title and user meta visually hidden (kept for screen readers)
+   <=620   2-col and 4-col grids -> 1 col
+   <=400   page-head actions fill the width
+   ========================================================================== */
+@media (min-width:901px){
+  /* opt-in: <div class="ds-sidebar ds-sidebar--sticky"> */
+  .ds-sidebar--sticky{
+    position:sticky;
+    top:0;
+    align-self:start;
+    height:100vh;
+    height:100dvh;
+    overflow-x:hidden;
+    overflow-y:auto;
+  }
+}
+
+@media (max-width:1280px){
+  .ds-grid--dash-a{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .ds-grid--dash-a > :first-child{ grid-column:1/-1; }
+  .ds-grid--dash-b{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+  .ds-grid--dash-b > :first-child{ grid-column:1/-1; }
+  .ds-grid--4{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+
+@media (max-width:900px){
+  .ds-app{ grid-template-columns:minmax(0,1fr); }
+  /* off-canvas drawer; visibility keeps closed links out of the tab order */
+  .ds-sidebar{
+    position:fixed;
+    inset:0 auto 0 0;
+    z-index:var(--ds-z-sidebar);
+    width:var(--ds-sidebar-w-offcanvas);
+    padding-top:env(safe-area-inset-top,0px);
+    overflow-y:auto;
+    visibility:hidden;
+    transform:translateX(-100%);
+    transition:transform var(--ds-dur),visibility 0s var(--ds-dur);
+  }
+  .ds-sidebar.is-open{
+    visibility:visible;
+    transform:none;
+    transition:transform var(--ds-dur),visibility 0s;
+    box-shadow:0 0 0 100vmax var(--ds-scrim);   /* page scrim */
+  }
+  /* Page scroll lock + inert page while the drawer is open: ds-ui.js
+     (syncSidebar), with scrollbar-width compensation. iOS Safari only
+     fires the outside tap that closes the drawer on a "clickable" target,
+     hence the pointer cursor on the app while the drawer is open. */
+  :root:has(.ds-sidebar.is-open) .ds-app{ cursor:pointer; }
+  .ds-sidebar.is-open{ cursor:auto; }
+  .ds-menu-btn,
+  .ds-icon-btn.ds-menu-btn{ display:grid; }
+  /* hidden visually only: the h1 and the user name stay in the a11y tree
+     (same layout as display:none - both are out of flow) */
+  .ds-topbar__title,
+  .ds-user__meta{
+    position:absolute; left:0; top:0; width:1px; height:1px; margin:-1px; padding:0; border:0;
+    overflow:hidden; clip-path:inset(50%); white-space:nowrap;
+  }
+  .ds-user__meta > *{ max-width:1px; overflow:hidden; }   /* hidden text can never reach past the screen edge */
+  .ds-grid--dash-a,
+  .ds-grid--dash-b,
+  .ds-grid--aside,
+  .ds-grid--3{ grid-template-columns:minmax(0,1fr); }
+}
+
+@media (max-width:620px){
+  .ds-grid--2,
+  .ds-grid--4{ grid-template-columns:minmax(0,1fr); }
+  .ds-page-head__actions{ margin-left:0; }
+  /* ONE compact topbar row: menu, logo, (spacer), search button, theme,
+     bell, avatar. The search field opens as a full-width row below. */
+  .ds-topbar{ gap:8px; padding:8px 12px; }
+  .ds-topbar__logo{ margin-inline-end:auto; }
+  .ds-search-btn,
+  .ds-icon-btn.ds-search-btn{ display:grid; }
+  .ds-search-btn ~ .ds-search:not(.is-open){ display:none; }
+  .ds-search.is-open{ order:1; flex:1 1 100%; max-width:none; }
+  /* dropdowns (5.9b): full-width sheet under the topbar; the user button
+     keeps only the avatar (the caret would push the row past 375px) */
+  .ds-menu,
+  .ds-popover{
+    position:fixed; left:8px; right:8px; top:calc(64px + env(safe-area-inset-top,0px));
+    width:auto; max-width:none;
+  }
+  .ds-popover{ max-height:min(75vh,520px); }
+  .ds-user__caret{ display:none; }
+  /* footer: stacked lines, the "|" separators (aria-hidden spans) drop out */
+  .ds-footer{ flex-direction:column; align-items:flex-start; gap:2px; padding:10px 16px; }
+  .ds-footer > span[aria-hidden="true"]{ display:none; }
+  .ds-footer__spacer{ margin-left:0; }
+}
+
+@media (max-width:400px){
+  .ds-page-head__actions{ width:100%; }
+  .ds-page-head__actions > *{ flex:1 1 auto; }
+}
+
+/* Windows High Contrast / forced colors: keep state visible
+   (system color keywords are allowed here - they are not theme colors) */
+@media (forced-colors:active){
+  .ds-nav__item[aria-current="page"]{
+    border-left-color:Highlight;
+    outline:2px solid Highlight;
+    outline-offset:-4px;
+  }
+  .ds-icon-btn,
+  .ds-nav__count,
+  .ds-icon-btn__dot{ border:1px solid CanvasText; }
+  .ds-sidebar::after{ display:none; }
+  /* dropdowns + nav groups: open / current state without background colors */
+  .ds-menu,
+  .ds-popover{ border:1px solid CanvasText; }
+  .ds-menu__item:hover{ outline:1px solid CanvasText; outline-offset:-1px; }
+  .ds-icon-btn[data-ds-dropdown][aria-expanded="true"],
+  button.ds-user[aria-expanded="true"]{ outline:2px solid Highlight; outline-offset:0; }
+  .ds-nav__toggle.has-current{ border-left-color:Highlight; }
+}
+
+/* reduced motion (explicit; section 3 already shortens motion in scopes) */
+@media (prefers-reduced-motion:reduce){
+  .ds-menu,
+  .ds-popover{ animation:none; }
+  .ds-nav__caret,
+  .ds-user__caret{ transition:none; }
+}
+
+/* Print (shell part; component print rules live with the components):
+   the dark token blocks are screen-only (section 2), so print uses the
+   light :root tokens, including a system's own overrides. Here: white
+   page, no shadows, drop the chrome, reclaim the sidebar column.
+   !important is allowed in print. */
+@media print{
+  :root{
+    --ds-bg:var(--ds-surface) !important;
+    --ds-shadow:none !important;
+    --ds-shadow-up:none !important;
+  }
+  .ds-app{ display:block !important; min-height:0 !important; background:none !important; }
+  .ds-main{ display:block !important; }
+  .ds-content{ padding:0 !important; }
+  .ds-sidebar,
+  .ds-topbar,
+  .ds-footer,
+  .ds-menu-btn,
+  .ds-skip-link,
+  .ds-page-head__actions,
+  .ds-menu,
+  .ds-popover{ display:none !important; }
+  /* undo the JS scroll lock of an open drawer (inline overflow/padding) */
+  :root:has(.ds-sidebar.is-open){ overflow:visible !important; padding-right:0 !important; }
+}
+
+
+/* =====================================================================
+   ds-ui.css  PART 02 / 04 : dashboard, panel, data-viz, lists
+   ---------------------------------------------------------------------
+   Blocks: ds-hero-row, ds-hero, ds-datecard, ds-kpis, ds-kpi, ds-panel,
+           ds-chart, ds-seg, ds-legend, ds-bars, ds-bar, ds-progress,
+           ds-quick, ds-notes, ds-recent; then the responsive rules
+           (1280 / 900 / 620 / 400), container queries, forced colors
+           and print for these blocks.
+   Rules:  colors only via --ds-* tokens (all defined in part 01, none
+           added here); no bare element selectors; values of blocks that
+           exist in the original dashboard are copied 1:1. Deviations are
+           marked "FIX:" with the audit id.
+   Optional component variable (set inline on the element or a parent,
+           never on :root):
+           --ds-accent   fill of ds-kpi__icon, ds-quick__btn,
+                         ds-notes__icon, ds-bar__fill, ds-progress,
+                         ds-legend__dot. e.g. style="--ds-accent:var(--ds-green)".
+                         style="background:var(--ds-green)" works too.
+           --ds-kpi-cols number of KPI columns above 1280px (default 5).
+           --ds-value    width of ds-progress__fill, e.g. style="--ds-value:62%".
+   ===================================================================== */
+
+
+/* =====================================================================
+   AA FILLS - white text/icons on a palette fill (WCAG AA pass)
+   ---------------------------------------------------------------------
+   Inside every component that puts WHITE content on a data color, the
+   base palette names resolve to the darker -strong fills (section 1), so
+   existing markup keeps working and becomes AA:
+     <span class="ds-kpi__icon" style="background:var(--ds-orange)">  -> --ds-orange-strong
+     <a class="ds-quick__btn" style="--ds-accent:var(--ds-green)">     -> --ds-green-strong
+     <button class="ds-btn" style="--ds-btn-bg:var(--ds-red)">         -> --ds-red-strong
+   Writing var(--ds-orange-strong) directly is equivalent. Charts, legend
+   dots, bars, progress and timeline dots keep the brighter base palette.
+   (Declared on the element itself, so an inline var() on the SAME element
+   or its children resolves to the -strong value.)
+   ===================================================================== */
+.ds-btn,.ds-quick__btn,.ds-kpi__icon,.ds-notes__icon,.ds-error__icon{
+  --ds-blue:var(--ds-blue-strong);
+  --ds-green:var(--ds-green-strong);
+  --ds-orange:var(--ds-orange-strong);
+  --ds-purple:var(--ds-purple-strong);
+  --ds-red:var(--ds-red-strong);
+}
+
+
+/* =====================================================================
+   HERO ROW - hero banner + date card side by side (1 column <=900px)
+   ---------------------------------------------------------------------
+   <section class="ds-hero-row">
+     <div class="ds-hero">...</div>
+     <div class="ds-datecard">...</div>
+   </section>
+   A row that holds only the hero lets it span the full width.
+   ===================================================================== */
+.ds-hero-row{display:grid;grid-template-columns:minmax(0,1fr) 256px;gap:var(--ds-gap)}
+.ds-hero-row > :only-child{grid-column:1/-1}
+
+
+/* =====================================================================
+   HERO - navy banner: building art, title, lead, points, quote
+   ---------------------------------------------------------------------
+   <div class="ds-hero">
+     <svg class="ds-hero__art" viewBox="0 0 600 160" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+       ...gradient stops: style="stop-color:var(--ds-hero-glow-a)" ...
+     </svg>
+     <h2 class="ds-hero__title">สินทรัพย์พร้อมใช้ งานต่อเนื่อง องค์กรเดินหน้า</h2>
+     <p class="ds-hero__lead">ขับเคลื่อนการบริการงานซ่อมบำรุงรวดเร็ว แม่นยำ ตรวจสอบได้ทุกขั้นตอน</p>
+     <ul class="ds-hero__points">
+       <li><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-clock"></use></svg>ลดเวลาซ่อม</li>
+     </ul>
+     <div class="ds-hero__quote" aria-hidden="true">“ดูแลวันนี้<span>เพื่อพรุ่งนี้ที่ดีกว่า”</span></div>
+   </div>
+   FIX (A7): the art is z-index:-1 inside an isolated stacking context,
+     so every other child paints above it. No ">*:not(.bld)" catch-all,
+     no source-order tie with the absolutely positioned quote.
+   Default = the original: the quote is hidden at <=900px only, so between
+     ~900 and ~1220px it can overlap a long title/lead.
+   Opt-in .ds-hero--fit (<div class="ds-hero ds-hero--fit">): the hero
+     becomes a size container and the quote is hidden whenever the hero
+     is too narrow for it (rule at the end of this part).
+   ===================================================================== */
+.ds-hero{
+  position:relative;isolation:isolate;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:center;gap:4px;
+  min-height:148px;padding:22px 32px 18px;
+  border-radius:var(--ds-r-lg);background:var(--ds-grad-hero);color:var(--ds-on-color);
+}
+.ds-hero,.ds-hero--fit{container:ds-hero / inline-size} /* default now: the quote hides before it can overlap the text */
+.ds-hero__art{
+  position:absolute;z-index:-1;right:0;top:0;
+  width:62%;height:100%;opacity:.5;pointer-events:none;
+}
+.ds-hero__title{
+  margin:0;max-width:72%;color:inherit;
+  font-size:var(--ds-fs-3xl);font-weight:500;line-height:1.25;text-wrap:balance;
+}
+.ds-hero__lead{margin:0;max-width:72%;font-size:16px;color:var(--ds-on-navy-lead)}
+.ds-hero__points{
+  display:flex;flex-wrap:wrap;gap:8px 44px;
+  margin:14px 0 0;padding:0;list-style:none;font-size:13.5px;
+}
+.ds-hero__points > li{display:flex;align-items:center;gap:8px}
+.ds-hero__points .ds-ic{width:24px;height:24px}
+.ds-hero__quote{
+  position:absolute;right:30px;top:50%;transform:translateY(-58%);
+  font-size:20px;font-style:italic;font-weight:400;line-height:1.45;text-align:left;
+}
+.ds-hero__quote > span{display:block;padding-left:14px}
+.ds-hero__quote::after{
+  content:"";display:block;width:54px;height:3px;margin:8px 0 0 90px;
+  border-radius:var(--ds-r-xs);background:var(--ds-sky);
+}
+
+
+/* =====================================================================
+   DATE CARD - date, live clock, optional weather (navy, 256px in row)
+   ---------------------------------------------------------------------
+   <div class="ds-datecard">
+     <div class="ds-datecard__date" data-ds-clock="date">วันพฤหัสบดีที่ <b>15 พฤษภาคม 2025</b></div>
+     <time class="ds-datecard__time ds-num" data-ds-clock="time">10:24 น.</time>
+     <div class="ds-datecard__weather">                      (optional)
+       <svg viewBox="0 0 70 56" aria-hidden="true">
+         sun/rays: style="fill:var(--ds-sun)" / style="stroke:var(--ds-sun)"
+         cloud:    style="fill:var(--ds-cloud)"
+       </svg>
+       <div>
+         <div class="ds-datecard__temp">32°C</div>
+         <small class="ds-datecard__place">กรุงเทพมหานคร<br>มีเมฆบางส่วน</small>
+       </div>
+     </div>
+   </div>
+   Date and time are both written by ds-ui.js from one clock (DS.now()),
+   so they never disagree; the server text is only the first paint.
+   Add data-ds-clock-be to show the Buddhist year (พ.ศ.) instead of ค.ศ.
+   The weather icon is the direct <svg> child of __weather (70x56).
+   ===================================================================== */
+.ds-datecard{
+  display:flex;flex-direction:column;gap:6px;padding:14px 18px;
+  border-radius:var(--ds-r-lg);background:var(--ds-grad-datecard);color:var(--ds-on-color);
+}
+.ds-datecard__date{font-size:13.5px;color:var(--ds-on-navy-date)}
+.ds-datecard__date b,
+.ds-datecard__date strong{font-size:15px;font-weight:400;color:var(--ds-on-color)}
+.ds-datecard__time{font-size:19px;font-weight:400;line-height:1;font-variant-numeric:tabular-nums}
+.ds-datecard__weather{display:flex;align-items:center;gap:12px;margin-top:2px}
+.ds-datecard__weather > svg{flex:none;width:70px;height:56px}
+.ds-datecard__temp{font-size:24px;font-weight:500;line-height:1.1}
+.ds-datecard__place{display:block;font-size:12px;line-height:1.35;color:var(--ds-on-navy-muted)}
+
+
+/* =====================================================================
+   KPI ROW + KPI CARD
+   ---------------------------------------------------------------------
+   <section class="ds-kpis" aria-label="ตัวชี้วัดหลัก">
+     <div class="ds-kpi">
+       <span class="ds-kpi__icon" style="background:var(--ds-blue)">
+         <svg class="ds-ic ds-ic--lg" aria-hidden="true"><use href="#ds-i-wrench"></use></svg></span>
+       <div>
+         <div class="ds-kpi__label" lang="en">Total Requests</div>
+         <div class="ds-kpi__row">
+           <span class="ds-kpi__value ds-num">128</span>
+           <span class="ds-kpi__delta ds-kpi__delta--good">▲ +12%<span class="ds-sr-only"> (ดีขึ้น)</span></span>
+         </div>
+       </div>
+       <div class="ds-kpi__foot"><span>คำขอแจ้งซ่อมทั้งหมด</span><span>จากเดือนที่แล้ว</span></div>
+     </div>
+   </section>
+   Columns 5 -> 3 (<=1280) -> 2 (<=620) -> 1 (<=400).
+   ds-kpis--auto: any number of cards, auto-fit columns of >=190px.
+   The whole card may be a link: <a class="ds-kpi" href="list.html">.
+   FIX #1: the delta is ds-kpi__delta (no clash with ds-dl any more), so
+     it sits flush right in the value row.
+   The value row never wraps (original): at 621-~700px a long delta may
+     overflow the card - keep deltas short. ds-kpi__delta--neutral = no change.
+   ===================================================================== */
+.ds-kpis{display:grid;grid-template-columns:repeat(var(--ds-kpi-cols,5),minmax(0,1fr));gap:var(--ds-gap)}
+.ds-kpis.ds-kpis--auto{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+/* fixed column count above 1280px: ds-kpis--3 / ds-kpis--4 (default 5) */
+.ds-kpis--3{--ds-kpi-cols:3}
+.ds-kpis--4{--ds-kpi-cols:4}
+.ds-kpi{
+  display:grid;grid-template-columns:54px minmax(0,1fr);gap:4px 14px;align-items:start;
+  min-width:0;padding:14px 16px 12px;
+  border-radius:var(--ds-r-lg);background:var(--ds-surface);color:var(--ds-ink);box-shadow:var(--ds-shadow);
+}
+a.ds-kpi,
+a.ds-kpi:hover{color:var(--ds-ink);text-decoration:none}
+.ds-kpi:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+.ds-kpi__icon{
+  display:grid;place-items:center;width:54px;height:54px;
+  border-radius:var(--ds-r-lg);background:var(--ds-accent,var(--ds-primary));color:var(--ds-on-color);
+}
+.ds-kpi__icon .ds-ic{width:30px;height:30px;stroke-width:2}
+.ds-kpi__label{font-size:14.5px;font-weight:400;color:var(--ds-ink)}
+.ds-kpi__row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;white-space:nowrap}
+.ds-kpi__value{font-size:var(--ds-fs-3xl);font-weight:500;line-height:1.15;font-variant-numeric:tabular-nums}
+.ds-kpi__delta{font-size:13.5px;font-weight:400;white-space:nowrap}
+.ds-kpi__delta--good{color:var(--ds-good)}
+.ds-kpi__delta--bad{color:var(--ds-bad)}
+.ds-kpi__delta--neutral{color:var(--ds-ink-3)}
+.ds-kpi__foot{
+  grid-column:1/-1;display:flex;justify-content:space-between;gap:8px;
+  font-size:var(--ds-fs-xs);color:var(--ds-ink-3);
+}
+
+
+/* =====================================================================
+   PANEL - white card with a header row (title left, tools right)
+   ---------------------------------------------------------------------
+   <section class="ds-panel" aria-labelledby="p-status">
+     <div class="ds-panel__head">
+       <h3 class="ds-panel__title" id="p-status">งานที่ต้องติดตามวันนี้ <span class="ds-badge ds-num">17</span></h3>
+       <div class="ds-panel__tools">
+         <select class="ds-select ds-select--sm" aria-label="ช่วงเวลา"><option>เดือนนี้</option></select>
+         <a class="ds-link-btn" href="list.html">ดูทั้งหมด →</a>
+       </div>
+     </div>
+     ...content...
+   </section>
+   A title with no tools may sit directly in the panel (keeps the 12px gap).
+   The head wraps by default: the title keeps at least 12em, then the tools
+   drop to their own line (no overlap on phones). ds-panel__head--wrap is
+   kept only for backward compatibility.
+   FIX #4: controls live in ds-panel__tools, no longer inside the <h3>;
+     the tools keep weight 300 / 12.5px exactly like the old ".r" span.
+   ===================================================================== */
+.ds-panel{
+  min-width:0;padding:14px 16px;
+  border-radius:var(--ds-r-lg);background:var(--ds-surface);color:var(--ds-ink);box-shadow:var(--ds-shadow);
+}
+/* wraps safely: the title keeps >=12em before the tools drop to their own
+   line, so long tools text can never overlap the title on phones */
+.ds-panel__head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;row-gap:8px;margin:0 0 12px}
+.ds-panel__title{
+  display:flex;align-items:center;gap:8px;min-width:0;margin:0 0 12px;
+  font-size:var(--ds-fs-lg);font-weight:500;line-height:1.5;color:var(--ds-ink);
+}
+.ds-panel__head .ds-panel__title{margin:0;flex:1 1 12em}
+.ds-panel__tools{
+  flex:0 1 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px;max-width:100%;margin-left:auto;
+  font-size:var(--ds-fs-sm);font-weight:300;
+}
+
+
+/* =====================================================================
+   CHART - donut / pie SVG with its legend (legend wraps under if narrow)
+   ---------------------------------------------------------------------
+   <div class="ds-chart">
+     <svg class="ds-chart__svg" viewBox="0 0 180 180" role="img"
+          aria-label="สัดส่วนสถานะงานแจ้งซ่อม" aria-describedby="lg-status"></svg>
+     <ul class="ds-legend" id="lg-status"></ul>
+   </div>
+   DS.charts.donut / DS.charts.pie fill the svg with segments:
+     <circle|path class="ds-seg" data-ds-tip="รอดำเนินการ: 18 รายการ (14.1%)" .../>
+   Hovering the chart fades every other segment to .5 (same .15s fade as
+   the original). If segments are made focusable, keyboard focus gets the
+   same treatment (separate :has() rule, ignored by older browsers).
+   ===================================================================== */
+.ds-chart{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:16px}
+.ds-chart__svg{flex:none;width:178px;height:178px}
+.ds-seg{cursor:pointer;transition:opacity var(--ds-dur-fast)}
+.ds-chart__svg:hover .ds-seg:not(:hover){opacity:.5}
+.ds-chart__svg:has(.ds-seg:focus-visible) .ds-seg:not(:focus-visible){opacity:.5}
+.ds-seg:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+
+
+/* =====================================================================
+   LEGEND - dot + label + value rows (donut: default, pie: --tight)
+   ---------------------------------------------------------------------
+   <ul class="ds-legend">
+     <li class="ds-legend__item">
+       <span class="ds-legend__dot" style="background:var(--ds-blue)"></span>
+       <span class="ds-legend__label">รอดำเนินการ</span>
+       <b class="ds-legend__value ds-num">18 (14.1%)</b>
+     </li>
+   </ul>
+   A plain <li> (no class) is styled the same.
+   FIX (B9): a legend that is alone on its line never gets wider than the
+     chart; long labels ellipsize instead of pushing the value out.
+     (max-width:100% also caps the flex item's automatic minimum, so the
+     legend still wraps under the svg at exactly the original widths.)
+   ===================================================================== */
+.ds-legend{
+  flex:1 1 170px;max-width:100%;display:flex;flex-direction:column;gap:13px;
+  margin:0;padding:0;list-style:none;
+}
+.ds-legend--tight{gap:8px;flex-basis:140px}
+.ds-legend > li,
+.ds-legend__item{display:flex;align-items:center;gap:10px;min-width:0}
+.ds-legend__dot{
+  display:inline-block;flex:none;width:15px;height:15px;
+  border-radius:50%;background:var(--ds-accent,var(--ds-gray));
+}
+.ds-legend--tight .ds-legend__dot{width:12px;height:12px}
+.ds-legend__label{
+  flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--ds-ink-2);
+}
+.ds-legend__value{font-weight:400;white-space:nowrap;color:var(--ds-ink);font-variant-numeric:tabular-nums}
+
+
+/* =====================================================================
+   BARS - horizontal bar list: label | track | value
+   ---------------------------------------------------------------------
+   <div class="ds-bars">
+     <div class="ds-bar" data-ds-tip="คอมพิวเตอร์ / Notebook: 32 ใบ (25.0%)">
+       <span class="ds-bar__label">คอมพิวเตอร์ / Notebook</span>
+       <span class="ds-bar__track"><span class="ds-bar__fill" style="width:100%;background:var(--ds-blue)"></span></span>
+       <b class="ds-bar__value ds-num">32</b>
+     </div>
+   </div>
+   Built by DS.charts.bars: fill width is relative to the largest item.
+   Label column 132px (100px <=620). Hover brightens the fill.
+   ===================================================================== */
+.ds-bars{display:flex;flex-direction:column;gap:12px;padding-top:2px}
+.ds-bar{display:grid;grid-template-columns:132px 1fr 28px;gap:10px;align-items:center}
+.ds-bar__label{
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:13px;color:var(--ds-ink-2);
+}
+.ds-bar__track{display:block;height:12px;overflow:hidden;border-radius:var(--ds-r-pill);background:var(--ds-track)}
+.ds-bar__fill{display:block;height:100%;border-radius:var(--ds-r-pill);background:var(--ds-accent,var(--ds-primary))}
+.ds-bar__value{text-align:right;font-weight:400;font-variant-numeric:tabular-nums}
+.ds-bar:hover .ds-bar__fill,
+.ds-bar:focus-visible .ds-bar__fill{filter:brightness(1.1)}
+.ds-bar:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px;border-radius:var(--ds-r-sm)}
+
+
+/* =====================================================================
+   PROGRESS - one value on a bar track (new; same look as ds-bar__track)
+   ---------------------------------------------------------------------
+   <div class="ds-progress" role="progressbar" aria-label="ความคืบหน้างานซ่อม"
+        aria-valuemin="0" aria-valuemax="100" aria-valuenow="62">
+     <span class="ds-progress__fill" style="width:62%"></span>
+   </div>
+   or native:  <progress class="ds-progress" value="62" max="100">62%</progress>
+   Width: inline width:% or style="--ds-value:62%". Color: --ds-accent on
+   the .ds-progress (default primary blue), e.g. style="--ds-accent:var(--ds-green)".
+   ===================================================================== */
+.ds-progress{
+  display:block;width:100%;height:12px;margin:0;padding:0;border:0;overflow:hidden;
+  -webkit-appearance:none;appearance:none;vertical-align:middle;
+  border-radius:var(--ds-r-pill);background:var(--ds-track);color:var(--ds-accent,var(--ds-primary));
+}
+.ds-progress__fill{
+  display:block;width:var(--ds-value,0%);max-width:100%;height:100%;
+  border-radius:inherit;background:currentColor;transition:width var(--ds-dur);
+}
+.ds-progress::-webkit-progress-bar{border-radius:var(--ds-r-pill);background:var(--ds-track)}
+.ds-progress::-webkit-progress-value{border-radius:var(--ds-r-pill);background:currentColor}
+.ds-progress::-moz-progress-bar{border-radius:var(--ds-r-pill);background:currentColor}
+
+
+/* =====================================================================
+   QUICK ACTIONS - colored 2-column tile buttons (1 column <=400)
+   ---------------------------------------------------------------------
+   <div class="ds-quick">
+     <a class="ds-quick__btn" href="form.html" style="background:var(--ds-blue)">
+       <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-plus"></use></svg>
+       <span>แจ้งซ่อมใหม่<small class="ds-quick__sub">สร้างคำขอแจ้งซ่อม</small></span>
+     </a>
+     <button class="ds-quick__btn" type="button" data-ds-open="dlgNew" style="--ds-accent:var(--ds-green)">...</button>
+   </div>
+   Navigation = <a href>, in-page action = <button type="button">.
+   Tile color only through an inline token (blue / green / orange / purple).
+   FIX (A8): explicit reset instead of all:unset, so [hidden], forced
+     colors and host a:hover rules cannot break the tile.
+   ===================================================================== */
+.ds-quick{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ds-quick__btn{
+  box-sizing:border-box;-webkit-appearance:none;appearance:none;
+  display:flex;align-items:center;gap:10px;min-width:0;margin:0;padding:10px;border:0;
+  border-radius:var(--ds-r-md);background:var(--ds-accent,var(--ds-primary));color:var(--ds-on-color);
+  font:inherit;font-size:var(--ds-fs-sm);font-weight:500;line-height:1.25;
+  text-align:start;text-decoration:none;cursor:pointer;
+}
+/* AA: hover darkens (the original brightened, which dropped white text under 4.5:1) */
+.ds-quick__btn:hover{filter:brightness(.92);color:var(--ds-on-color);text-decoration:none}
+.ds-quick__btn:focus-visible{outline:2px solid var(--ds-ink);outline-offset:2px}
+.ds-quick__btn:disabled,
+.ds-quick__btn[aria-disabled="true"]{opacity:.55;filter:none;cursor:not-allowed}
+.ds-quick__btn .ds-ic{width:26px;height:26px;stroke-width:2}
+.ds-quick__sub{display:block;font-size:11px;font-weight:300}   /* AA: no .92 opacity */
+
+
+/* =====================================================================
+   NOTES - notification list: round colored icon + text + time
+   ---------------------------------------------------------------------
+   <ul class="ds-notes">
+     <li class="ds-notes__item">
+       <span class="ds-notes__icon" style="background:var(--ds-red)">
+         <svg class="ds-ic ds-ic--sm" aria-hidden="true"><use href="#ds-i-bell"></use></svg></span>
+       <span>มีงานค้างเกินกำหนด 9 รายการ
+         <small class="ds-notes__time ds-num">15/05/2568 09:00</small></span>
+     </li>
+   </ul>
+   Linked + unread (the topbar notifications popover, see 5.9b):
+     <li class="ds-notes__item is-unread"> icon
+       <span><a class="ds-notes__link" href="list.html?status=overdue">มีงานค้างเกินกำหนด 9 รายการ</a>
+         <small class="ds-notes__time ds-num">15/05/2568 09:00</small></span></li>
+   The link covers the whole row (stretched ::before). .is-unread = tinted
+   row + medium-weight text + a blue dot on the right.
+   ===================================================================== */
+.ds-notes{display:flex;flex-direction:column;gap:9px;margin:0;padding:0;list-style:none}
+.ds-notes__item{
+  position:relative;
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:var(--ds-fs-sm);line-height:1.35;overflow-wrap:anywhere;
+}
+.ds-notes__icon{
+  display:grid;place-items:center;flex:none;width:28px;height:28px;
+  border-radius:50%;background:var(--ds-accent,var(--ds-primary));color:var(--ds-on-color);
+}
+.ds-notes__icon .ds-ic{width:16px;height:16px;stroke-width:2.4}
+.ds-notes__time{display:block;font-size:11px;color:var(--ds-ink-3);font-variant-numeric:tabular-nums}
+.ds-notes__link{color:var(--ds-ink);text-decoration:none;border-radius:var(--ds-r-xs)}
+.ds-notes__link::before{content:"";position:absolute;inset:0}    /* whole row clickable */
+.ds-notes__link:hover{color:var(--ds-ink);text-decoration:underline}
+.ds-notes__link:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+.ds-notes__item.is-unread{background:var(--ds-info-bg)}
+.ds-notes__item.is-unread .ds-notes__link{font-weight:500}
+.ds-notes__item.is-unread .ds-notes__time{color:var(--ds-ink-2)}   /* AA on the tint (dark) */
+.ds-notes__item.is-unread::after{
+  content:"";flex:none;width:8px;height:8px;margin:5px 0 0 auto;
+  border-radius:50%;background:var(--ds-link);
+}
+
+
+/* =====================================================================
+   RECENT - compact list: id link | name | date | status pill
+   ---------------------------------------------------------------------
+   <ul class="ds-recent">
+     <li class="ds-recent__item">
+       <a class="ds-id-link ds-num" href="detail.html?id=SR-202505-0152">SR-202505-0152</a>
+       <span class="ds-recent__name" title="เครื่องปรับอากาศ ชั้น 3 (ไม่เย็น)">เครื่องปรับอากาศ ชั้น 3</span>
+       <time class="ds-recent__time ds-num" datetime="2025-05-15">15/05/2568</time>
+       <span class="ds-pill ds-pill--pending">รอดำเนินการ</span>
+     </li>
+   </ul>
+   Keep this child order (id, name, time, status). Every row, including
+   the last one, keeps its bottom rule (as in the original).
+   Default = the original: one line per item at every width.
+   Opt-in .ds-recent--reflow (<ul class="ds-recent ds-recent--reflow">):
+     the list becomes a size container; when it is narrower than 360px
+     (e.g. the 3-column dash-b row at 1281-~1600px, phones) each item
+     reflows to two lines - id + name / date + status - so the name is
+     not cut to a few characters. Wider lists keep the 1-line row.
+   ===================================================================== */
+.ds-recent{margin:0;padding:0;list-style:none}
+.ds-recent--reflow{container:ds-recent / inline-size}
+.ds-recent__item{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:7px;align-items:center;
+  padding:11px 0;border-bottom:1px solid var(--ds-line);font-size:var(--ds-fs-xs);
+}
+.ds-recent__name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ds-recent__time{color:var(--ds-ink-2);font-variant-numeric:tabular-nums}
+
+
+/* =====================================================================
+   PERSON - avatar + name + role/contact (assignee, requester, commenter)
+   ---------------------------------------------------------------------
+   <div class="ds-person">
+     <span class="ds-avatar" aria-hidden="true">ว</span>
+     <span class="ds-person__body"><b class="ds-person__name">วิชัย ช่างเย็น</b>
+       <small class="ds-person__meta">ช่างเครื่องปรับอากาศ (TECHNICIAN)</small></span>
+   </div>
+   Unlike ds-user__meta (topbar) the text stays visible at every width.
+   ===================================================================== */
+.ds-person{display:flex;align-items:center;gap:10px;min-width:0;margin:0}
+.ds-person > .ds-avatar{flex:none}
+.ds-person__body{display:flex;flex-direction:column;min-width:0;line-height:1.5}
+.ds-person__name{font-size:13px;font-weight:500;color:var(--ds-ink);overflow-wrap:anywhere}
+.ds-person__meta{font-size:11.5px;font-weight:300;color:var(--ds-ink-3);overflow-wrap:anywhere}
+
+
+/* =====================================================================
+   RESPONSIVE - part 02 blocks (same breakpoints as the original)
+   ===================================================================== */
+@media (max-width:1280px){
+  .ds-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ds-kpis--4{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:900px){
+  .ds-hero-row{grid-template-columns:minmax(0,1fr)}
+  .ds-hero{padding:20px}
+  .ds-hero__quote{display:none}
+  .ds-hero__title,
+  .ds-hero__lead{max-width:none}
+  .ds-hero__title{font-size:22px}
+}
+@media (max-width:620px){
+  .ds-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ds-kpi{grid-template-columns:44px minmax(0,1fr)}
+  .ds-kpi__icon{width:44px;height:44px}
+  .ds-kpi__value{font-size:24px}
+  .ds-bar{grid-template-columns:100px 1fr 28px}
+  /* opt-in (not the default: on the dashboard the title wraps instead, as
+     in the original): tools drop under the title, right-aligned */
+  .ds-panel__head--wrap{flex-wrap:wrap;row-gap:8px}
+  .ds-panel__head--wrap > .ds-panel__tools{flex-wrap:wrap}
+}
+@media (max-width:400px){
+  .ds-kpis{grid-template-columns:minmax(0,1fr)}
+  .ds-quick{grid-template-columns:minmax(0,1fr)}
+}
+
+/* Opt-in .ds-hero--fit: hide the hero quote before it can touch the
+   title / lead. Measured on the original: the space between the lead and
+   the quote drops under ~40px once the hero is narrower than ~690px and
+   the two overlap under ~600px. 620px content box = 684px hero (~1225px
+   viewport in the dashboard layout). Browsers without container queries
+   fall back to hiding it at <=1280px. The @container rule only matches
+   inside the named container, i.e. inside .ds-hero--fit. */
+@container ds-hero (max-width:620px){
+  .ds-hero__quote{display:none}
+}
+@supports not (container-type:inline-size){
+  @media (max-width:1280px){ .ds-hero > .ds-hero__quote{display:none} }
+}
+
+/* Opt-in .ds-recent--reflow: narrow list -> 2-line items (see RECENT).
+   Only matches inside the named container, i.e. inside .ds-recent--reflow. */
+@container ds-recent (max-width:360px){
+  .ds-recent__item{grid-template-columns:auto minmax(0,1fr);gap:3px 7px;justify-items:start}
+  .ds-recent__name{justify-self:stretch}
+}
+
+
+/* =====================================================================
+   FORCED COLORS (Windows High Contrast) - keep data colors meaningful
+   (system color keywords are allowed here; they are not theme colors)
+   ===================================================================== */
+@media (forced-colors:active){
+  .ds-chart__svg,
+  .ds-legend__dot,
+  .ds-bar__fill,
+  .ds-progress,
+  .ds-kpi__icon,
+  .ds-quick__btn,
+  .ds-notes__icon{forced-color-adjust:none}
+  .ds-bar__track{border:1px solid CanvasText}
+  .ds-hero__art{display:none}
+  .ds-notes__item.is-unread::after{forced-color-adjust:none;background:Highlight}
+}
+
+
+/* =====================================================================
+   PRINT - part 02 blocks (part 01 already forces the light tokens and
+   drops --ds-shadow). Navy blocks print as outlined light cards; data
+   colors are kept.
+   ===================================================================== */
+@media print{
+  .ds-hero,
+  .ds-datecard{background:none;color:var(--ds-ink);border:1px solid var(--ds-line)}
+  .ds-hero__art{display:none}
+  .ds-hero__lead,
+  .ds-datecard__date,
+  .ds-datecard__place{color:var(--ds-ink-2)}
+  .ds-datecard__date b,
+  .ds-datecard__date strong{color:var(--ds-ink)}
+  .ds-hero-row,
+  .ds-kpi,
+  .ds-panel{break-inside:avoid}
+  .ds-kpi__icon,
+  .ds-chart__svg,
+  .ds-legend__dot,
+  .ds-bar__fill,
+  .ds-progress,
+  .ds-quick__btn,
+  .ds-notes__icon{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+
+/* =====================================================================
+   ds-ui.css  PART 03 / 04 : data & forms
+   ---------------------------------------------------------------------
+   Blocks: ds-table-wrap, ds-table, ds-id-link, ds-pager, ds-pill,
+           ds-badge, ds-btn, ds-link-btn, ds-form, ds-field, ds-input,
+           ds-select, ds-textarea, ds-check, ds-choice-group,
+           ds-form-section, ds-file, ds-input-group, ds-form-actions,
+           ds-filters; then touch targets, forced colors, print and the
+           responsive rules (620 / 400) for these blocks.
+   Rules:  colors only via --ds-* tokens; no bare element selectors;
+           values of blocks that exist in the original dashboard (table,
+           pill, badge, btn, .more, .sel, dialog inputs) are copied 1:1.
+   Component variables (set on the element, never on :root):
+           --ds-table-min-w (540px), --ds-btn-bg, --ds-btn-ink.
+   ===================================================================== */
+
+/* token --ds-shadow-up (used by ds-form-actions) is defined in sections 1-2 */
+
+
+/* =====================================================================
+   TABLE  (ds-table-wrap, ds-table, ds-id-link)
+   original: .tbl-wrap, table/th/td (now scoped), td.nw, a.id, .empty
+   ---------------------------------------------------------------------
+   <div class="ds-table-wrap" role="region" aria-labelledby="tblTitle" tabindex="0">
+     <table class="ds-table">
+       <caption class="ds-sr-only">งานที่ต้องติดตามวันนี้</caption>
+       <thead><tr>
+         <th class="ds-table__check"><input type="checkbox" aria-label="เลือกทั้งหมด"></th>
+         <th aria-sort="ascending"><button class="ds-table__sort" type="button">เลขที่แจ้งซ่อม</button></th>
+         <th aria-sort="none"><button class="ds-table__sort" type="button">กำหนดเสร็จ</button></th>
+         <th>สถานะ</th>
+         <th class="ds-table__actions">การดำเนินการ</th>
+       </tr></thead>
+       <tbody>
+         <tr>
+           <td class="ds-table__check"><input type="checkbox" aria-label="เลือก SR-202505-0025"></td>
+           <td><a class="ds-id-link" href="detail.html?id=SR-202505-0025">SR-202505-0025</a></td>
+           <td class="ds-num ds-nowrap">20/05/2025</td>
+           <td><span class="ds-pill ds-pill--pending">รอดำเนินการ</span></td>
+           <td class="ds-table__actions"><a class="ds-btn" href="detail.html?id=SR-202505-0025">ดูรายละเอียด</a></td>
+         </tr>
+         <tr><td class="ds-table__empty" colspan="5">ไม่พบรายการ</td></tr>
+       </tbody>
+     </table>
+   </div>
+   Selected row: <tr class="is-selected"> (aria-selected="true" in role=grid).  Narrow tables: style="--ds-table-min-w:0".
+   Row hover highlight (list pages, opt-in): class="ds-table ds-table--hover".
+   aria-sort values: ascending | descending | none (JS updates them).
+   ===================================================================== */
+.ds-table-wrap{overflow-x:auto;max-width:100%}
+.ds-table-wrap:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+
+.ds-table{
+  width:100%;min-width:var(--ds-table-min-w,540px);margin:0;
+  border-collapse:collapse;border-spacing:0;
+  font-size:12px;font-weight:300;line-height:1.5;color:var(--ds-ink);
+}
+/* :where() keeps th/td at (0,1,0) so __check / __empty / __actions win */
+.ds-table :where(th){
+  padding:8px 6px;
+  background:var(--ds-surface-2);color:var(--ds-ink-2);
+  font-size:11.5px;font-weight:500;text-align:left;vertical-align:middle;
+  white-space:nowrap;
+}
+.ds-table :where(td){
+  padding:8px 6px;
+  border-bottom:1px solid var(--ds-line);   /* last row keeps its border (original) */
+  vertical-align:middle;
+}
+/* opt-in row highlight (the original table has none): <table class="ds-table ds-table--hover"> */
+@media (hover:hover){
+  .ds-table--hover > tbody > tr:hover > td:not(.ds-table__empty){background:var(--ds-surface-2)}
+}
+/* short tables that should not force the 540px scroll width: ds-table--fluid */
+.ds-table--fluid{--ds-table-min-w:0}
+/* ds-table--stack: each row becomes a card at <=620px (see RESPONSIVE below);
+   put data-label="หัวคอลัมน์" on every <td>. */
+.ds-table > tbody > tr.is-selected > td,
+.ds-table > tbody > tr[aria-selected="true"] > td{background:var(--ds-progress-bg)}
+
+/* checkbox column (header "select all" + row checkboxes) */
+.ds-table__check{width:36px;text-align:center;accent-color:var(--ds-primary)}
+.ds-table__check > input[type="checkbox"]{
+  width:16px;height:16px;margin:0;vertical-align:middle;cursor:pointer;
+}
+.ds-table__check > input[type="checkbox"]:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+
+/* row actions: keep buttons on one line, 6px apart */
+.ds-table__actions{white-space:nowrap}
+.ds-table__actions > :not(:first-child){margin-inline-start:6px}
+
+/* sortable header: <th aria-sort="…"><button class="ds-table__sort"> */
+.ds-table__sort{
+  -webkit-appearance:none;appearance:none;
+  display:inline-flex;align-items:center;gap:6px;
+  margin:0;padding:0;border:0;border-radius:var(--ds-r-sm);
+  background:none;color:inherit;
+  font:inherit;text-align:inherit;white-space:nowrap;cursor:pointer;
+}
+.ds-table__sort:hover{color:var(--ds-ink)}
+.ds-table__sort:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+/* arrow indicator drawn from currentColor: up + down triangles (unsorted) */
+.ds-table__sort::after{
+  content:"";flex:none;width:8px;height:10px;opacity:.45;
+  background:
+    linear-gradient(to top left,currentColor 50%,transparent 50%) 0 0/4px 4px no-repeat,
+    linear-gradient(to top right,currentColor 50%,transparent 50%) 4px 0/4px 4px no-repeat,
+    linear-gradient(to bottom left,currentColor 50%,transparent 50%) 0 6px/4px 4px no-repeat,
+    linear-gradient(to bottom right,currentColor 50%,transparent 50%) 4px 6px/4px 4px no-repeat;
+}
+[aria-sort="ascending"] > .ds-table__sort,
+[aria-sort="descending"] > .ds-table__sort{color:var(--ds-ink)}
+[aria-sort="ascending"] > .ds-table__sort::after{opacity:1;background-size:4px 4px,4px 4px,0 0,0 0}
+[aria-sort="descending"] > .ds-table__sort::after{opacity:1;background-size:0 0,0 0,4px 4px,4px 4px}
+
+/* "no rows" cell (original .empty) - put it on the <td colspan> */
+.ds-table__empty{padding:18px;color:var(--ds-ink-3);text-align:center}
+
+/* record id link (original a.id). May be a <button> when it opens a dialog. */
+.ds-id-link{
+  -webkit-appearance:none;appearance:none;
+  position:relative;margin:0;padding:0;border:0;background:none;
+  font:inherit;font-variant-numeric:tabular-nums;
+  color:var(--ds-link);text-decoration:none;white-space:nowrap;cursor:pointer;
+}
+.ds-id-link:hover{color:var(--ds-link);text-decoration:underline}
+.ds-id-link:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+
+
+/* =====================================================================
+   PAGER  (ds-pager)  - new; sits under a ds-table-wrap
+   ---------------------------------------------------------------------
+   <nav class="ds-pager" aria-label="เปลี่ยนหน้า">
+     <p class="ds-pager__info">แสดง 1–10 จาก 58 รายการ</p>
+     <ul class="ds-pager__list">
+       <li><button class="ds-pager__btn" type="button" disabled aria-label="หน้าก่อนหน้า">
+             <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-chevron-left"></use></svg></button></li>
+       <li><a class="ds-pager__btn" href="?page=1" aria-current="page">1</a></li>
+       <li><a class="ds-pager__btn" href="?page=2">2</a></li>
+       <li aria-hidden="true">…</li>
+       <li><a class="ds-pager__btn" href="?page=2" aria-label="หน้าถัดไป">
+             <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-chevron-right"></use></svg></a></li>
+     </ul>
+     <label class="ds-pager__size">แสดง
+       <select class="ds-select ds-select--sm"><option>10</option><option>25</option></select> รายการ</label>
+   </nav>
+   Disabled link: <a class="ds-pager__btn" aria-disabled="true">  (no href)
+   ===================================================================== */
+.ds-pager{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+  gap:8px 12px;margin:0;
+  font-size:12.5px;font-weight:300;line-height:1.5;color:var(--ds-ink-2);
+}
+.ds-table-wrap + .ds-pager{margin-top:12px}
+.ds-pager__info{margin:0;font-size:12.5px;color:var(--ds-ink-2)}
+.ds-pager__list{
+  display:flex;flex-wrap:wrap;align-items:center;gap:4px;
+  margin:0;padding:0;list-style:none;
+}
+.ds-pager__btn{
+  -webkit-appearance:none;appearance:none;box-sizing:border-box;
+  position:relative;display:inline-flex;align-items:center;justify-content:center;
+  min-width:32px;height:32px;margin:0;padding:0 8px;
+  border:1px solid var(--ds-line);border-radius:var(--ds-r-md);
+  background:var(--ds-surface);color:var(--ds-ink-2);
+  font-family:inherit;font-size:12.5px;font-weight:400;line-height:1;
+  font-variant-numeric:tabular-nums;text-decoration:none;white-space:nowrap;cursor:pointer;
+}
+.ds-pager__btn:hover:not(:disabled){background:var(--ds-surface-2);color:var(--ds-ink);text-decoration:none}
+.ds-pager__btn:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+.ds-pager__btn[aria-current="page"],
+.ds-pager__btn[aria-current="true"],
+.ds-pager__btn[aria-current="page"]:hover,          /* 0,3,0: beats the hover rule above */
+.ds-pager__btn[aria-current="true"]:hover{
+  background:var(--ds-primary);border-color:var(--ds-primary);
+  color:var(--ds-on-color);font-weight:500;cursor:default;
+}
+.ds-pager__btn:disabled,
+.ds-pager__btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+.ds-pager__btn[aria-disabled="true"]{pointer-events:none}
+.ds-pager__btn .ds-ic{width:16px;height:16px}
+.ds-pager__size{
+  display:inline-flex;align-items:center;gap:8px;margin:0;
+  font-size:12.5px;color:var(--ds-ink-2);white-space:nowrap;
+}
+/* "…" between page numbers: <li class="ds-pager__gap" aria-hidden="true">…</li> */
+.ds-pager__gap,
+.ds-pager__list > li[aria-hidden="true"]{
+  min-width:20px;text-align:center;
+  font-size:12.5px;line-height:32px;color:var(--ds-ink-3);
+}
+
+
+/* =====================================================================
+   STATUS PILL  (ds-pill)  - original .pill + .pending/.progress/.done/.cancel
+   ---------------------------------------------------------------------
+   <span class="ds-pill ds-pill--pending">รอดำเนินการ</span>
+   <span class="ds-pill ds-pill--progress">กำลังดำเนินการ</span>
+   <span class="ds-pill ds-pill--done">เสร็จสิ้น</span>
+   <span class="ds-pill ds-pill--cancel">ยกเลิก</span>
+   <span class="ds-pill ds-pill--info">รออะไหล่</span>
+   <span class="ds-pill ds-pill--neutral">ฉบับร่าง</span>   (neutral is also the default)
+   ===================================================================== */
+.ds-pill{
+  display:inline-block;padding:2px 9px;border-radius:var(--ds-r-pill);
+  background:var(--ds-neutral-bg);color:var(--ds-neutral-ink);
+  font-size:11.5px;font-weight:400;line-height:1.5;white-space:nowrap;
+}
+.ds-pill--pending{background:var(--ds-pending-bg);color:var(--ds-pending-ink)}
+.ds-pill--progress{background:var(--ds-progress-bg);color:var(--ds-progress-ink)}
+.ds-pill--done{background:var(--ds-done-bg);color:var(--ds-done-ink)}
+.ds-pill--cancel{background:var(--ds-cancel-bg);color:var(--ds-cancel-ink)}
+.ds-pill--info{background:var(--ds-info-bg);color:var(--ds-info-ink)}
+.ds-pill--neutral{background:var(--ds-neutral-bg);color:var(--ds-neutral-ink)}
+
+
+/* =====================================================================
+   BADGE  (ds-badge)  - original .badge (red counter beside a panel title)
+   ---------------------------------------------------------------------
+   <h3 class="ds-panel__title">งานที่ต้องติดตามวันนี้ <span class="ds-badge">3</span></h3>
+   <span class="ds-badge ds-badge--neutral">12</span>
+   Red stays red in dark mode (--ds-red-strong, not --ds-bad): the -strong
+   fill keeps the white count AA (5.5:1; plain --ds-red is 4.0:1).
+   ===================================================================== */
+.ds-badge{
+  box-sizing:border-box;display:inline-grid;place-items:center;
+  min-width:24px;height:24px;padding:0 7px;border-radius:var(--ds-r-pill);
+  background:var(--ds-red-strong);color:var(--ds-on-color);   /* -strong: AA with white */
+  font-size:13px;font-weight:500;line-height:1.5;font-variant-numeric:tabular-nums;
+  vertical-align:middle;
+}
+.ds-badge--neutral{background:var(--ds-neutral-bg);color:var(--ds-neutral-ink)}
+
+
+/* =====================================================================
+   BUTTONS  (ds-btn)  - original .btn / .btn.ghost
+   ---------------------------------------------------------------------
+   <button class="ds-btn" type="button">บันทึก</button>
+   <a class="ds-btn" href="form.html">
+     <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-plus"></use></svg>แจ้งซ่อมใหม่</a>
+   <button class="ds-btn ds-btn--ghost" type="button">ยกเลิก</button>
+   <button class="ds-btn ds-btn--danger" type="button">ลบรายการ</button>
+   <button class="ds-btn ds-btn--success" type="button">ปิดงาน</button>
+   <button class="ds-btn ds-btn--lg ds-btn--block" type="submit">เข้าสู่ระบบ</button>
+   <button class="ds-btn ds-btn--ghost ds-btn--icon" type="button" aria-label="แก้ไข">
+     <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-edit"></use></svg></button>
+   Data-driven color: style="--ds-btn-bg:var(--ds-purple)"
+   Heights: default 30.75px (12.5px text); ghost 32.75px (+1px border, as in
+   the original); --lg 39px = same height as ds-input / ds-select.
+   Icons inside a button are always 16px (18px in --lg).
+   ===================================================================== */
+.ds-btn{
+  --ds-btn-bg:var(--ds-primary);
+  --ds-btn-ink:var(--ds-on-color);
+  -webkit-appearance:none;appearance:none;box-sizing:border-box;
+  position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  margin:0;padding:6px 9px;border:0;border-radius:var(--ds-r-sm);
+  background:var(--ds-btn-bg);color:var(--ds-btn-ink);
+  font-family:inherit;font-size:12.5px;font-weight:400;line-height:1.5;
+  text-align:center;text-decoration:none;white-space:nowrap;vertical-align:middle;
+  cursor:pointer;
+}
+/* AA: filled buttons darken on hover (brightening dropped white text under
+   4.5:1); ghost buttons (solid surface since 1.0.2 - brighten cannot lift
+   white) tint to surface-2 instead */
+.ds-btn:hover{color:var(--ds-btn-ink);text-decoration:none;filter:brightness(.92)}
+.ds-btn--ghost:not(:disabled):hover{filter:none;background:var(--ds-surface-2)}
+.ds-btn:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+.ds-btn:disabled,
+.ds-btn[aria-disabled="true"]{opacity:.5;cursor:not-allowed;filter:none}
+.ds-btn[aria-disabled="true"]{pointer-events:none}
+.ds-btn .ds-ic{width:16px;height:16px}
+/* toggle button (aria-pressed) and busy button (aria-busy; keep it enabled-looking) */
+.ds-btn--ghost[aria-pressed="true"]{--ds-btn-ink:var(--ds-ink);background:var(--ds-surface-2);border-color:var(--ds-ink-3)}
+.ds-btn[aria-busy="true"],
+.ds-btn[aria-busy="true"]:disabled{opacity:1;cursor:progress;filter:none}
+
+.ds-btn--ghost{
+  --ds-btn-bg:var(--ds-surface);   /* 1.0.2: was transparent - vanished on the page background (ds-page-head actions, ds-filters) */
+  --ds-btn-ink:var(--ds-ink-2);
+  border:1px solid var(--ds-line);
+}
+.ds-btn--danger{--ds-btn-bg:var(--ds-red-strong)}     /* AA with white text */
+.ds-btn--success{--ds-btn-bg:var(--ds-green-strong)}
+.ds-btn--lg{gap:8px;padding:9px 16px;border-radius:var(--ds-r-md);font-size:14px}
+.ds-btn--lg.ds-btn--ghost{padding:8px 15px}          /* border included: still 39px */
+.ds-btn--lg .ds-ic{width:18px;height:18px}
+.ds-btn--block{display:flex;width:100%}
+/* square icon-only button: padding = (line box - icon) / 2 + vertical padding */
+.ds-btn--icon{gap:0;padding:calc(.75em - 2px)}      /* 30.75 x 30.75 */
+.ds-btn--lg.ds-btn--icon{padding:.75em}              /* 39 x 39 */
+.ds-btn--lg.ds-btn--ghost.ds-btn--icon{padding:calc(.75em - 1px)}
+
+
+/* =====================================================================
+   LINK BUTTON  (ds-link-btn)  - original .more ("ดูทั้งหมด →")
+   ---------------------------------------------------------------------
+   <a class="ds-link-btn" href="list.html">ดูทั้งหมด <span aria-hidden="true">→</span></a>
+   <button class="ds-link-btn" type="button">ล้างตัวกรอง</button>
+   Explicit reset instead of the original all:unset, so [hidden] and
+   forced-colors keep working.
+   ===================================================================== */
+.ds-link-btn{
+  -webkit-appearance:none;appearance:none;
+  position:relative;display:inline-flex;align-items:center;gap:4px;
+  margin:0;padding:0;border:0;border-radius:0;background:none;
+  color:var(--ds-link);
+  font-family:inherit;font-size:12.5px;font-weight:300;line-height:1.5;
+  text-align:inherit;text-decoration:none;white-space:nowrap;cursor:pointer;
+}
+.ds-link-btn:hover{color:var(--ds-link);text-decoration:underline}
+.ds-link-btn:focus-visible{outline:2px solid var(--ds-focus);outline-offset:0}
+.ds-link-btn:disabled,
+.ds-link-btn[aria-disabled="true"]{color:var(--ds-ink-3);text-decoration:none;cursor:not-allowed}
+.ds-link-btn .ds-ic{width:16px;height:16px}
+
+
+/* =====================================================================
+   FORM GRID & FIELDS  (ds-form, ds-field)
+   field look = the original dialog label (.dlg label: column, gap 4px,
+   12.5px, ink-2); ds-form is new (2 columns, 1 column at <=620px)
+   ---------------------------------------------------------------------
+   <form class="ds-form" action="save.php" method="post">
+     <div class="ds-field">
+       <label class="ds-field__label" for="fTitle">เรื่อง / อาการ
+         <span class="ds-field__req" aria-hidden="true">*</span></label>
+       <input class="ds-input" id="fTitle" name="title" required
+              aria-describedby="fTitleHint" placeholder="เช่น เครื่องพิมพ์ชั้น 2 กระดาษติด">
+       <p class="ds-field__hint" id="fTitleHint">อธิบายอาการสั้น ๆ</p>
+     </div>
+     <div class="ds-field">
+       <label class="ds-field__label" for="fCat">ประเภทครุภัณฑ์</label>
+       <select class="ds-select" id="fCat" name="cat"><option>คอมพิวเตอร์</option></select>
+     </div>
+     <div class="ds-field ds-field--full">
+       <label class="ds-field__label" for="fDetail">รายละเอียด</label>
+       <textarea class="ds-textarea" id="fDetail" rows="4"
+                 aria-invalid="true" aria-describedby="fDetailErr"></textarea>
+       <p class="ds-field__error" id="fDetailErr">กรุณากรอกรายละเอียด</p>
+     </div>
+   </form>
+   Compact (dialog) field, identical to the original dialog:
+     <label class="ds-field"><span class="ds-field__label">ผู้แจ้ง</span>
+       <input class="ds-input" name="by"></label>
+   Radio / checkbox group:
+     <fieldset class="ds-field"><legend class="ds-field__label">ความเร่งด่วน</legend>
+       <div class="ds-choice-group"> ...ds-check... </div></fieldset>
+   ===================================================================== */
+.ds-form{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;align-items:start;margin:0;
+}
+.ds-field{
+  display:flex;flex-direction:column;gap:4px;min-width:0;
+  margin:0;padding:0;border:0;
+  font-size:12.5px;font-weight:300;line-height:1.5;color:var(--ds-ink-2);
+}
+.ds-field--full{grid-column:1/-1}
+.ds-field__label{
+  display:block;float:none;width:auto;margin:0;padding:0;
+  font-size:12.5px;font-weight:300;line-height:1.5;color:var(--ds-ink-2);
+}
+legend.ds-field__label{padding:0 0 4px}   /* a legend is not a flex item: no gap */
+.ds-field__req{margin-inline-start:2px;color:var(--ds-bad);font-weight:500;text-decoration:none}
+.ds-field__hint{display:block;margin:0;font-size:11.5px;line-height:1.5;color:var(--ds-ink-3)}
+/* hint left + counter right: <p class="ds-field__hint ds-field__hint--split"><span>..</span><span class="ds-num">0/500</span></p> */
+.ds-field__hint--split{display:flex;justify-content:space-between;gap:8px}
+/* keep focused / scrolled-to fields clear of the sticky topbar and ds-form-actions */
+.ds-form :is(.ds-input,.ds-select,.ds-textarea,.ds-file,.ds-choice-group),
+.ds-form .ds-check > input{scroll-margin-block:80px 96px}
+.ds-field__error{
+  display:flex;align-items:flex-start;gap:4px;margin:0;
+  font-size:11.5px;font-weight:400;line-height:1.5;color:var(--ds-bad);
+}
+.ds-field__error .ds-ic{width:14px;height:14px;margin-top:calc(.75em - 7px)}
+
+
+/* =====================================================================
+   CONTROLS  (ds-input, ds-select, ds-textarea, ds-input--sm, ds-select--sm)
+   base = original .dlg input/.dlg select; --sm = original .sel
+   ---------------------------------------------------------------------
+   <input class="ds-input" type="text" name="q" placeholder="ค้นหา...">
+   <select class="ds-select" name="dept"><option>ฝ่ายบริหาร</option></select>
+   <textarea class="ds-textarea" name="detail" rows="4"></textarea>
+   <select class="ds-select ds-select--sm" aria-label="ช่วงเวลา"><option>เดือนนี้</option></select>
+   States: aria-invalid="true" | disabled | readonly.
+   Base: 39px tall, 14px text, block, full width.
+   --sm: 12.5px text, inline width, surface background (panel-head filter).
+   FIX (visual, intentional): the select arrow is drawn with gradients from
+   --ds-ink-2 (appearance:none) instead of the native arrow, so it follows
+   the theme and looks the same in every browser; the box keeps the
+   original size. Native appearance comes back in forced-colors mode.
+   AA pass: borders use --ds-line-strong (3:1 against bg / surface /
+   surface-2; --ds-line is 1.3:1) and placeholders use --ds-ink-3 (4.5:1;
+   the browser default grey is ~2.5:1).
+   ===================================================================== */
+.ds-input,.ds-select,.ds-textarea{
+  -webkit-appearance:none;appearance:none;box-sizing:border-box;
+  display:block;width:100%;min-width:0;min-height:calc(1.5em + 18px);
+  margin:0;padding:8px 10px;
+  border:1px solid var(--ds-line-strong);border-radius:var(--ds-r-md);
+  background-color:var(--ds-surface-2);color:var(--ds-ink);
+  font-family:inherit;font-size:14px;font-weight:300;line-height:1.5;
+  box-shadow:none;
+}
+.ds-textarea{min-height:calc(4.5em + 18px);resize:vertical}
+/* ONE focus ring: the border itself turns blue and thickens to 2px (border +
+   1px inset-free shadow) instead of a separate outline 2px outside the grey
+   border (that looked like two lines). The transparent outline is only
+   painted in Windows High Contrast, where box-shadow is dropped. */
+.ds-input:focus,.ds-select:focus,.ds-textarea:focus{
+  outline:2px solid transparent;outline-offset:0;
+  border-color:var(--ds-focus);box-shadow:0 0 0 1px var(--ds-focus);
+}
+.ds-input[aria-invalid="true"],.ds-select[aria-invalid="true"],.ds-textarea[aria-invalid="true"]{
+  border-color:var(--ds-bad);
+}
+.ds-input[aria-invalid="true"]:focus,.ds-select[aria-invalid="true"]:focus,
+.ds-textarea[aria-invalid="true"]:focus{border-color:var(--ds-bad);box-shadow:0 0 0 1px var(--ds-bad)}
+.ds-input:disabled,.ds-select:disabled,.ds-textarea:disabled{
+  background-color:var(--ds-track);color:var(--ds-ink-3);opacity:1;cursor:not-allowed;
+}
+.ds-input[readonly],.ds-textarea[readonly]{background-color:var(--ds-surface);border-style:dashed}
+/* keep autofilled fields on the theme surface (Chrome paints them light blue) */
+.ds-input:-webkit-autofill{
+  -webkit-box-shadow:inset 0 0 0 100px var(--ds-surface-2);
+  box-shadow:inset 0 0 0 100px var(--ds-surface-2);
+  -webkit-text-fill-color:var(--ds-ink);caret-color:var(--ds-ink);
+}
+/* AA placeholder (4.5:1 on surface-2 in both themes); opacity:1 undoes Firefox's .54 */
+.ds-input::placeholder,.ds-textarea::placeholder,.ds-search input::placeholder{color:var(--ds-ink-3);opacity:1}
+
+.ds-select{
+  padding-inline-end:32px;
+  background-image:
+    linear-gradient(45deg,transparent 50%,var(--ds-ink-2) 50%),
+    linear-gradient(135deg,var(--ds-ink-2) 50%,transparent 50%);
+  background-position:calc(100% - 17px) 50%,calc(100% - 12px) 50%;
+  background-size:5px 5px,5px 5px;
+  background-repeat:no-repeat;
+  cursor:pointer;
+}
+.ds-select[multiple],
+.ds-select[size]:not([size="1"]){padding-inline-end:10px;background-image:none;cursor:default}
+.ds-select:disabled{cursor:not-allowed}
+
+.ds-input--sm,.ds-select--sm{
+  display:inline-block;width:auto;min-height:calc(1.5em + 10px);vertical-align:middle;
+  padding:4px 8px;
+  background-color:var(--ds-surface);color:var(--ds-ink-2);
+  font-size:12.5px;
+}
+/* 28px end padding + line-height 1.6 = the native .sel box (72 x 29.6px) */
+.ds-select--sm{
+  padding-inline-end:28px;line-height:1.6;
+  background-position:calc(100% - 13px) 50%,calc(100% - 9px) 50%;
+  background-size:4px 4px,4px 4px;
+}
+
+
+/* =====================================================================
+   CHECKBOX / RADIO  (ds-check, ds-choice-group)  - new
+   native inputs, tinted with accent-color (the box stays light in dark mode, like the original)
+   ---------------------------------------------------------------------
+   <label class="ds-check"><input type="checkbox" name="urgent"> งานด่วน</label>
+   <div class="ds-choice-group" role="radiogroup" aria-labelledby="prioLbl">
+     <label class="ds-check"><input type="radio" name="prio" value="1" checked> ปกติ</label>
+     <label class="ds-check"><input type="radio" name="prio" value="2"> ด่วน</label>
+   </div>
+   Stacked list: add aria-orientation="vertical" to the group.
+   ===================================================================== */
+.ds-check{
+  display:inline-flex;align-items:flex-start;gap:8px;min-height:24px;margin:0;
+  font-size:14px;font-weight:300;line-height:1.5;color:var(--ds-ink);
+  accent-color:var(--ds-primary);cursor:pointer;
+}
+.ds-check > input:is([type="checkbox"],[type="radio"]){
+  flex:none;width:16px;height:16px;margin:calc(.75em - 8px) 0 0;   /* centred on line 1 */
+  font-size:inherit;accent-color:var(--ds-primary);cursor:inherit;
+}
+.ds-check > input:is([type="checkbox"],[type="radio"]):focus-visible{
+  outline:2px solid var(--ds-focus);outline-offset:2px;
+}
+.ds-check > input:disabled{cursor:not-allowed}
+.ds-check:has(> input:disabled){color:var(--ds-ink-3);cursor:not-allowed}
+/* invalid state: on the input, or on the group (fieldset.ds-choice-group aria-invalid="true") */
+.ds-check > input[aria-invalid="true"]:not(:focus-visible),
+.ds-choice-group[aria-invalid="true"] .ds-check > input:not(:focus-visible){outline:2px solid var(--ds-bad);outline-offset:1px}
+
+.ds-choice-group{
+  display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px 20px;
+  min-width:0;margin:0;padding:0;border:0;
+}
+.ds-choice-group[aria-orientation="vertical"]{flex-direction:column;flex-wrap:nowrap;gap:6px}
+
+
+/* =====================================================================
+   FORM SECTION  (ds-form-section)  - new
+   a ds-panel variant (same surface, 10px radius, 14px 16px padding,
+   --ds-shadow) with a numbered, titled header
+   ---------------------------------------------------------------------
+   <section class="ds-form-section" aria-labelledby="secReq">
+     <div class="ds-form-section__head">
+       <span class="ds-form-section__num" aria-hidden="true">1</span>
+       <h3 class="ds-form-section__title" id="secReq">ข้อมูลผู้แจ้ง</h3>
+       <p class="ds-form-section__desc">ใช้ติดต่อกลับเมื่อดำเนินการเสร็จ</p>
+     </div>
+     <div class="ds-form"> ...ds-field... </div>
+   </section>
+   The number and the description are optional. Stack several sections
+   in a <div class="ds-stack"> (12px gap).
+   ===================================================================== */
+.ds-form-section{
+  min-width:0;margin:0;padding:14px 16px;border:0;
+  background:var(--ds-surface);border-radius:var(--ds-r-lg);box-shadow:var(--ds-shadow);
+}
+.ds-form-section__head{
+  display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;
+  margin:0 0 12px;padding:0 0 12px;border-bottom:1px solid var(--ds-line);
+}
+.ds-form-section__num{
+  box-sizing:border-box;display:inline-grid;place-items:center;flex:none;
+  width:24px;height:24px;border-radius:var(--ds-r-pill);
+  background:var(--ds-primary);color:var(--ds-on-color);
+  font-size:13px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums;
+}
+.ds-form-section__title{
+  flex:1 1 auto;min-width:0;margin:0;
+  font-size:16px;font-weight:500;line-height:1.5;color:var(--ds-ink);
+}
+.ds-form-section__desc{flex:1 0 100%;margin:0;font-size:12.5px;line-height:1.5;color:var(--ds-ink-3)}
+.ds-form-section__num ~ .ds-form-section__desc{padding-inline-start:34px}   /* under the title */
+
+
+/* =====================================================================
+   FILE DROP ZONE  (ds-file)  - new
+   The real <input type="file"> is stretched invisibly over the zone, so
+   click, keyboard and native drag-and-drop work without any JS. Scripts
+   may toggle .is-dragover while files are dragged over the zone.
+   ---------------------------------------------------------------------
+   <label class="ds-file">
+     <input class="ds-file__input" type="file" name="files[]" multiple accept=".pdf,.jpg,.png">
+     <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-upload"></use></svg>
+     <span class="ds-file__title">ลากไฟล์มาวางที่นี่ หรือ <span class="ds-file__link">เลือกไฟล์</span></span>
+     <span class="ds-file__hint">PDF, JPG, PNG ขนาดไม่เกิน 10 MB</span>
+   </label>
+   ===================================================================== */
+.ds-file{
+  position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;min-height:120px;margin:0;padding:20px 16px;
+  border:2px dashed var(--ds-line);border-radius:var(--ds-r-lg);
+  background:var(--ds-surface-2);color:var(--ds-ink-2);
+  font-size:12.5px;font-weight:300;line-height:1.5;text-align:center;cursor:pointer;
+  transition:border-color var(--ds-dur-fast),background-color var(--ds-dur-fast);
+}
+.ds-file:hover{border-color:var(--ds-ink-3)}
+.ds-file:focus-within{outline:2px solid var(--ds-focus);outline-offset:2px}
+.ds-file:has(.ds-file__input:focus:not(:focus-visible)){outline:0}   /* no ring after a mouse click */
+.ds-file.is-dragover{border-color:var(--ds-primary);background:var(--ds-progress-bg);color:var(--ds-progress-ink)}
+.ds-file:has(.ds-file__input[aria-invalid="true"]){border-color:var(--ds-bad)}
+.ds-file:has(.ds-file__input:disabled){opacity:.6;cursor:not-allowed}
+.ds-file__input{
+  position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;
+  opacity:0;cursor:inherit;
+}
+.ds-file .ds-ic{width:30px;height:30px;color:var(--ds-primary)}
+.ds-file__title{font-size:14px;font-weight:400;color:var(--ds-ink)}
+.ds-file__link{color:var(--ds-link);text-decoration:underline}
+.ds-file__hint{font-size:11.5px;color:var(--ds-ink-3)}
+
+
+/* selected files under a ds-file drop zone (rendered by the page script):
+   <ul class="ds-file__list" aria-label="ไฟล์ที่เลือก">
+     <li class="ds-file__item">icon (ds-ic ds-ic--sm)
+       <span class="ds-file__name" title="photo.jpg">photo.jpg</span>
+       <span class="ds-file__size ds-num">1.2 MB</span>
+       <button type="button" class="ds-btn ds-btn--ghost ds-btn--icon ds-file__remove" aria-label="ลบไฟล์ photo.jpg">x icon</button></li>
+   </ul> */
+.ds-file__list{margin:8px 0 0;padding:0;list-style:none}
+.ds-file__item{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:10px;
+  padding:8px 0;border-bottom:1px solid var(--ds-line);
+  font-size:12.5px;line-height:1.5;color:var(--ds-ink);
+}
+.ds-file__item:last-child{border-bottom:0}
+.ds-file__item > .ds-ic{color:var(--ds-ink-3)}
+.ds-file__name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ds-file__size{color:var(--ds-ink-3);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ds-file__remove{justify-self:end}
+
+
+/* =====================================================================
+   INPUT GROUP  (ds-input-group)  - new; a control joined to addons/buttons
+   ---------------------------------------------------------------------
+   <div class="ds-input-group">
+     <span class="ds-input-group__addon">฿</span>
+     <input class="ds-input" type="number" name="cost" aria-label="ค่าซ่อม">
+     <span class="ds-input-group__addon">บาท</span>
+   </div>
+   <div class="ds-input-group">
+     <input class="ds-input" type="search" name="asset" aria-label="ค้นหาครุภัณฑ์">
+     <button class="ds-btn" type="button">ค้นหา</button>
+   </div>
+   Buttons stretch to the control height; inner corners are squared.
+   ===================================================================== */
+.ds-input-group{display:flex;align-items:stretch;width:100%;min-width:0}
+.ds-input-group > .ds-input,
+.ds-input-group > .ds-select{flex:1 1 auto;width:1%;min-width:0}
+.ds-input-group > :not(:first-child){
+  margin-inline-start:-1px;border-start-start-radius:0;border-end-start-radius:0;
+}
+.ds-input-group > :not(:last-child){border-start-end-radius:0;border-end-end-radius:0}
+.ds-input-group > :focus{position:relative;z-index:1}   /* ring above the neighbour */
+.ds-input-group > .ds-btn:not(.ds-btn--icon){padding-inline:14px}
+.ds-input-group__addon{
+  box-sizing:border-box;display:flex;align-items:center;gap:6px;flex:none;
+  padding:0 10px;border:1px solid var(--ds-line-strong);border-radius:var(--ds-r-md);
+  background:var(--ds-track);color:var(--ds-ink-2);
+  font-size:14px;font-weight:300;line-height:1.5;white-space:nowrap;
+}
+.ds-input-group__addon .ds-ic{width:18px;height:18px}
+
+
+/* =====================================================================
+   FORM ACTIONS  (ds-form-actions)  - new; sticky bottom action bar
+   ---------------------------------------------------------------------
+   <form class="ds-stack" action="save.php" method="post">
+     ...ds-form-section...
+     <div class="ds-form-actions">
+       <p class="ds-form-actions__info"><span class="ds-field__req">*</span> จำเป็นต้องกรอก</p>
+       <a class="ds-btn ds-btn--ghost ds-btn--lg" href="list.html">ยกเลิก</a>
+       <button class="ds-btn ds-btn--lg" type="submit">บันทึกใบแจ้งซ่อม</button>
+     </div>
+   </form>
+   Sticks to the viewport bottom while its form scrolls; inside a ds-form
+   grid it spans every column.
+   ===================================================================== */
+.ds-form-actions{
+  position:sticky;bottom:0;z-index:5;grid-column:1/-1;
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;
+  margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid var(--ds-line);border-radius:var(--ds-r-lg) var(--ds-r-lg) 0 0;
+  background:var(--ds-surface);box-shadow:var(--ds-shadow-up);
+}
+.ds-form-actions__info{
+  margin:0;margin-inline-end:auto;
+  font-size:12.5px;font-weight:300;line-height:1.5;color:var(--ds-ink-3);
+}
+
+
+/* =====================================================================
+   FILTER BAR  (ds-filters)  - new; wrapping row of fields + actions
+   ---------------------------------------------------------------------
+   <form class="ds-filters" role="search" aria-label="ตัวกรองรายการแจ้งซ่อม">
+     <div class="ds-field">
+       <label class="ds-field__label" for="fQ">คำค้น</label>
+       <input class="ds-input" id="fQ" name="q" type="search">
+     </div>
+     <div class="ds-field">
+       <label class="ds-field__label" for="fSt">สถานะ</label>
+       <select class="ds-select" id="fSt" name="status"><option>ทั้งหมด</option></select>
+     </div>
+     <div class="ds-filters__actions">
+       <button class="ds-btn ds-btn--ghost ds-btn--lg" type="reset">ล้างตัวกรอง</button>
+       <button class="ds-btn ds-btn--lg" type="submit">ค้นหา</button>
+     </div>
+   </form>
+   Use ds-btn--lg here: it is exactly as tall as the 39px controls.
+   ===================================================================== */
+.ds-filters{
+  display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;
+  min-width:0;margin:0;padding:0;border:0;
+}
+.ds-filters > .ds-field{flex:1 1 180px;max-width:280px}
+.ds-filters > .ds-input,
+.ds-filters > .ds-select{flex:1 1 180px;width:auto;max-width:280px}
+.ds-filters__actions{
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-inline-start:auto;
+}
+/* Collapsible on phones (ds-filters--collapsible): at <=620px only the FIRST
+   field (usually the search box) stays visible next to a "ตัวกรอง" button;
+   fields/actions marked ds-filters__more open when the button is pressed.
+   <form class="ds-filters ds-filters--collapsible" id="f1">
+     <div class="ds-field">…search…</div>
+     <button type="button" class="ds-btn ds-btn--ghost ds-btn--lg ds-filters__toggle"
+             data-ds-filters-toggle aria-controls="f1" aria-expanded="false">
+       <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-filter"></use></svg>ตัวกรอง</button>
+     <div class="ds-field ds-filters__more">…</div>
+     <div class="ds-filters__actions ds-filters__more">…</div>
+   </form> */
+.ds-filters__toggle{display:none}
+
+/* Dark theme: native calendar/clock icons and pickers of form controls must
+   be light-on-dark, otherwise the date icon disappears on the dark field */
+@media screen and (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) :is(.ds-input,.ds-select,.ds-textarea){color-scheme:dark}
+}
+@media screen{
+  :root[data-theme="dark"] :is(.ds-input,.ds-select,.ds-textarea){color-scheme:dark}
+}
+
+
+/* =====================================================================
+   DATE PICKER - Thai calendar (ds-date + ds-datepicker)  - new
+   ---------------------------------------------------------------------
+   Write a normal date input; ds-ui.js turns it into this automatically:
+     <input class="ds-input" type="date" id="fDue" name="due_date" value="2025-05-20">
+   → <div class="ds-date">
+       <input class="ds-input ds-date__input" type="text" id="fDue-ds">   shows 20/05/2568
+       <button class="ds-date__btn" type="button" aria-label="เปิดปฏิทิน">…cal…</button>
+       <input class="ds-input ds-date__native" type="date" id="fDue" name="due_date" value="2025-05-20">
+     </div>
+   The native input keeps id/name/ISO value (ค.ศ.) for the server and page
+   scripts; the popup .ds-datepicker shows Thai months, weekday อา–ส and
+   พ.ศ. years. Opt out per input with data-ds-native.
+   ===================================================================== */
+.ds-date{position:relative;display:flex;align-items:stretch;width:100%;min-width:0}
+.ds-date > .ds-date__input{flex:1 1 auto;width:100%;min-width:0;padding-inline-end:40px}
+.ds-date__btn{
+  position:absolute;top:0;bottom:0;right:0;width:38px;
+  display:grid;place-items:center;margin:0;padding:0;
+  border:0;border-radius:0 var(--ds-r-md) var(--ds-r-md) 0;background:transparent;
+  color:var(--ds-ink-2);cursor:pointer;
+}
+.ds-date__btn:hover{color:var(--ds-blue)}
+.ds-date__btn:focus-visible{outline:2px solid var(--ds-focus);outline-offset:-2px}
+.ds-date__btn:disabled{cursor:not-allowed;opacity:.5}
+.ds-date__btn .ds-ic{width:18px;height:18px}
+.ds-date__native{
+  position:absolute;left:0;bottom:0;width:1px;height:1px;min-width:0;
+  margin:0;padding:0;border:0;opacity:0;pointer-events:none;
+}
+
+.ds-datepicker{
+  position:fixed;z-index:var(--ds-z-tip);box-sizing:border-box;
+  width:min(304px,calc(100vw - 16px));padding:12px;
+  border:1px solid var(--ds-line);border-radius:var(--ds-r-lg);
+  background:var(--ds-surface);color:var(--ds-ink);box-shadow:var(--ds-shadow-pop);
+  font-family:var(--ds-font);font-size:var(--ds-fs-md);font-weight:300;line-height:1.5;
+}
+.ds-datepicker[hidden]{display:none}
+.ds-datepicker__head{display:flex;align-items:center;gap:6px;margin:0 0 8px}
+.ds-datepicker__head .ds-select{flex:1 1 auto;min-width:0;width:auto}
+.ds-datepicker__head .ds-datepicker__year{flex:0 0 84px}
+.ds-datepicker__nav.ds-icon-btn{width:32px;height:32px;flex:none}
+.ds-datepicker__nav .ds-ic{width:18px;height:18px}
+.ds-datepicker__nav:disabled{opacity:.35;cursor:not-allowed}
+.ds-datepicker__grid{width:100%;margin:0;border-collapse:collapse;table-layout:fixed}
+.ds-datepicker__grid th{
+  padding:4px 0;background:none;border:0;text-align:center;
+  font-size:var(--ds-fs-xs);font-weight:400;color:var(--ds-ink-3);
+}
+.ds-datepicker__grid th:first-child{color:var(--ds-bad)}      /* วันอาทิตย์ สีแดงแบบปฏิทินไทย */
+.ds-datepicker__grid td{padding:1px;border:0;text-align:center}
+.ds-datepicker__day{
+  display:grid;place-items:center;width:100%;height:36px;margin:0;padding:0;
+  border:0;border-radius:var(--ds-r-md);background:transparent;color:var(--ds-ink);
+  font:inherit;font-size:13.5px;font-variant-numeric:tabular-nums;cursor:pointer;
+}
+.ds-datepicker__day:hover{background:var(--ds-surface-2)}
+.ds-datepicker__day.is-outside{color:var(--ds-ink-3)}
+.ds-datepicker__day[aria-current="date"]{box-shadow:inset 0 0 0 1px var(--ds-blue);color:var(--ds-link);font-weight:500}
+.ds-datepicker__day[aria-pressed="true"]{background:var(--ds-blue);color:var(--ds-on-color);font-weight:500;box-shadow:none}
+.ds-datepicker__day:disabled{opacity:.35;cursor:not-allowed;background:transparent}
+.ds-datepicker__day:focus-visible{outline:2px solid var(--ds-focus);outline-offset:1px}
+.ds-datepicker__foot{
+  display:flex;justify-content:space-between;align-items:center;
+  margin:8px 0 0;padding:8px 2px 0;border-top:1px solid var(--ds-line);
+}
+@media (pointer:coarse){ .ds-datepicker__day{height:40px} }
+@media print{ .ds-date__btn,.ds-datepicker{display:none !important} }
+
+
+/* =====================================================================
+   COMBOBOX - searchable single select (ds-combo)  - new; replaces Select2
+   ---------------------------------------------------------------------
+   Write a normal select; ds-ui.js enhances it (also nodes added later,
+   or DS.combobox.enhance(el)):
+     <select class="ds-select" id="fDept" name="dept" data-ds-combobox>
+       <option value="">— เลือกหน่วยงาน —</option> <optgroup label="…">…</optgroup></select>
+   → <div class="ds-combo">
+       <input type="text" class="ds-input ds-combo__input" id="fDept-ds" role="combobox"
+              aria-autocomplete="list" aria-expanded="false" aria-controls="fDept-ds-list">
+       <button type="button" class="ds-combo__btn" tabindex="-1" aria-label="แสดงตัวเลือก">chevron</button>
+       <select class="ds-select ds-combo__native" id="fDept" name="dept" data-ds-combobox tabindex="-1" aria-hidden="true">…</select>
+     </div>
+     <ul class="ds-combo__list" id="fDept-ds-list" role="listbox">   (in <body> or the open <dialog>)
+       <li class="ds-combo__group" role="presentation">กลุ่ม</li>
+       <li class="ds-combo__option is-active" role="option" aria-selected="true">ฝ่าย<mark>ไอ</mark>ที</li>
+       <li class="ds-combo__empty" role="presentation">ไม่พบข้อมูล</li>
+     </ul>
+   The native select stays the source of truth (id / name / value, change
+   events). Field look = ds-date; list look = ds-datepicker (fixed, placed
+   under the field by JS). .is-active = keyboard highlight
+   (aria-activedescendant), aria-selected = the chosen value.
+   ===================================================================== */
+.ds-combo{position:relative;display:flex;align-items:stretch;width:100%;min-width:0}
+.ds-combo > .ds-combo__input{flex:1 1 auto;width:100%;min-width:0;padding-inline-end:40px;text-overflow:ellipsis}
+.ds-combo__btn{
+  position:absolute;top:0;bottom:0;right:0;width:38px;
+  display:grid;place-items:center;margin:0;padding:0;
+  border:0;border-radius:0 var(--ds-r-md) var(--ds-r-md) 0;background:transparent;
+  color:var(--ds-ink-2);cursor:pointer;
+}
+.ds-combo__btn:hover{color:var(--ds-blue)}
+.ds-combo__btn:focus-visible{outline:2px solid var(--ds-focus);outline-offset:-2px}
+.ds-combo__btn:disabled,
+.ds-combo:has(.ds-combo__input:disabled) .ds-combo__btn{cursor:not-allowed;opacity:.5;color:var(--ds-ink-2)}
+.ds-combo__btn .ds-ic{width:18px;height:18px;transition:transform var(--ds-dur-fast) ease}
+.ds-combo__input[aria-expanded="true"] ~ .ds-combo__btn .ds-ic{transform:rotate(180deg)}
+/* visually hidden, still submitted (same technique as .ds-date__native);
+   beats .ds-select (block, full width, min-height) by source order */
+.ds-combo__native{
+  position:absolute;left:0;bottom:0;width:1px;height:1px;min-width:0;min-height:0;
+  margin:0;padding:0;border:0;opacity:0;pointer-events:none;
+}
+/* in a filter bar the wrapper replaces the select as the flex item */
+.ds-filters > .ds-combo{flex:1 1 180px;width:auto;max-width:280px}
+
+.ds-combo__list{
+  position:fixed;z-index:var(--ds-z-tip);box-sizing:border-box;
+  min-width:160px;max-width:calc(100vw - 16px);max-height:280px;
+  margin:0;padding:4px;list-style:none;
+  overflow-y:auto;overscroll-behavior:contain;
+  border:1px solid var(--ds-line);border-radius:var(--ds-r-md);
+  background:var(--ds-surface);color:var(--ds-ink);box-shadow:var(--ds-shadow-pop);
+  font-family:var(--ds-font);font-size:14px;font-weight:300;line-height:1.5;text-align:start;
+}
+.ds-combo__list[hidden]{display:none}
+/* block (not flex): the <mark> highlight must stay inline with the text */
+.ds-combo__option{
+  position:relative;display:block;box-sizing:border-box;margin:0;
+  padding:8px 30px 8px 10px;border-radius:var(--ds-r-sm);
+  color:var(--ds-ink);overflow-wrap:anywhere;cursor:pointer;
+  -webkit-user-select:none;user-select:none;
+}
+@media (hover:hover){ .ds-combo__option:hover{background:var(--ds-surface-2)} }
+/* keyboard highlight: tint + a 3px primary bar (the tint alone is too faint in dark mode) */
+.ds-combo__option.is-active{background:var(--ds-surface-2);box-shadow:inset 3px 0 0 var(--ds-primary)}
+.ds-combo__option[aria-selected="true"]{color:var(--ds-link);font-weight:500}
+.ds-combo__option[aria-selected="true"]::after{         /* check mark */
+  content:"";position:absolute;right:13px;top:50%;
+  width:5px;height:10px;margin-top:-7px;
+  border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg);
+}
+.ds-combo__option[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+@media (hover:hover){ .ds-combo__option[aria-disabled="true"]:hover{background:none} }
+.ds-combo__option mark{
+  margin:0;padding:0;border-radius:2px;
+  background:var(--ds-pending-bg);color:inherit;font-weight:inherit;
+}
+.ds-combo__group{
+  margin:0;padding:8px 10px 4px;
+  font-size:11.5px;font-weight:500;line-height:1.5;letter-spacing:.02em;text-transform:uppercase;
+  color:var(--ds-ink-3);cursor:default;-webkit-user-select:none;user-select:none;
+}
+.ds-combo__group:not(:first-child){margin-top:4px;padding-top:10px;border-top:1px solid var(--ds-line)}
+.ds-combo__empty{margin:0;padding:12px 10px;font-size:13px;color:var(--ds-ink-3);text-align:center;cursor:default}
+@media (pointer:coarse){ .ds-combo__option{min-height:40px;padding-block:9.5px} }
+@media (prefers-reduced-motion:reduce){ .ds-combo__btn .ds-ic{transition:none} }
+@media (forced-colors:active){
+  .ds-combo__list{border:1px solid CanvasText}
+  .ds-combo__option.is-active{outline:2px solid Highlight;outline-offset:-2px}
+  .ds-combo__option[aria-selected="true"]{text-decoration:underline}
+}
+@media print{ .ds-combo__btn,.ds-combo__list{display:none !important} }
+
+
+/* =====================================================================
+   TOUCH TARGETS  (data & forms) - pointer:coarse only
+   ---------------------------------------------------------------------
+   Phones/tablets: an invisible ::after grows the hit area of the small
+   original controls (18-32px) to at least 44px tall WITHOUT changing the
+   layout, so the dashboard still looks identical. No markup needed.
+   ===================================================================== */
+@media (pointer:coarse){
+  .ds-btn::after,.ds-link-btn::after,.ds-id-link::after,.ds-pager__btn::after{
+    content:"";position:absolute;left:-2px;right:-2px;
+  }
+  .ds-btn::after{top:-7px;bottom:-7px}
+  .ds-btn--lg::after{top:-3px;bottom:-3px}
+  .ds-link-btn::after,.ds-id-link::after{top:-13px;bottom:-13px}
+  .ds-pager__btn::after{top:-6px;bottom:-6px}
+}
+
+
+/* =====================================================================
+   FORCED COLORS  (Windows High Contrast) - data & forms
+   ---------------------------------------------------------------------
+   Backgrounds and gradients are dropped in this mode, so give filled
+   shapes a border, bring back the native select arrow, show the current
+   page with system Highlight and replace the gradient sort arrows by
+   text arrows.
+   ===================================================================== */
+@media (forced-colors:active){
+  .ds-btn,.ds-pill,.ds-badge,.ds-form-section__num,.ds-input-group__addon{border:1px solid CanvasText}
+  .ds-select{-webkit-appearance:auto;appearance:auto;background-image:none;padding-inline-end:10px}
+  .ds-select--sm{padding-inline-end:8px}
+  .ds-pager__btn[aria-current="page"],
+  .ds-pager__btn[aria-current="true"]{
+    forced-color-adjust:none;background:Highlight;border-color:Highlight;color:HighlightText;
+  }
+  .ds-table__sort::after{
+    width:auto;height:auto;opacity:1;background:none;
+    content:"\2195";content:"\2195" / "";
+  }
+  [aria-sort="ascending"] > .ds-table__sort::after{content:"\2191";content:"\2191" / ""}
+  [aria-sort="descending"] > .ds-table__sort::after{content:"\2193";content:"\2193" / ""}
+  .ds-table > tbody > tr.is-selected > td,
+  .ds-table > tbody > tr[aria-selected="true"] > td{border-bottom:2px solid Highlight}
+  .ds-file.is-dragover{border-style:solid;border-color:Highlight}
+}
+
+
+/* =====================================================================
+   PRINT  (data & forms)
+   ---------------------------------------------------------------------
+   Tables print in full width with repeated headers; pagers, filters,
+   sticky action bars, row checkboxes and row actions are hidden; pills
+   and badges keep their colors (plus an outline for b/w printers).
+   ===================================================================== */
+@media print{
+  .ds-table-wrap{overflow:visible}
+  .ds-table{min-width:0}
+  .ds-table > thead{display:table-header-group}
+  .ds-table :where(tr){break-inside:avoid}
+  .ds-pager,.ds-filters,.ds-form-actions,
+  .ds-table__actions,.ds-table__check{display:none !important}
+  .ds-table__sort::after{display:none}
+  .ds-pill,.ds-badge,.ds-form-section__num{
+    border:1px solid currentColor;-webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .ds-form-section{box-shadow:none;border:1px solid var(--ds-line);break-inside:avoid}
+  .ds-file{min-height:0;padding:8px}
+}
+
+
+/* =====================================================================
+   RESPONSIVE  (data & forms) - same breakpoints as the original
+   ---------------------------------------------------------------------
+   <=1280 / <=900: nothing changes for these blocks (tables scroll inside
+   ds-table-wrap at every width, exactly like the original).
+   <=620: forms go to 1 column, pager stacks and centres, filter fields
+          and action buttons take full rows.
+   <=400: radio/checkbox groups stack; the sticky action bar stacks its
+          buttons (primary on top).
+   ===================================================================== */
+@media (max-width:620px){
+  .ds-form{grid-template-columns:minmax(0,1fr)}
+  .ds-pager{flex-direction:column;align-items:center;text-align:center}
+  .ds-pager__list{justify-content:center}
+  .ds-filters > .ds-field,
+  .ds-filters > .ds-input,
+  .ds-filters > .ds-select,
+  .ds-filters > .ds-combo{flex-basis:100%;max-width:none}
+  .ds-filters__actions{flex:1 1 100%;margin-inline-start:0}
+  .ds-filters__actions > .ds-btn{flex:1 1 0}
+  .ds-filters--collapsible > .ds-field:first-child{flex:1 1 0;min-width:0;max-width:none}
+  .ds-filters--collapsible > .ds-filters__toggle{display:inline-flex;flex:none;align-self:flex-end}
+  .ds-filters--collapsible:not(.is-open) > .ds-filters__more{display:none}
+  /* compact sticky bar (~110px): primary action on its own full row,
+     secondary (ghost) actions share the row below; the "* required" note
+     is dropped because the form already says it at the top */
+  .ds-form-actions{padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px))}
+  .ds-form-actions > .ds-btn{flex:1 1 0;min-width:0}
+  .ds-form-actions > .ds-btn:not(.ds-btn--ghost){order:-1;flex-basis:100%}
+  .ds-form-actions__info{display:none}
+  .ds-form-section__num ~ .ds-form-section__desc{padding-inline-start:0}
+}
+/* ds-table--stack: one card per row at <=620px (data-label on every td) */
+@media (max-width:620px){
+  .ds-table.ds-table--stack{min-width:0}
+  .ds-table--stack > thead{
+    position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;
+    overflow:hidden;clip-path:inset(50%);white-space:nowrap;
+  }
+  .ds-table--stack > tbody,
+  .ds-table--stack > tbody > tr{display:block}
+  .ds-table--stack > tbody > tr{
+    margin:0 0 10px;padding:4px 12px;
+    border:1px solid var(--ds-line);border-radius:var(--ds-r-md);background:var(--ds-surface);
+  }
+  .ds-table--stack > tbody > tr:last-child{margin-bottom:0}
+  /* cells stay block (mixed content such as "title<br><small>" keeps its flow);
+     the label floats left, the value sits right-aligned beside it */
+  .ds-table--stack > tbody > tr > td{
+    display:block;padding:7px 0;border-bottom:1px dashed var(--ds-line);
+    text-align:right;overflow-wrap:anywhere;
+  }
+  .ds-table--stack > tbody > tr > td.ds-nowrap{white-space:normal}
+  .ds-table--stack > tbody > tr > td:last-child{border-bottom:0}
+  .ds-table--stack > tbody > tr > td::after{content:"";display:block;clear:both}
+  .ds-table--stack > tbody > tr > td[data-label]::before{
+    content:attr(data-label);float:left;max-width:45%;margin-inline-end:12px;
+    color:var(--ds-ink-3);font-weight:400;text-align:left;white-space:normal;
+  }
+  /* actions: a right-aligned button row at the bottom of the card */
+  .ds-table--stack > tbody > tr > td.ds-table__actions{padding-top:8px}
+  .ds-table--stack > tbody > tr > td.ds-table__check{width:auto;text-align:left}
+  .ds-table--stack > tbody > tr > td.ds-table__empty{text-align:center}
+  .ds-table--stack > tbody > tr:has(> td.ds-table__empty){border-style:dashed}
+}
+@media (max-width:400px){
+  .ds-choice-group{flex-direction:column;flex-wrap:nowrap;gap:6px}
+}
+/* =====================================================================
+   ds-ui.css  PART 04 / 04 : navigation, feedback, overlays, auth, print
+   ---------------------------------------------------------------------
+   Blocks: ds-tabs, ds-alert, ds-dl, ds-timeline, ds-empty, ds-skeleton,
+           ds-spinner, ds-dialog, ds-toast, ds-tip,
+           ds-auth, responsive rules (1280/900/620/400), reduced motion,
+           forced colors, @media print.
+   Rules:  colors only via --ds-* tokens; no bare element selectors;
+           z-index uses --ds-z-* when part 01 defines them (numeric
+           fallbacks keep the layer order tip < toast above host UIs).
+   ===================================================================== */
+
+/* token --ds-float-edge (1px edge of the auth card, visible in dark only)
+   is defined in sections 1-2 */
+
+/* [hidden] on any block below is guaranteed by part 01's global
+   :is([class^="ds-"],[class*=" ds-"])[hidden][hidden] rule. */
+
+/* =====================================================================
+   TABS  (ds-tabs)
+   ---------------------------------------------------------------------
+   <div class="ds-tabs" role="tablist" aria-label="รายละเอียดใบแจ้งซ่อม">
+     <button class="ds-tabs__tab" type="button" role="tab" id="tab-info"
+             aria-controls="tp-info" aria-selected="true">ข้อมูลทั่วไป</button>
+     <button class="ds-tabs__tab" type="button" role="tab" id="tab-log"
+             aria-controls="tp-log" aria-selected="false" tabindex="-1">
+       ประวัติการดำเนินการ <span class="ds-tabs__count">4</span></button>
+   </div>
+   <div class="ds-tabs__panel" role="tabpanel" id="tp-info" aria-labelledby="tab-info" tabindex="0">…</div>
+   <div class="ds-tabs__panel" role="tabpanel" id="tp-log" aria-labelledby="tab-log" tabindex="0" hidden>…</div>
+   ds-ui.js wires click + arrow/Home/End keys for every .ds-tabs[role=tablist].
+   Server-rendered tab links: <nav class="ds-tabs"><a class="ds-tabs__tab"
+   href="?tab=log" aria-current="page">…</a></nav> (same look, no JS).
+   ===================================================================== */
+.ds-tabs{
+  display:flex;align-items:flex-end;gap:4px;
+  margin:0;padding:0;
+  box-shadow:inset 0 -1px 0 var(--ds-line);   /* baseline drawn inside, so the 2px underline covers it */
+  overflow-x:auto;overflow-y:hidden;
+  scrollbar-width:thin;
+}
+.ds-tabs__tab{
+  -webkit-appearance:none;appearance:none;
+  display:inline-flex;align-items:center;gap:8px;flex:none;
+  box-sizing:border-box;margin:0;
+  padding:9px 14px 8px;
+  background:none;border:0;border-bottom:2px solid transparent;
+  border-radius:var(--ds-r-sm) var(--ds-r-sm) 0 0;
+  font:inherit;font-size:14px;font-weight:400;line-height:1.5;
+  color:var(--ds-ink-2);text-decoration:none;text-align:center;white-space:nowrap;
+  cursor:pointer;
+}
+.ds-tabs__tab:hover{background:var(--ds-surface-2)}
+.ds-tabs__tab:hover:not([aria-selected="true"]):not([aria-current="page"]):not(:disabled){color:var(--ds-ink)}
+.ds-tabs__tab[aria-selected="true"],
+.ds-tabs__tab[aria-current="page"]{
+  color:var(--ds-link);font-weight:500;
+  border-bottom-color:var(--ds-blue);
+}
+.ds-tabs__tab:focus-visible{outline:2px solid var(--ds-focus);outline-offset:-2px}
+.ds-tabs__tab:disabled,
+.ds-tabs__tab[aria-disabled="true"]{opacity:.5;cursor:not-allowed;background:none}
+.ds-tabs__count{
+  display:inline-block;box-sizing:border-box;min-width:20px;padding:0 6px;
+  border-radius:var(--ds-r-pill);
+  background:var(--ds-neutral-bg);color:var(--ds-neutral-ink);
+  font-size:11.5px;font-weight:500;line-height:1.5;text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+.ds-tabs__tab[aria-selected="true"] .ds-tabs__count,
+.ds-tabs__tab[aria-current="page"] .ds-tabs__count{background:var(--ds-progress-bg);color:var(--ds-progress-ink)}
+.ds-tabs__panel{padding-top:14px;min-width:0}
+.ds-tabs__panel:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+
+/* =====================================================================
+   ALERT  (ds-alert, ds-alert--info|--success|--warning|--danger)
+   ---------------------------------------------------------------------
+   <div class="ds-alert ds-alert--warning" role="alert">      (use role="status" for non-urgent info)
+     <svg class="ds-ic ds-alert__icon" aria-hidden="true"><use href="#ds-i-alert-triangle"></use></svg>
+     <div class="ds-alert__body">
+       <p class="ds-alert__title">มีงานค้างเกินกำหนด 9 รายการ</p>
+       กรุณาตรวจสอบและมอบหมายช่างผู้รับผิดชอบ <a href="list.html">ดูรายการ</a>
+     </div>
+   </div>
+   Tints come from the status token family: info → --ds-info-*,
+   success → --ds-done-*, warning → --ds-pending-*, danger → --ds-cancel-*.
+   Body text stays --ds-ink for readability; title + icon use the tint ink.
+   ===================================================================== */
+.ds-alert{
+  --ds-alert-bg:var(--ds-info-bg);
+  --ds-alert-ink:var(--ds-info-ink);
+  --ds-alert-edge:var(--ds-sky);
+  display:flex;align-items:flex-start;gap:10px;
+  box-sizing:border-box;margin:0;padding:11px 14px;
+  border:0;border-left:4px solid var(--ds-alert-edge);
+  border-radius:var(--ds-r-md);
+  background:var(--ds-alert-bg);color:var(--ds-ink);
+  font-size:13px;line-height:1.5;
+}
+.ds-alert--info{--ds-alert-bg:var(--ds-info-bg);--ds-alert-ink:var(--ds-info-ink);--ds-alert-edge:var(--ds-sky)}
+.ds-alert--success{--ds-alert-bg:var(--ds-done-bg);--ds-alert-ink:var(--ds-done-ink);--ds-alert-edge:var(--ds-green)}
+.ds-alert--warning{--ds-alert-bg:var(--ds-pending-bg);--ds-alert-ink:var(--ds-pending-ink);--ds-alert-edge:var(--ds-yellow)}
+.ds-alert--danger{--ds-alert-bg:var(--ds-cancel-bg);--ds-alert-ink:var(--ds-cancel-ink);--ds-alert-edge:var(--ds-red)}
+.ds-alert__icon{width:20px;height:20px;flex:none;color:var(--ds-alert-ink)}
+.ds-alert__body{flex:1 1 auto;min-width:0}
+.ds-alert__body > p{margin:0}
+.ds-alert__title{display:block;margin:0;font-size:14px;font-weight:500;line-height:1.5;color:var(--ds-alert-ink)}
+.ds-alert__body a{color:var(--ds-alert-ink);font-weight:400;text-decoration:underline}
+.ds-alert__body a:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+.ds-alert__body :is(ul,ol){margin:4px 0 0;padding-inline-start:18px}
+.ds-alert__body li + li{margin-top:2px}
+/* buttons at the end of the alert (a full row under the text at <=620px):
+   <div class="ds-alert__actions"><button class="ds-btn ds-btn--ghost">..</button></div> */
+.ds-alert__actions{
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+  flex:none;align-self:center;margin-inline-start:auto;
+}
+
+/* =====================================================================
+   DEFINITION LIST  (ds-dl)  — original `.dl` (dialog detail view)
+   ---------------------------------------------------------------------
+   <dl class="ds-dl">
+     <dt>เลขที่แจ้งซ่อม</dt><dd>SR-202505-0152</dd>
+     <dt>สถานะ</dt><dd><span class="ds-pill ds-pill--pending">รอดำเนินการ</span></dd>
+     <div><dt>กำหนดเสร็จ</dt><dd>15/05/2025</dd></div>   (optional group wrapper)
+   </dl>
+   Children are scoped with `>` so host dl/dt/dd rules are untouched;
+   dt weight is `inherit` to undo Bootstrap reboot's dt{font-weight:700}.
+   ===================================================================== */
+.ds-dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:6px 12px;margin:0;padding:0}
+.ds-dl > div{display:contents}
+.ds-dl > dt,
+.ds-dl > div > dt{margin:0;color:var(--ds-ink-3);font-weight:inherit}
+.ds-dl > dd,
+.ds-dl > div > dd{margin:0;min-width:0;overflow-wrap:anywhere}
+
+/* =====================================================================
+   TIMELINE  (ds-timeline)
+   ---------------------------------------------------------------------
+   <ol class="ds-timeline">
+     <li class="ds-timeline__item" style="--ds-accent:var(--ds-green)">
+       <span class="ds-timeline__dot" aria-hidden="true"></span>
+       <p class="ds-timeline__title">ปิดงานซ่อม</p>
+       <time class="ds-timeline__time" datetime="2025-05-15T16:30">15/05/2025 16:30 น.</time>
+       <div class="ds-timeline__body">เปลี่ยนลูกยางดึงกระดาษ ทดสอบพิมพ์ผ่าน</div>
+     </li>
+     <li class="ds-timeline__item">…</li>            (no --ds-accent → blue dot)
+   </ol>
+   Dot color = --ds-accent (set on the item or the dot; default --ds-blue).
+   The dot is centred on the title's first line; the connector line runs
+   from under the dot to the next dot (4px gap each side), none after the last.
+   ===================================================================== */
+.ds-timeline{list-style:none;margin:0;padding:0}
+.ds-timeline__item{position:relative;min-width:0;margin:0;padding:0 0 16px 26px}
+.ds-timeline__item:last-child{padding-bottom:0}
+.ds-timeline__item::before{
+  content:"";position:absolute;left:5px;top:21px;bottom:-1px;width:2px;
+  border-radius:2px;background:var(--ds-line);
+}
+.ds-timeline__item:last-child::before{display:none}
+.ds-timeline__dot{
+  position:absolute;left:0;top:5px;
+  box-sizing:border-box;width:12px;height:12px;border-radius:50%;
+  background:var(--ds-accent,var(--ds-blue));
+}
+.ds-timeline__title{margin:0;font-size:14px;font-weight:500;line-height:1.5;color:var(--ds-ink)}
+.ds-timeline__time{display:block;font-size:11.5px;line-height:1.5;color:var(--ds-ink-3);font-variant-numeric:tabular-nums}
+.ds-timeline__body{margin-top:4px;font-size:12.5px;line-height:1.5;color:var(--ds-ink-2);overflow-wrap:anywhere}
+.ds-timeline__body > p{margin:0}
+
+/* =====================================================================
+   EMPTY STATE  (ds-empty)
+   ---------------------------------------------------------------------
+   <div class="ds-empty">
+     <svg class="ds-ic ds-empty__icon" aria-hidden="true"><use href="#ds-i-file-text"></use></svg>
+     <p class="ds-empty__title">ยังไม่มีใบแจ้งซ่อม</p>
+     <p class="ds-empty__text">เมื่อมีการแจ้งซ่อม รายการจะแสดงที่นี่</p>
+     <a class="ds-btn" href="form.html">แจ้งซ่อมใหม่</a>          (optional action)
+   </div>
+   __icon works on the <svg> itself or on a wrapper <span> around it.
+   (Inside a table use ds-table__empty on the <td> instead.)
+   ===================================================================== */
+.ds-empty{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  box-sizing:border-box;margin:0;padding:28px 18px;
+  text-align:center;color:var(--ds-ink-3);
+}
+.ds-empty__icon{
+  box-sizing:border-box;display:grid;place-items:center;flex:none;
+  width:56px;height:56px;padding:14px;margin:0 0 4px;
+  border-radius:50%;background:var(--ds-surface-2);color:var(--ds-ink-3);
+}
+.ds-empty__icon > .ds-ic{width:28px;height:28px}
+.ds-empty__title{margin:0;font-size:16px;font-weight:500;line-height:1.5;color:var(--ds-ink)}
+.ds-empty__text{margin:0;max-width:44ch;font-size:12.5px;line-height:1.5;color:var(--ds-ink-3)}
+.ds-empty > .ds-btn,
+.ds-empty > .ds-link-btn{margin-top:6px}
+
+/* =====================================================================
+   SKELETON  (ds-skeleton)  — loading placeholder with shimmer
+   ---------------------------------------------------------------------
+   <div class="ds-panel" aria-busy="true">
+     <span class="ds-skeleton ds-skeleton--title" aria-hidden="true"></span>
+     <span class="ds-skeleton" aria-hidden="true"></span>
+     <span class="ds-skeleton" aria-hidden="true"></span>
+     <span class="ds-skeleton ds-skeleton--circle" aria-hidden="true"></span>
+     <span class="ds-skeleton ds-skeleton--block" aria-hidden="true"></span>
+   </div>
+   Default = one text line (12px, full width). Consecutive skeletons get
+   8px spacing; the last of several plain lines is shortened to 64%.
+   Shimmer stops under prefers-reduced-motion (static track color).
+   ===================================================================== */
+.ds-skeleton{
+  display:block;box-sizing:border-box;width:100%;height:12px;
+  border-radius:var(--ds-r-sm);
+  background-color:var(--ds-track);
+  background-image:linear-gradient(90deg,transparent 0%,var(--ds-surface-2) 50%,transparent 100%);
+  background-size:40% 100%;background-repeat:no-repeat;background-position:-150% 0;
+  animation:ds-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+.ds-skeleton + .ds-skeleton{margin-top:8px}
+.ds-skeleton:not([class*="ds-skeleton--"]):last-child:not(:first-child){width:64%}
+.ds-skeleton--title{width:45%;height:20px}
+.ds-skeleton--circle{width:42px;height:42px;border-radius:50%}
+.ds-skeleton--block{height:120px;border-radius:var(--ds-r-lg)}
+@keyframes ds-skeleton-shimmer{
+  from{background-position:-150% 0}
+  to{background-position:250% 0}
+}
+
+/* =====================================================================
+   SPINNER  (ds-spinner)
+   ---------------------------------------------------------------------
+   <span class="ds-spinner" role="status" aria-label="กำลังโหลด"></span>
+   <span class="ds-spinner ds-spinner--sm" aria-hidden="true"></span>   14px
+   <span class="ds-spinner ds-spinner--lg" role="status" aria-label="กำลังโหลด"></span>   32px
+   Inside a button it follows the button text color:
+   <button class="ds-btn" disabled><span class="ds-spinner" aria-hidden="true"></span> กำลังบันทึก…</button>
+   ===================================================================== */
+.ds-spinner{
+  display:inline-block;flex:none;box-sizing:border-box;
+  width:20px;height:20px;vertical-align:-4px;
+  border:2px solid var(--ds-track);border-top-color:var(--ds-blue);
+  border-radius:50%;
+  animation:ds-spin .75s linear infinite;
+}
+.ds-spinner--sm{width:14px;height:14px;vertical-align:-2px}
+.ds-spinner--lg{width:32px;height:32px;border-width:3px;vertical-align:-10px}
+.ds-btn .ds-spinner{width:14px;height:14px;border-width:2px;vertical-align:-2px;border-color:currentColor;border-top-color:transparent}
+@keyframes ds-spin{to{transform:rotate(360deg)}}
+
+/* =====================================================================
+   DIALOG  (ds-dialog)  — original `dialog` + `.dlg`, native <dialog>
+   ---------------------------------------------------------------------
+   <button class="ds-btn" type="button" data-ds-open="dlgNew">แจ้งซ่อมใหม่</button>
+   <dialog class="ds-dialog" id="dlgNew" aria-labelledby="dlgNewTitle">
+     <form class="ds-dialog__body" method="dialog">
+       <h2 class="ds-dialog__title" id="dlgNewTitle">แจ้งซ่อมใหม่</h2>
+       <p class="ds-dialog__text">กรอกข้อมูลให้ครบถ้วน</p>              (optional)
+       <label class="ds-field"><span class="ds-field__label">เรื่อง / อาการ</span>
+         <input class="ds-input" required autofocus></label>
+       <div class="ds-dialog__actions">
+         <button class="ds-btn ds-btn--ghost" type="button" data-ds-close>ยกเลิก</button>
+         <button class="ds-btn" value="ok">บันทึกใบแจ้งซ่อม</button>
+       </div>
+     </form>
+   </dialog>
+   Never set `display` on .ds-dialog (the UA hides closed dialogs with it).
+   Font is re-declared because JS-created dialogs may live outside .ds-app.
+   ===================================================================== */
+.ds-dialog{
+  box-sizing:border-box;
+  width:min(480px,calc(100vw - 32px));
+  padding:0;
+  border:1px solid var(--ds-line);border-radius:var(--ds-r-xl);
+  background:var(--ds-surface);color:var(--ds-ink);
+  font-family:var(--ds-font);font-size:14px;font-weight:300;line-height:1.5;
+}
+.ds-dialog--lg{width:min(720px,calc(100vw - 32px))}
+/* Fallback literal = --ds-overlay: before Chrome 122 / Safari 17.4, ::backdrop
+   does not inherit custom properties from :root, so var() alone would be void. */
+.ds-dialog::backdrop{background:var(--ds-overlay,rgba(8,18,38,.55))}
+.ds-dialog__body{display:flex;flex-direction:column;gap:12px;margin:0;padding:20px 22px}
+.ds-dialog__title{margin:0;font-size:17px;font-weight:500;line-height:1.5;color:inherit}
+.ds-dialog__text{margin:0;color:var(--ds-ink-2)}
+.ds-dialog__body > p{margin:0}
+.ds-dialog__actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:4px}
+
+/* =====================================================================
+   TOAST  (ds-toast, ds-toast--success|--danger)  — original `.toast`
+   ---------------------------------------------------------------------
+   JS only, one at a time (as in the original): a new DS.toast() replaces
+   the current one. Bottom-centre, above the iOS home indicator.
+     DS.toast('บันทึกใบแจ้งซ่อม SR-202505-0153 แล้ว', {type:'success'})
+   Server flash message (PHP session / Laravel flash), end of <body>:
+     <script>DS.toast('บันทึกเรียบร้อย', {type:'success'})</script>
+   Click or Esc closes it; hover pauses the timer; timeout:0 = sticky.
+   Do not write static .ds-toast markup (it would never hide).
+   Success/danger keep the dark pill (AA contrast) and add a status dot.
+   ===================================================================== */
+.ds-toast{
+  position:fixed;left:50%;
+  bottom:calc(20px + env(safe-area-inset-bottom,0px));
+  transform:translateX(-50%);
+  z-index:var(--ds-z-toast,1090);
+  box-sizing:border-box;
+  max-width:calc(100vw - 32px);
+  padding:9px 18px;border-radius:var(--ds-r-pill);
+  background:var(--ds-tooltip-bg);color:var(--ds-on-color);
+  font-family:var(--ds-font);font-size:13px;font-weight:300;line-height:1.5;
+  overflow-wrap:anywhere;
+}
+.ds-toast--success::before,
+.ds-toast--danger::before{
+  content:"";display:inline-block;width:8px;height:8px;margin-right:8px;
+  border-radius:50%;vertical-align:1px;
+}
+.ds-toast--success::before{background:var(--ds-green)}
+.ds-toast--danger::before{background:var(--ds-red)}
+
+/* =====================================================================
+   TOOLTIP  (ds-tip)  — original `.tip`
+   ---------------------------------------------------------------------
+   Authors only add data-ds-tip to any element:
+     <button class="ds-icon-btn" data-ds-tip="สลับโหมดสว่าง / มืด" aria-label="สลับโหมดสว่าง/มืด">…</button>
+   ds-ui.js creates ONE <div class="ds-tip" role="tooltip" hidden> and sets
+   its left/top inline (follows the mouse; below the element on keyboard focus).
+   One line, never wraps (original): keep tips short.
+   ===================================================================== */
+.ds-tip{
+  position:fixed;left:0;top:0;
+  z-index:var(--ds-z-tip,1080);
+  box-sizing:border-box;
+  padding:5px 10px;border-radius:var(--ds-r-sm);
+  background:var(--ds-tooltip-bg);color:var(--ds-on-color);
+  font-family:var(--ds-font);font-size:12px;font-weight:300;line-height:1.5;
+  white-space:nowrap;
+  pointer-events:none;
+}
+
+/* =====================================================================
+   AUTH  (ds-auth)  — login / register / forgot-password (no sidebar)
+   ---------------------------------------------------------------------
+   <body class="ds-body">
+   <div class="ds-auth">
+     <aside class="ds-auth__brand">
+       <a class="ds-sidebar__brand" href="dashboard.html">            (reuses the sidebar brand)
+         <svg class="ds-sidebar__logo" viewBox="0 0 48 48" aria-hidden="true">…</svg>
+         <span><b class="ds-sidebar__name">SMMS</b>
+           <small class="ds-sidebar__tagline">Smart Maintenance &amp;<br>Asset Service Management</small></span>
+       </a>
+       <div class="ds-auth__intro">
+         <p class="ds-auth__headline">สินทรัพย์พร้อมใช้ งานต่อเนื่อง องค์กรเดินหน้า</p>
+         <p class="ds-auth__lead">ขับเคลื่อนการบริการงานซ่อมบำรุงรวดเร็ว แม่นยำ ตรวจสอบได้ทุกขั้นตอน</p>
+       </div>
+       <p class="ds-auth__quote">“ดูแลวันนี้<span>เพื่อพรุ่งนี้ที่ดีกว่า”</span></p>
+     </aside>
+     <main class="ds-auth__card" id="ds-main">
+       <h1 class="ds-auth__title">เข้าสู่ระบบ</h1>
+       <p class="ds-auth__sub">ใช้บัญชีผู้ใช้ขององค์กร</p>
+       <form class="ds-auth__form" method="post">
+         <div class="ds-field">…ds-input…</div>
+         <div class="ds-auth__row"><label class="ds-check">…จดจำฉันไว้</label>
+           <a class="ds-link-btn" href="#">ลืมรหัสผ่าน?</a></div>
+         <button class="ds-btn ds-btn--lg ds-btn--block" type="submit">เข้าสู่ระบบ</button>
+       </form>
+       <div class="ds-auth__foot">ยังไม่มีบัญชี? <a href="#">ติดต่อผู้ดูแลระบบ</a></div>
+     </main>
+   </div>
+   Left: navy brand panel = sidebar gradient + grid-line decoration + hero
+   typography (headline 28px/500, lead 16px, italic quote with sky bar).
+   Right: panel-like card, max 420px, centred. <=900px: stacks, the brand
+   panel becomes a compact banner (logo + headline; <=620px logo only).
+   ===================================================================== */
+.ds-auth{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  min-height:100vh;min-height:100dvh;
+  background:var(--ds-bg);color:var(--ds-ink);
+}
+.ds-auth__brand{
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;gap:32px;
+  min-width:0;padding:32px 40px 36px;
+  background:var(--ds-grad-sidebar);color:var(--ds-on-navy);
+}
+.ds-auth__brand::after{
+  content:"";position:absolute;inset:auto 0 0 0;height:260px;
+  pointer-events:none;opacity:.22;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 22px,var(--ds-sidebar-grid) 22px 23px),
+    repeating-linear-gradient(0deg,transparent 0 30px,var(--ds-sidebar-grid) 30px 31px);
+  transform:skewY(-14deg) translateY(60px);
+  /* mask uses alpha only; #000 is not a visible color */
+  -webkit-mask-image:linear-gradient(0deg,#000,transparent);
+  mask-image:linear-gradient(0deg,#000,transparent);
+}
+.ds-auth__brand > *{position:relative;z-index:1}
+.ds-auth__brand > .ds-sidebar__brand{align-self:flex-start;padding:0}
+.ds-auth__brand :focus-visible{outline-color:var(--ds-on-color)}
+.ds-auth__intro{max-width:560px}
+.ds-auth__headline{
+  margin:0;font-size:28px;font-weight:500;line-height:1.25;
+  color:var(--ds-on-color);text-wrap:balance;
+}
+.ds-auth__lead{margin:10px 0 0;font-size:16px;font-weight:300;line-height:1.5;color:var(--ds-on-navy-lead)}
+.ds-auth__quote{
+  margin:0;font-size:20px;font-style:italic;font-weight:400;line-height:1.45;
+  color:var(--ds-on-color);
+}
+.ds-auth__quote > span{display:block;padding-left:14px}
+.ds-auth__quote::after{
+  content:"";display:block;width:54px;height:3px;margin:8px 0 0 90px;
+  border-radius:var(--ds-r-xs);background:var(--ds-sky);
+}
+.ds-auth__card{
+  align-self:center;justify-self:center;
+  box-sizing:border-box;width:calc(100% - 32px);max-width:420px;
+  margin:32px 0;padding:28px 28px 24px;
+  border:1px solid var(--ds-float-edge);border-radius:var(--ds-r-lg);
+  background:var(--ds-surface);color:var(--ds-ink);
+  box-shadow:var(--ds-shadow);
+}
+.ds-auth__title{margin:0;font-size:20px;font-weight:500;line-height:1.4;color:var(--ds-ink)}
+.ds-auth__sub{margin:4px 0 0;font-size:13px;line-height:1.5;color:var(--ds-ink-3)}
+.ds-auth__form{display:flex;flex-direction:column;gap:14px;margin:20px 0 0}
+.ds-auth__row{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:8px 12px;font-size:12.5px;
+}
+.ds-auth__foot{
+  margin-top:20px;padding-top:14px;border-top:1px solid var(--ds-line);
+  font-size:12.5px;line-height:1.5;color:var(--ds-ink-3);text-align:center;
+}
+.ds-auth__foot a{color:var(--ds-link);text-decoration:none}
+.ds-auth__foot a:hover{text-decoration:underline}
+.ds-auth__foot a:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+
+/* =====================================================================
+   ERROR PAGE  (ds-error)  — 403 / 404 / 419 / 500 / 503, no sidebar
+   ---------------------------------------------------------------------
+   <body class="ds-body">
+   <main class="ds-error" id="ds-main">
+     <div class="ds-error__card">
+       <div class="ds-error__brand"><a href="dashboard.html"><svg width="32" height="32" …>logo</svg><span>SMMS แจ้งซ่อม</span></a></div>
+       <div class="ds-error__icon" style="--ds-accent:var(--ds-red)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-lock"></use></svg></div>
+       <p class="ds-error__code ds-num">403</p>
+       <h1 class="ds-error__title">ไม่มีสิทธิ์เข้าถึง</h1>
+       <p class="ds-error__text">…</p>
+       <div class="ds-error__actions"><a class="ds-btn ds-btn--lg" href="dashboard.html">กลับหน้าหลัก</a>
+         <button type="button" class="ds-btn ds-btn--ghost ds-btn--lg" data-ds-back>ย้อนกลับ</button></div>
+       <p class="ds-error__meta">รหัสอ้างอิง: … · เวลา …</p>
+     </div>
+   </main>
+   Icon circle = --ds-accent on .ds-error__icon (default blue); 403 / 500
+   var(--ds-red), 419 / 503 var(--ds-orange). AA FILLS (part 02) maps them
+   to the -strong fills, so the white icon keeps >= 3:1.
+   ===================================================================== */
+.ds-error{
+  position:relative;isolation:isolate;overflow:hidden;
+  display:grid;place-items:center;box-sizing:border-box;
+  min-height:100vh;min-height:100dvh;margin:0;
+  padding:calc(24px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px));
+  background:var(--ds-bg);color:var(--ds-ink);
+}
+/* faint navy grid around the card, fading towards the edges
+   (the mask uses alpha only: any opaque color works) */
+.ds-error::before{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.45;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 39px,var(--ds-sidebar-grid) 39px 40px),
+    repeating-linear-gradient(0deg,transparent 0 39px,var(--ds-sidebar-grid) 39px 40px);
+  -webkit-mask-image:radial-gradient(ellipse 75% 65% at 50% 45%,var(--ds-ink),transparent);
+  mask-image:radial-gradient(ellipse 75% 65% at 50% 45%,var(--ds-ink),transparent);
+}
+.ds-error__card{
+  box-sizing:border-box;width:100%;max-width:520px;margin:0;padding:28px 28px 22px;
+  border:1px solid var(--ds-float-edge);border-radius:var(--ds-r-lg);
+  background:var(--ds-surface);color:var(--ds-ink);box-shadow:var(--ds-shadow);
+  text-align:center;
+}
+.ds-error__brand{display:flex;justify-content:center;margin:0 0 22px}
+.ds-error__brand > a{
+  display:inline-flex;align-items:center;gap:8px;border-radius:var(--ds-r-sm);
+  font-size:16px;font-weight:600;line-height:1.5;color:var(--ds-ink);text-decoration:none;
+}
+.ds-error__brand > a:hover{color:var(--ds-ink);text-decoration:none}
+.ds-error__brand > a:focus-visible{outline:2px solid var(--ds-focus);outline-offset:4px}
+.ds-error__brand svg{flex:none;width:32px;height:32px}
+.ds-error__icon{
+  position:relative;isolation:isolate;box-sizing:border-box;
+  display:grid;place-items:center;width:72px;height:72px;margin:8px auto 14px;
+  border-radius:50%;background:var(--ds-accent,var(--ds-blue));color:var(--ds-on-color);
+}
+.ds-error__icon::before{              /* soft halo in the same tint */
+  content:"";position:absolute;inset:-8px;z-index:-1;border-radius:50%;
+  background:inherit;opacity:.16;
+}
+.ds-error__icon .ds-ic{width:34px;height:34px;stroke-width:2}
+.ds-error__code{
+  margin:0;font-size:56px;font-weight:600;line-height:1.1;letter-spacing:.02em;
+  color:var(--ds-ink-3);font-variant-numeric:tabular-nums;
+}
+.ds-error__title{margin:6px 0 0;font-size:22px;font-weight:500;line-height:1.4;color:var(--ds-ink);text-wrap:balance}
+.ds-error__text{margin:8px auto 0;max-width:44ch;font-size:14px;line-height:1.6;color:var(--ds-ink-2)}
+.ds-error__actions{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:22px 0 0}
+.ds-error__meta{
+  margin:20px 0 0;padding-top:12px;border-top:1px solid var(--ds-line);
+  font-size:12px;line-height:1.5;color:var(--ds-ink-3);overflow-wrap:anywhere;
+}
+.ds-error__meta + .ds-error__meta{margin-top:6px;padding-top:0;border-top:0}
+.ds-error__meta a{color:var(--ds-link);text-decoration:none}
+.ds-error__meta a:hover{color:var(--ds-link);text-decoration:underline}
+.ds-error__meta a:focus-visible{outline:2px solid var(--ds-focus);outline-offset:2px}
+
+/* =====================================================================
+   A4 PRINT DOCUMENT  (ds-doc, ds-print-toolbar)  — official printed form
+   ---------------------------------------------------------------------
+   <body class="ds-body ds-print-body">
+   <div class="ds-print-toolbar">
+     <a class="ds-btn ds-btn--ghost" href="detail.html">← กลับ</a>
+     <button class="ds-btn" type="button" data-ds-print>พิมพ์ / บันทึก PDF</button></div>
+   <article class="ds-doc">                       (ONE A4 sheet; repeat for more pages)
+     <header class="ds-doc__head">
+       <svg class="ds-doc__logo" …>…</svg>
+       <div class="ds-doc__org"><b>บริษัท …</b><span>หน่วยงาน</span><span>ที่อยู่ · โทร</span></div>
+       <h1 class="ds-doc__title">ใบแจ้งซ่อม</h1>
+       <table class="ds-doc__meta"><tr><th scope="row">เลขที่</th><td>SR-…</td></tr>…</table>
+     </header>
+     <section class="ds-doc__section"><h2 class="ds-doc__heading">1. ข้อมูลผู้แจ้ง</h2>
+       <table class="ds-doc__table"><tr><th scope="row">ชื่อ-สกุล</th><td>…</td><th scope="row">…</th><td>…</td></tr></table>
+       <p>หมายเหตุ</p> <div class="ds-doc__lines" style="--ds-doc-lines:3" aria-hidden="true"></div>
+       <span class="ds-doc__check">☐ ซ่อมได้ทันที</span> …
+     </section>
+     <div class="ds-doc__signs"> 3 x <div class="ds-doc__sign">ลงชื่อ …… ผู้แจ้ง<br>( ชื่อ-สกุล )<br>ตำแหน่ง …<br>วันที่ …</div></div>
+     <footer class="ds-doc__foot">แบบฟอร์ม SMMS-F01 · พิมพ์เมื่อ … · หน้า 1/1</footer>
+   </article>
+   The sheet is ALWAYS black on white paper (--ds-doc-* tokens), in light
+   and dark theme and in print; text uses --ds-font-doc (Sarabun).
+   Screen: a 210 x 297 mm sheet centred on --ds-bg; <=900px it shrinks to
+     the viewport width, keeping the A4 proportion (no horizontal scroll).
+   Print: named page ds-a4 (A4, margin 0 - the sheet padding is the page
+     margin; other pages that load the kit keep their own @page), toolbar
+     hidden, one sheet per page. Print at scale 100 %.
+   ===================================================================== */
+@page ds-a4{size:A4;margin:0}
+.ds-print-body{min-height:100vh;background:var(--ds-bg)}
+.ds-print-toolbar{
+  position:sticky;top:0;z-index:var(--ds-z-topbar);
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;
+  padding:10px max(16px,calc((100% - 210mm) / 2));
+  border-bottom:1px solid var(--ds-line);background:var(--ds-surface);color:var(--ds-ink);
+}
+/* Sizes inside the sheet are N * --ds-doc-u (1 "sheet px"): 1px on paper
+   and wide screens; <=900px screens shrink the unit so the WHOLE sheet
+   scales down like a page preview (same layout and line breaks as print). */
+.ds-doc{
+  --ds-doc-u:1px;
+  page:ds-a4;
+  box-sizing:border-box;display:flex;flex-direction:column;
+  width:210mm;min-height:297mm;margin:16px auto 24px;padding:18mm 16mm;
+  background:var(--ds-doc-paper);color:var(--ds-doc-ink);box-shadow:var(--ds-shadow-pop);
+  font-family:var(--ds-font-doc);font-size:calc(15 * var(--ds-doc-u));font-weight:400;line-height:1.4;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+/* Sarabun ships 300/400/600 only: weight 500 would fall back to 400 */
+.ds-doc :is(b,strong,th,h1,h2,h3){font-weight:600}
+.ds-doc__head{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+  grid-template-areas:"logo org meta" "title title title";
+  align-items:start;gap:calc(2 * var(--ds-doc-u)) calc(12 * var(--ds-doc-u));
+  margin:0 0 calc(10 * var(--ds-doc-u));padding:0 0 calc(8 * var(--ds-doc-u));border-bottom:calc(2 * var(--ds-doc-u)) solid var(--ds-doc-line);
+}
+.ds-doc__logo{grid-area:logo;flex:none;width:calc(56 * var(--ds-doc-u));height:calc(56 * var(--ds-doc-u))}
+.ds-doc__org{grid-area:org;display:flex;flex-direction:column;min-width:0;font-size:calc(13 * var(--ds-doc-u));line-height:1.4}
+.ds-doc__org > b{font-size:calc(17 * var(--ds-doc-u));line-height:1.3}
+.ds-doc__title{grid-area:title;margin:calc(4 * var(--ds-doc-u)) 0 0;font-size:calc(24 * var(--ds-doc-u));line-height:1.2;letter-spacing:.02em;text-align:center}
+.ds-doc__meta{grid-area:meta;margin:0;border-collapse:collapse;font-size:calc(14 * var(--ds-doc-u))}
+.ds-doc__meta :is(th,td){padding:calc(2 * var(--ds-doc-u)) calc(8 * var(--ds-doc-u));border:1px solid var(--ds-doc-line);text-align:left;white-space:nowrap}
+.ds-doc__meta th{background:var(--ds-doc-fill)}
+.ds-doc__section{margin:0 0 calc(10 * var(--ds-doc-u));break-inside:avoid;page-break-inside:avoid}
+.ds-doc__heading{margin:0 0 calc(4 * var(--ds-doc-u));font-size:calc(16 * var(--ds-doc-u));line-height:1.3}
+.ds-doc__section > p{margin:calc(6 * var(--ds-doc-u)) 0 0}
+.ds-doc__table{width:100%;margin:0;border-collapse:collapse;font-size:inherit}
+.ds-doc__table :is(th,td){
+  padding:calc(3 * var(--ds-doc-u)) calc(8 * var(--ds-doc-u));border:1px solid var(--ds-doc-line);
+  text-align:left;vertical-align:top;overflow-wrap:anywhere;
+}
+.ds-doc__table th{width:17%;background:var(--ds-doc-fill);white-space:nowrap}
+/* N blank ruled lines to write on: style="--ds-doc-lines:3" (default 3) */
+.ds-doc__lines{
+  --ds-doc-lh:1.8em;
+  height:calc(var(--ds-doc-lines,3) * var(--ds-doc-lh));margin:0;opacity:.55;
+  background:repeating-linear-gradient(180deg,transparent 0 calc(var(--ds-doc-lh) - 1px),
+    var(--ds-doc-line) calc(var(--ds-doc-lh) - 1px) var(--ds-doc-lh));
+}
+/* tick-box option (the ☐ is written in the text) */
+.ds-doc__check{display:inline-block;margin:0 calc(18 * var(--ds-doc-u)) 0 0;white-space:nowrap}
+/* signatures pinned to the bottom of the sheet */
+.ds-doc__signs{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:calc(8 * var(--ds-doc-u));
+  margin-top:auto;padding-top:calc(16 * var(--ds-doc-u));break-inside:avoid;page-break-inside:avoid;
+}
+.ds-doc__sign{font-size:calc(13.5 * var(--ds-doc-u));line-height:1.8;text-align:center;overflow-wrap:anywhere}
+.ds-doc__foot{
+  margin:calc(12 * var(--ds-doc-u)) 0 0;padding-top:calc(4 * var(--ds-doc-u));border-top:1px solid var(--ds-doc-line);
+  font-size:calc(12 * var(--ds-doc-u));line-height:1.4;text-align:right;
+}
+/* screen <=900px: the whole sheet scales to the viewport width (A4 aspect
+   kept, same layout as paper, no horizontal scroll; pinch-zoom to read).
+   794 = 210mm in CSS px; 1123 = 297mm; 68 / 60 = 18mm / 16mm. "screen"
+   matters: a printed A4 page is ~794px wide and would match a bare
+   (max-width:900px) query. */
+@media screen and (max-width:900px){
+  .ds-print-toolbar{padding-inline:12px}
+  .ds-doc{
+    --ds-doc-u:min(1px, calc((100vw - 32px) / 794));
+    width:calc(794 * var(--ds-doc-u));min-height:calc(1123 * var(--ds-doc-u));
+    margin:12px auto;padding:calc(68 * var(--ds-doc-u)) calc(60 * var(--ds-doc-u));
+  }
+}
+@media print{
+  .ds-print-body{min-height:0;background:none !important}
+  .ds-print-toolbar{display:none !important}
+  /* width:auto = the page box: 210mm with the named page, or the page area
+     in a browser without named pages (then its default margins apply) */
+  .ds-doc{
+    width:auto;min-height:0;margin:0 !important;box-shadow:none !important;
+    break-after:page;page-break-after:always;
+    -webkit-box-decoration-break:clone;box-decoration-break:clone;
+  }
+  .ds-doc:last-of-type{break-after:auto;page-break-after:auto}
+  /* 296mm (not 297): a 1px rounding overflow would add a blank page */
+  @supports (page:auto){ .ds-doc{min-height:296mm} }
+}
+
+/* =====================================================================
+   RESPONSIVE (part 04 components) — same breakpoints as the original:
+   1280 / 900 / 620 / 400. Dialog, toast and tooltip keep the original
+   viewport-relative sizing (min(480px,100vw - 32px), 100vw - 32px).
+   ===================================================================== */
+@media (max-width:1280px){
+  .ds-auth__brand{padding:28px 32px 32px}
+  .ds-auth__headline{font-size:24px}
+}
+@media (max-width:900px){
+  /* auth: stack; brand panel becomes a compact banner */
+  .ds-auth{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr}
+  .ds-auth__brand{
+    justify-content:flex-start;gap:14px;
+    padding:calc(16px + env(safe-area-inset-top,0px)) 20px 18px;
+  }
+  .ds-auth__brand::after{height:160px}
+  .ds-auth__headline{font-size:22px}
+  .ds-auth__lead,
+  .ds-auth__quote,
+  .ds-auth__brand .ds-hero__points{display:none}
+  .ds-auth__card{align-self:start;margin:20px 0 28px}
+}
+@media (max-width:620px){
+  .ds-tabs__tab{padding-inline:12px}
+  .ds-alert{padding:10px 12px;flex-wrap:wrap}
+  .ds-alert__body{flex:1 1 0}
+  .ds-alert__actions{flex:1 1 100%;margin-inline-start:0}
+  .ds-empty{padding:22px 14px}
+  .ds-auth__intro{display:none}
+  .ds-auth__card{padding:22px 18px 20px}
+  .ds-error__card{padding:22px 18px 18px}
+  .ds-error__code{font-size:44px}
+  .ds-error__actions > .ds-btn{flex:1 1 auto}
+}
+@media (max-width:400px){
+  .ds-auth__brand{padding:calc(14px + env(safe-area-inset-top,0px)) 16px 14px}
+  .ds-auth__card{width:calc(100% - 24px);margin-top:12px}
+}
+
+/* =====================================================================
+   REDUCED MOTION — part 01 already shortens motion inside ds scopes;
+   these rules also cover skeletons/spinners used outside a scope root.
+   The spinner becomes a static ring, the skeleton a plain track.
+   ===================================================================== */
+@media (prefers-reduced-motion:reduce){
+  .ds-skeleton{animation:none;background-image:none}
+  .ds-spinner{animation:none}
+}
+
+/* =====================================================================
+   FORCED COLORS (Windows High Contrast) — keep state visible where the
+   meaning was carried by background color or a transparent border only.
+   ===================================================================== */
+@media (forced-colors:active){
+  .ds-tabs__tab{border-bottom-color:Canvas}
+  .ds-tabs__tab[aria-selected="true"],
+  .ds-tabs__tab[aria-current="page"]{border-bottom-color:Highlight}
+  .ds-alert{border:1px solid CanvasText;border-left-width:4px}
+  .ds-timeline__dot{forced-color-adjust:none;background:CanvasText}
+  .ds-skeleton{border:1px solid GrayText;background-image:none}
+  .ds-spinner{forced-color-adjust:none;border-color:GrayText;border-top-color:Highlight}
+  .ds-toast,
+  .ds-tip,
+  .ds-auth__card,
+  .ds-error__card{border:1px solid CanvasText}
+  .ds-error__icon{border:2px solid CanvasText}
+  .ds-error::before{display:none}
+}
+
+/* =====================================================================
+   PRINT (components) — part 01 already forces the light tokens, drops the
+   shell (ds-sidebar, ds-topbar, ds-footer, ds-menu-btn, ds-skip-link,
+   ds-page-head__actions) and reclaims the sidebar column. This block adds:
+   hide every interactive control and floating layer, white page, no
+   shadows (panels get a hairline instead), panels/rows avoid page breaks,
+   tables un-clipped with repeating headers, plain links, and exact colors
+   for data-carrying fills (pills, charts, KPI tiles).
+   !important is allowed in print only.
+   ===================================================================== */
+@media print{
+  /* No unnamed @page here: it would change paper size and margins of every
+     host page that loads ds-ui.css. A system that wants A4 adds
+     @page{size:A4;margin:12mm} to its own print CSS. The only page rule in
+     the kit is the NAMED page ds-a4, used by .ds-doc alone (A4 PRINT
+     DOCUMENT above). */
+
+  /* chrome + controls */
+  .ds-btn,.ds-icon-btn,.ds-link-btn,.ds-quick,
+  .ds-toast,.ds-tip,
+  .ds-auth__brand{display:none !important}
+
+  /* white page, flat surfaces */
+  .ds-auth{display:block !important;min-height:0 !important;background:none !important}
+  .ds-panel,.ds-kpi,.ds-auth__card{box-shadow:none !important;border:1px solid var(--ds-line)}
+  .ds-auth__card{max-width:none;width:auto;margin:0}
+  .ds-error{display:block !important;min-height:0 !important;padding:0 !important;background:none !important}
+  .ds-error::before{display:none}
+  .ds-error__card{max-width:none;box-shadow:none !important;border:1px solid var(--ds-line)}
+
+  /* tabs: print every panel, one after another; the tab row is dropped */
+  .ds-tabs{display:none !important}
+  .ds-tabs__panel[hidden]{display:block !important;padding-top:14px}
+
+  /* keep blocks whole */
+  .ds-panel,.ds-kpi,.ds-hero,.ds-datecard,.ds-alert,.ds-dl,.ds-empty,
+  .ds-timeline__item,.ds-auth__card,.ds-table tr{break-inside:avoid;page-break-inside:avoid}
+  .ds-panel__head,.ds-dialog__title,.ds-timeline__title{break-after:avoid;page-break-after:avoid}
+
+  /* tables (un-clipped, repeating header), pager, filters, form actions and
+     row actions: see PRINT (data & forms) in part 03 */
+
+  /* links print as plain text */
+  :is(.ds-app,.ds-scope,.ds-body,.ds-auth) a,
+  .ds-id-link{color:inherit !important;text-decoration:none !important}
+
+  /* print data colors even when "Background graphics" is off */
+  .ds-kpi__icon,.ds-pill,.ds-badge,.ds-legend__dot,
+  .ds-bar__fill,.ds-bar__track,.ds-progress,.ds-progress__fill,.ds-chart__svg,
+  .ds-alert,.ds-tabs__count,.ds-timeline__dot,.ds-notes__icon,.ds-error__icon{
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+
+  /* static loaders */
+  .ds-skeleton,.ds-spinner{animation:none !important}
+}
+
+
+/* =====================================================================
+   MOTION - small, quick animations (150-700ms, ease-out)
+   ---------------------------------------------------------------------
+   * sidebar collapse/expand: see 5.8b (column slides, labels fade, the
+     edge button's chevron turns around)
+   * popups (menus, notifications, date picker, combobox list) drop in,
+     nav sub-menus and tab panels fade in, dialogs rise + fade with their
+     backdrop, the toast rises from the bottom
+   * buttons press down 1px; quick-action tiles lift on hover
+   * FIRST PAGE LOAD ONLY (html:not(.ds-ready); ds-ui.js adds .ds-ready
+     ~1s after load): KPI cards rise in a short cascade, bars/progress grow
+     from the left, donut/pie turn in - live re-renders never replay them
+   * theme switch: colours cross-fade for .3s (html.ds-theme-anim, set by
+     ds-ui.js only while the toggle runs)
+   All of it is disabled by prefers-reduced-motion (base section).
+   ===================================================================== */
+@keyframes ds-fade-in{ from{ opacity:0; } }
+@keyframes ds-rise-in{ from{ opacity:0; transform:translateY(8px); } }
+@keyframes ds-dialog-in{ from{ opacity:0; transform:translateY(10px) scale(.97); } }
+@keyframes ds-toast-in{ from{ opacity:0; transform:translate(-50%,12px); } }
+@keyframes ds-grow-x{ from{ transform:scaleX(0); } }
+@keyframes ds-chart-in{ from{ opacity:0; transform:rotate(-30deg) scale(.9); } }
+
+.ds-datepicker,
+.ds-combo__list{ animation:ds-pop-in var(--ds-dur-fast) ease-out; }
+.ds-nav__sub:not([hidden]){ animation:ds-pop-in var(--ds-dur) var(--ds-ease-out); }
+.ds-tabs__panel:not([hidden]){ animation:ds-fade-in var(--ds-dur) ease-out; }
+.ds-dialog[open]{ animation:ds-dialog-in var(--ds-dur) var(--ds-ease-out); }
+.ds-dialog[open]::backdrop{ animation:ds-fade-in var(--ds-dur) ease-out; }
+.ds-toast:not([hidden]){ animation:ds-toast-in var(--ds-dur) var(--ds-ease-out); }
+
+.ds-btn:active:not(:disabled):not([aria-disabled="true"]),
+.ds-icon-btn:active:not(:disabled){ transform:translateY(1px); }
+.ds-icon-btn.ds-menu-btn:active{ transform:translateY(-50%) scale(.92); }   /* keeps its centring */
+.ds-quick__btn{ transition:filter var(--ds-dur-fast) ease, transform var(--ds-dur-fast) var(--ds-ease-out); }
+.ds-quick__btn:hover:not(:disabled){ transform:translateY(-2px); }
+.ds-quick__btn:active:not(:disabled){ transform:translateY(0); }
+
+:root:not(.ds-ready) .ds-kpi{ animation:ds-rise-in .35s var(--ds-ease-out) both; }
+:root:not(.ds-ready) .ds-kpi:nth-child(2){ animation-delay:.04s; }
+:root:not(.ds-ready) .ds-kpi:nth-child(3){ animation-delay:.08s; }
+:root:not(.ds-ready) .ds-kpi:nth-child(4){ animation-delay:.12s; }
+:root:not(.ds-ready) .ds-kpi:nth-child(n+5){ animation-delay:.16s; }
+:root:not(.ds-ready) .ds-bar__fill,
+:root:not(.ds-ready) .ds-progress__fill{ transform-origin:left center; animation:ds-grow-x .7s var(--ds-ease-out) .1s both; }
+:root:not(.ds-ready) .ds-chart__svg{ animation:ds-chart-in .6s var(--ds-ease-out) both; }
+
+.ds-theme-anim :where(.ds-app,.ds-body,.ds-auth),
+.ds-theme-anim :where(.ds-app,.ds-body,.ds-auth) *{
+  transition:background-color .3s ease, color .3s ease, border-color .3s ease, fill .3s ease, stroke .3s ease;
+}

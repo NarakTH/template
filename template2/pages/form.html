@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เพิ่มงานบริการ | Service Hub</title>
+<!-- =========================================================================
+  Template 2 : form.html (APP SHELL + form archetype: create / edit)
+
+  Shell copied unchanged from dashboard.html; the "งานบริการ" tab stays
+  current because this page belongs to that section. Options and texts are
+  SAMPLE data.
+
+  CONTENT
+    breadcrumb + page head
+    div.t2-alert               info note; #form-saved = demo success message
+    form[data-t2-validate]     novalidate; required controls carry [required]
+      section.t2-card--flush   one per group: .t2-form-section__head + __body
+        div.t2-form-grid       2 columns from 768px; .t2-field--span = full row
+          div.t2-field         label.t2-label (+ .t2-req) / control / .t2-hint / .t2-error[hidden]
+      div.t2-form-actions      sticky bar: note + cancel / save draft / submit
+    dialog#dlg-discard         "leave without saving?" (data-t2-dialog-open on cancel)
+  Validation: t2-ui.js marks empty [required] controls aria-invalid="true",
+  shows the field's .t2-error and focuses the first one. The server must
+  validate again and render the same markup with the errors visible.
+  DEMO ONLY: data-t2-demo-success shows #form-saved instead of submitting;
+  remove it (and set method="post" + action + CSRF token) in a real system.
+========================================================================== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../assets/t2-ui.css">
+<script src="../assets/t2-ui.js"></script>
+</head>
+<body class="t2-body t2-grid-bg">
+<a class="t2-skip-link" href="#t2-main">ข้ามไปยังเนื้อหาหลัก</a>
+
+<div class="t2-app">
+
+  <!-- ===== APP HEADER (shared layout) ===== -->
+  <header class="t2-appbar">
+    <div class="t2-container t2-container--fluid">
+      <div class="t2-appbar__row">
+        <a class="t2-brand t2-brand--app" href="dashboard.html">
+          <img class="t2-brand__logo" src="../assets/logo.svg" alt="" width="44" height="44">
+          <span class="t2-brand__text">
+            <span class="t2-brand__name">Service Hub</span>
+            <span class="t2-brand__org">ระบบคลังข้อมูลงานบริการ</span>
+          </span>
+        </a>
+        <div class="t2-appbar__actions">
+          <span class="t2-user">
+            <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-shield-check"></use></svg>
+            <span class="t2-user__name">นายสมชาย ใจดี</span>
+            <span class="t2-user__role">ผู้ประสานหลัก (ผู้ดูแลประจำหน่วยงาน)</span>
+          </span>
+          <button type="button" class="t2-btn t2-btn--ghost t2-btn--icon t2-btn--md" aria-label="การแจ้งเตือน" title="การแจ้งเตือน">
+            <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-bell"></use></svg>
+          </button>
+          <button type="button" class="t2-btn t2-btn--ghost t2-btn--icon t2-btn--md t2-theme-toggle" data-t2-theme-toggle aria-pressed="false" aria-label="โหมดมืด" title="สลับโหมดสว่าง / มืด">
+            <svg class="t2-ic t2-ic--sun" aria-hidden="true"><use href="#t2-i-sun"></use></svg>
+            <svg class="t2-ic t2-ic--moon" aria-hidden="true"><use href="#t2-i-moon"></use></svg>
+          </button>
+          <a class="t2-btn t2-btn--info t2-btn--md" href="login.html" aria-label="ออกจากระบบ">
+            <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-log-out"></use></svg><span class="t2-hide-mobile">ออกจากระบบ</span></a>
+        </div>
+      </div>
+    </div>
+    <nav class="t2-appnav" aria-label="เมนูหลัก">
+      <div class="t2-container t2-container--fluid">
+        <ul class="t2-appnav__list">
+          <li><a class="t2-appnav__link" href="dashboard.html"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-layout-dashboard"></use></svg>Dashboard</a></li>
+          <li><a class="t2-appnav__link" href="#"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-user"></use></svg>ข้อมูลของฉัน</a></li>
+          <li><a class="t2-appnav__link" href="list.html" aria-current="page"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-file-text"></use></svg>งานบริการ</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main class="t2-main" id="t2-main">
+    <div class="t2-container t2-container--fluid t2-stack t2-stack--lg">
+
+      <!-- Page head -->
+      <div class="t2-page-head">
+        <div class="t2-page-head__main">
+          <nav class="t2-breadcrumb" aria-label="เส้นทาง">
+            <ol class="t2-breadcrumb__list">
+              <li><a href="dashboard.html">Dashboard</a></li>
+              <li><a href="list.html">งานบริการ</a></li>
+              <li><span aria-current="page">เพิ่มงานบริการ</span></li>
+            </ol>
+          </nav>
+          <h1 class="t2-page-head__title">เพิ่มงานบริการ</h1>
+          <p class="t2-page-head__desc">กรอกข้อมูลงานบริการให้ครบ แล้วกด “ส่งตรวจทาน” เพื่อส่งให้ผู้อนุมัติตรวจสอบก่อนเผยแพร่</p>
+        </div>
+      </div>
+
+      <div class="t2-alert t2-tone-sky">
+        <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-info"></use></svg>
+        <div class="t2-alert__body">ช่องที่มีเครื่องหมาย <span class="t2-req">*</span> ต้องกรอก · บันทึกร่างไว้ก่อนได้ แล้วกลับมาแก้ไขภายหลัง</div>
+      </div>
+
+      <div class="t2-alert t2-tone-green" id="form-saved" role="status" hidden>
+        <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-circle-check"></use></svg>
+        <div class="t2-alert__body"><p class="t2-alert__title">ส่งตรวจทานเรียบร้อย</p>ผู้อนุมัติจะได้รับการแจ้งเตือน และติดตามสถานะได้ที่หน้างานบริการ (ข้อความตัวอย่าง)</div>
+      </div>
+
+      <form class="t2-stack t2-stack--lg" action="list.html" method="get" novalidate data-t2-validate data-t2-demo-success="form-saved">
+
+        <!-- Section 1 -->
+        <section class="t2-card t2-card--flush" aria-labelledby="sec-1">
+          <div class="t2-form-section__head">
+            <span class="t2-icon-tile"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-file-text"></use></svg></span>
+            <div>
+              <h2 class="t2-form-section__title" id="sec-1">ข้อมูลงานบริการ</h2>
+              <p class="t2-form-section__desc">ชื่อ หมวด และหน่วยงานเจ้าของเรื่อง</p>
+            </div>
+          </div>
+          <div class="t2-form-section__body">
+            <div class="t2-form-grid">
+              <div class="t2-field t2-field--span">
+                <label class="t2-label" for="svc-name">ชื่องานบริการ<span class="t2-req" aria-hidden="true">*</span></label>
+                <input class="t2-input" id="svc-name" name="name" type="text" required aria-describedby="svc-name-hint svc-name-err" placeholder="เช่น ขออนุญาตประกอบกิจการ…">
+                <p class="t2-hint" id="svc-name-hint">ขึ้นต้นด้วยคำกริยา เช่น ขอ… ยื่น… แจ้ง… ให้ผู้รับบริการเข้าใจทันที</p>
+                <p class="t2-error" id="svc-name-err" hidden><svg class="t2-ic t2-ic--sm" aria-hidden="true"><use href="#t2-i-circle-alert"></use></svg>กรุณากรอกชื่องานบริการ</p>
+              </div>
+              <div class="t2-field">
+                <label class="t2-label" for="svc-code">รหัสงานบริการ</label>
+                <input class="t2-input" id="svc-code" name="code" type="text" value="ระบบออกให้เมื่อบันทึก" readonly aria-describedby="svc-code-hint">
+                <p class="t2-hint" id="svc-code-hint">รูปแบบ SV-หมวด-ลำดับ</p>
+              </div>
+              <div class="t2-field">
+                <label class="t2-label" for="svc-agency">หน่วยงานเจ้าของเรื่อง<span class="t2-req" aria-hidden="true">*</span></label>
+                <select class="t2-select" id="svc-agency" name="agency" required aria-describedby="svc-agency-err">
+                  <option value="">เลือกหน่วยงาน</option>
+                  <option>กรมตัวอย่างที่ 1</option>
+                  <option>กรมตัวอย่างที่ 2</option>
+                  <option>กรมตัวอย่างที่ 3</option>
+                </select>
+                <p class="t2-error" id="svc-agency-err" hidden><svg class="t2-ic t2-ic--sm" aria-hidden="true"><use href="#t2-i-circle-alert"></use></svg>กรุณาเลือกหน่วยงาน</p>
+              </div>
+              <div class="t2-field">
+                <label class="t2-label" for="svc-topic">หมวดหลัก (Topic)<span class="t2-req" aria-hidden="true">*</span></label>
+                <select class="t2-select" id="svc-topic" name="topic" required aria-describedby="svc-topic-err">
+                  <option value="">เลือกหมวดหลัก</option>
+                  <option>การลงทุนและการประกอบธุรกิจ</option>
+                  <option>ยานพาหนะและการขนส่ง</option>
+                  <option>สุขภาพและการรักษาพยาบาล</option>
+                  <option>การศึกษาและการเรียนรู้</option>
+                  <option>แรงงานและการจ้างงาน</option>
+                  <option>ภาษีและการเงิน</option>
+                  <option>ที่ดินและสิ่งปลูกสร้าง</option>
+                  <option>สิ่งแวดล้อมและพลังงาน</option>
+                </select>
+                <p class="t2-error" id="svc-topic-err" hidden><svg class="t2-ic t2-ic--sm" aria-hidden="true"><use href="#t2-i-circle-alert"></use></svg>กรุณาเลือกหมวดหลัก</p>
+              </div>
+              <div class="t2-field">
+                <label class="t2-label" for="svc-subtopic">หมวดย่อย (Sub-Topic)<span class="t2-req" aria-hidden="true">*</span></label>
+                <select class="t2-select" id="svc-subtopic" name="subtopic" required aria-describedby="svc-subtopic-err">
+                  <option value="">เลือกหมวดย่อย</option>
+                  <option>การจดทะเบียนธุรกิจ</option>
+                  <option>การส่งเสริมการลงทุน</option>
+                  <option>ใบอนุญาตประกอบกิจการ</option>
+                  <option>การนำเข้าและส่งออก</option>
+                </select>
+                <p class="t2-error" id="svc-subtopic-err" hidden><svg class="t2-ic t2-ic--sm" aria-hidden="true"><use href="#t2-i-circle-alert"></use></svg>กรุณาเลือกหมวดย่อย</p>
+              </div>
+              <div class="t2-field t2-field--span">
+                <label class="t2-label" for="svc-law">กฎหมายหรือระเบียบที่เกี่ยวข้อง</label>
+                <input class="t2-input" id="svc-law" name="law" type="text" placeholder="เช่น พระราชบัญญัติ… มาตรา…">
+              </div>
+              <div class="t2-field t2-field--span">
+                <label class="t2-label" for="svc-desc">คำอธิบายงานบริการ</label>
+                <textarea class="t2-textarea" id="svc-desc" name="description" maxlength="500" aria-describedby="svc-desc-hint" placeholder="อธิบายสั้น ๆ ว่างานบริการนี้คืออะไร ใครใช้ และได้อะไร"></textarea>
+                <p class="t2-hint" id="svc-desc-hint">ไม่เกิน 500 ตัวอักษร</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2 -->
+        <section class="t2-card t2-card--flush" aria-labelledby="sec-2">
+          <div class="t2-form-section__head">
+            <span class="t2-icon-tile"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-link"></use></svg></span>
+            <div>
+              <h2 class="t2-form-section__title" id="sec-2">ช่องทางและการเชื่อมโยง</h2>
+              <p class="t2-form-section__desc">สถานะ e-Service และแพลตฟอร์มกลางที่เชื่อมต่อ</p>
+            </div>
+          </div>
+          <div class="t2-form-section__body">
+            <div class="t2-form-grid">
+              <fieldset class="t2-field t2-field--span" style="border:0;margin:0;padding:0;min-width:0">
+                <legend class="t2-label" style="padding:0;margin-bottom:8px">สถานะ e-Service<span class="t2-req" aria-hidden="true">*</span></legend>
+                <div class="t2-options">
+                  <label class="t2-option"><input type="radio" name="eservice" value="full" required aria-describedby="svc-es-err">
+                    <span><span class="t2-option__title">ครบทุกขั้นตอน</span><span class="t2-option__text">ยื่น ชำระเงิน และรับผลทางออนไลน์ได้ทั้งหมด</span></span></label>
+                  <label class="t2-option"><input type="radio" name="eservice" value="partial">
+                    <span><span class="t2-option__title">บางขั้นตอน</span><span class="t2-option__text">บางขั้นตอนยังต้องมาติดต่อที่หน่วยงาน</span></span></label>
+                  <label class="t2-option"><input type="radio" name="eservice" value="none">
+                    <span><span class="t2-option__title">ยังไม่เป็น e-Service</span><span class="t2-option__text">ให้บริการที่สำนักงานเท่านั้น</span></span></label>
+                </div>
+                <p class="t2-error" id="svc-es-err" hidden><svg class="t2-ic t2-ic--sm" aria-hidden="true"><use href="#t2-i-circle-alert"></use></svg>กรุณาเลือกสถานะ e-Service</p>
+              </fieldset>
+              <fieldset class="t2-field" style="border:0;margin:0;padding:0;min-width:0">
+                <legend class="t2-label" style="padding:0;margin-bottom:8px">แพลตฟอร์มกลางที่เชื่อมโยง</legend>
+                <div class="t2-choices t2-choices--stack">
+                  <label class="t2-check"><input type="checkbox" name="platform[]" value="tangrat"> แอปทางรัฐ</label>
+                  <label class="t2-check"><input type="checkbox" name="platform[]" value="bizportal"> Biz Portal</label>
+                  <label class="t2-check"><input type="checkbox" name="platform[]" value="nsw"> NSW</label>
+                </div>
+              </fieldset>
+              <div class="t2-field">
+                <label class="t2-label" for="svc-year">ปีงบประมาณที่วางแผนเชื่อมโยง</label>
+                <select class="t2-select" id="svc-year" name="plan_year">
+                  <option value="">ยังไม่มีแผน</option>
+                  <option>2569</option>
+                  <option>2570</option>
+                  <option>2571</option>
+                </select>
+              </div>
+              <div class="t2-field t2-field--span">
+                <label class="t2-label" for="svc-url">ลิงก์ช่องทางออนไลน์</label>
+                <span class="t2-search">
+                  <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-link"></use></svg>
+                  <input class="t2-input" id="svc-url" name="url" type="url" inputmode="url" placeholder="https://" aria-describedby="svc-url-err">
+                </span>
+                <p class="t2-error" id="svc-url-err" hidden><svg class="t2-ic t2-ic--sm" aria-hidden="true"><use href="#t2-i-circle-alert"></use></svg>รูปแบบลิงก์ไม่ถูกต้อง ต้องขึ้นต้นด้วย https://</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 3 -->
+        <section class="t2-card t2-card--flush" aria-labelledby="sec-3">
+          <div class="t2-form-section__head">
+            <span class="t2-icon-tile"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-user"></use></svg></span>
+            <div>
+              <h2 class="t2-form-section__title" id="sec-3">ผู้ประสานงาน</h2>
+              <p class="t2-form-section__desc">ผู้ที่ผู้อนุมัติติดต่อได้เมื่อมีคำถามเรื่องข้อมูล</p>
+            </div>
+          </div>
+          <div class="t2-form-section__body">
+            <div class="t2-form-grid">
+              <div class="t2-field">
+                <label class="t2-label" for="ct-name">ชื่อ-นามสกุล<span class="t2-req" aria-hidden="true">*</span></label>
+                <input class="t2-input" id="ct-name" name="contact_name" type="text" autocomplete="name" required aria-describedby="ct-name-err">
+                <p class="t2-error" id="ct-name-err" hidden><svg class="t2-ic t2-ic--sm" aria-hidden="true"><use href="#t2-i-circle-alert"></use></svg>กรุณากรอกชื่อผู้ประสานงาน</p>
+              </div>
+              <div class="t2-field">
+                <label class="t2-label" for="ct-position">ตำแหน่ง</label>
+                <input class="t2-input" id="ct-position" name="contact_position" type="text" autocomplete="organization-title">
+              </div>
+              <div class="t2-field">
+                <label class="t2-label" for="ct-email">อีเมล<span class="t2-req" aria-hidden="true">*</span></label>
+                <input class="t2-input" id="ct-email" name="contact_email" type="email" autocomplete="email" required aria-describedby="ct-email-err" placeholder="name@agency.go.th">
+                <p class="t2-error" id="ct-email-err" hidden><svg class="t2-ic t2-ic--sm" aria-hidden="true"><use href="#t2-i-circle-alert"></use></svg>กรุณากรอกอีเมลให้ถูกรูปแบบ</p>
+              </div>
+              <div class="t2-field">
+                <label class="t2-label" for="ct-phone">โทรศัพท์</label>
+                <input class="t2-input" id="ct-phone" name="contact_phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="0 2000 0000 ต่อ 000">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 4 -->
+        <section class="t2-card t2-card--flush" aria-labelledby="sec-4">
+          <div class="t2-form-section__head">
+            <span class="t2-icon-tile"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-upload"></use></svg></span>
+            <div>
+              <h2 class="t2-form-section__title" id="sec-4">เอกสารประกอบ</h2>
+              <p class="t2-form-section__desc">คู่มือประชาชน แบบฟอร์ม หรือประกาศที่เกี่ยวข้อง</p>
+            </div>
+          </div>
+          <div class="t2-form-section__body">
+            <div class="t2-field">
+              <span class="t2-label" id="svc-files-label">แนบไฟล์</span>
+              <div class="t2-dropzone" data-t2-dropzone>
+                <span class="t2-icon-tile t2-icon-tile--md"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-upload"></use></svg></span>
+                <span class="t2-dropzone__title">ลากไฟล์มาวาง หรือคลิกเพื่อเลือกไฟล์</span>
+                <span>PDF, DOCX หรือ XLSX ไม่เกิน 10 MB ต่อไฟล์</span>
+                <input type="file" name="files[]" multiple accept=".pdf,.docx,.xlsx" aria-labelledby="svc-files-label">
+              </div>
+              <ul class="t2-files" data-t2-file-list aria-live="polite"></ul>
+            </div>
+          </div>
+        </section>
+
+        <div class="t2-form-actions">
+          <p class="t2-form-actions__note">บันทึกร่างล่าสุด: ยังไม่ได้บันทึก</p>
+          <button class="t2-btn t2-btn--outline" type="button" data-t2-dialog-open="dlg-discard">ยกเลิก</button>
+          <button class="t2-btn t2-btn--secondary" type="button"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-save"></use></svg>บันทึกร่าง</button>
+          <button class="t2-btn t2-btn--primary" type="submit"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-send"></use></svg>ส่งตรวจทาน</button>
+        </div>
+      </form>
+
+    </div>
+  </main>
+
+  <footer class="t2-app-footer">
+    <div class="t2-container t2-container--fluid t2-app-footer__row">
+      <span>© 2569 สำนักงานตัวอย่าง · Service Hub v1.0</span>
+      <span>ข้อมูล ณ 27 ต.ค. 2569 10:30 น.</span>
+    </div>
+  </footer>
+
+</div>
+
+<!-- Leave without saving? (t2-dialog; opened by the cancel button) -->
+<dialog class="t2-dialog" id="dlg-discard" aria-labelledby="dlg-discard-title">
+  <div class="t2-dialog__body">
+    <span class="t2-icon-tile t2-icon-tile--md t2-tone-amber"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-triangle-alert"></use></svg></span>
+    <div>
+      <h2 class="t2-dialog__title" id="dlg-discard-title">ออกจากหน้านี้โดยไม่บันทึก?</h2>
+      <p class="t2-dialog__text">ข้อมูลที่กรอกไว้และยังไม่ได้บันทึกร่างจะหายไป</p>
+    </div>
+  </div>
+  <div class="t2-dialog__foot">
+    <button type="button" class="t2-btn t2-btn--outline" data-t2-dialog-close autofocus>กลับไปแก้ไข</button>
+    <a class="t2-btn t2-btn--danger" href="list.html">ออกโดยไม่บันทึก</a>
+  </div>
+</dialog>
+</body>
+</html>

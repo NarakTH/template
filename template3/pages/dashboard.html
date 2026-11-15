@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แดชบอร์ดภาพรวม | SMMS แจ้งซ่อม</title>
+<!-- =========================================================================
+  Template 3 (preview) : dashboard.html
+
+  A redesign of template1/pages/dashboard.html: same system (SMMS แจ้งซ่อม),
+  same sample figures, calmer look. All numbers, names and dates are SAMPLE
+  data; a real system renders them on the server.
+
+  What changed against Template 1
+    - Hero: slogan banner  ->  greeting + today's summary + the main action
+    - KPI: 5 loud icon tiles  ->  one brand tint, change chip, sparkline
+    - New: 15-day trend chart (new requests vs. closed)
+    - Status colours mean one thing everywhere (see t3-ui.css header)
+    - Pie chart  ->  one segmented bar + key; category bars use one hue
+    - Table: a button per row  ->  quiet row link; overdue shown in words
+    - Quick actions: 4 solid colour tiles  ->  1 primary + 3 quiet tiles
+
+  Shell: a.t3-skip-link, div.t3-app > aside.t3-sidebar + div.t3-main
+         (header.t3-topbar, main.t3-content, footer.t3-footer)
+  Demo only: elements with data-t3-demo show a toast; remove in a real system.
+  Assets: ../assets/t3-ui.css + ../assets/t3-ui.js (window.T3). No page CSS/JS.
+========================================================================== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/t3-ui.css">
+<script src="../assets/t3-ui.js"></script>
+</head>
+<body class="t3-body">
+<a class="t3-skip-link" href="#t3-main">ข้ามไปยังเนื้อหาหลัก</a>
+
+<div class="t3-app">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="t3-sidebar" id="t3-sidebar" aria-label="แถบด้านข้าง">
+    <a class="t3-sidebar__brand" href="dashboard.html">
+      <span class="t3-logo"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-wrench"></use></svg></span>
+      <span class="t3-sidebar__text">
+        <b class="t3-sidebar__name">SMMS</b>
+        <small class="t3-sidebar__tag">Smart Maintenance &amp;<br>Asset Service Management</small>
+      </span>
+    </a>
+
+    <div class="t3-sidebar__scroll">
+      <nav class="t3-nav" aria-label="เมนูหลัก">
+        <p class="t3-nav__section">เมนูหลัก</p>
+        <a class="t3-nav__item" href="dashboard.html" aria-current="page"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-layout-dashboard"></use></svg><span class="t3-nav__label">แดชบอร์ดภาพรวม</span></a>
+        <a class="t3-nav__item" href="#" data-t3-demo><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-wrench"></use></svg><span class="t3-nav__label">แจ้งซ่อมใหม่</span></a>
+        <a class="t3-nav__item" href="#" data-t3-demo><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-clipboard-list"></use></svg><span class="t3-nav__label">รายการแจ้งซ่อม</span><span class="t3-nav__count">9<span class="t3-sr-only"> รายการเกินกำหนด</span></span></a>
+        <a class="t3-nav__item" href="#" data-t3-demo><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-package"></use></svg><span class="t3-nav__label">ครุภัณฑ์ / สินทรัพย์</span></a>
+        <a class="t3-nav__item" href="#" data-t3-demo><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-user-check"></use></svg><span class="t3-nav__label">งานของฉัน</span></a>
+        <a class="t3-nav__item" href="#" data-t3-demo><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-calendar-days"></use></svg><span class="t3-nav__label">ปฏิทินงาน</span></a>
+        <a class="t3-nav__item" href="#" data-t3-demo><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-chart-column"></use></svg><span class="t3-nav__label">รายงาน</span></a>
+
+        <p class="t3-nav__section">ระบบ</p>
+        <a class="t3-nav__item" href="#" data-t3-demo><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-database"></use></svg><span class="t3-nav__label">ข้อมูลหลัก</span></a>
+        <div class="t3-nav__group">
+          <button type="button" class="t3-nav__item t3-nav__toggle" aria-expanded="false" aria-controls="t3-nav-settings"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-settings"></use></svg><span class="t3-nav__label">ตั้งค่า</span><svg class="t3-ic t3-nav__chev" aria-hidden="true"><use href="#t3-i-chevron-down"></use></svg></button>
+          <div class="t3-nav__sub" id="t3-nav-settings" hidden>
+            <a class="t3-nav__item t3-nav__subitem" href="#" data-t3-demo>ตั้งค่าบริษัท</a>
+            <a class="t3-nav__item t3-nav__subitem" href="#" data-t3-demo>ตั้งค่าระบบ</a>
+            <a class="t3-nav__item t3-nav__subitem" href="#" data-t3-demo>ผู้ใช้งานและสิทธิ์</a>
+            <a class="t3-nav__item t3-nav__subitem" href="#" data-t3-demo>บันทึกการใช้งาน</a>
+          </div>
+        </div>
+        <a class="t3-nav__item" href="#" data-t3-demo><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-layout-grid"></use></svg><span class="t3-nav__label">คลังคอมโพเนนต์ (UI Kit)</span></a>
+      </nav>
+    </div>
+
+    <figure class="t3-quote">
+      <svg class="t3-ic" aria-hidden="true"><use href="#t3-i-quote"></use></svg>
+      <blockquote>ดูแลทุกสินทรัพย์ให้พร้อมใช้งาน เพื่อองค์กรที่เดินหน้าได้ไกลกว่า</blockquote>
+      <figcaption lang="en">Maintain Today for a Better Tomorrow</figcaption>
+    </figure>
+  </aside>
+  <div class="t3-backdrop" data-t3-sidebar-close></div>
+
+  <div class="t3-main">
+
+    <!-- ===== TOPBAR ===== -->
+    <header class="t3-topbar">
+      <button type="button" class="t3-iconbtn t3-iconbtn--plain" data-t3-sidebar-toggle aria-controls="t3-sidebar" aria-expanded="true" aria-label="แสดง/ซ่อนเมนู" title="แสดง/ซ่อนเมนู">
+        <svg class="t3-ic" aria-hidden="true"><use href="#t3-i-panel-left"></use></svg>
+      </button>
+      <div class="t3-topbar__titles">
+        <h1 class="t3-topbar__title">แดชบอร์ดภาพรวม</h1>
+        <p class="t3-topbar__sub">ระบบบริหารจัดการงานแจ้งซ่อมและบำรุงรักษาพัสดุครุภัณฑ์องค์กร</p>
+      </div>
+      <label class="t3-search">
+        <span class="t3-sr-only">ค้นหา</span>
+        <svg class="t3-ic" aria-hidden="true"><use href="#t3-i-search"></use></svg>
+        <input type="search" name="q" placeholder="ค้นหาใบแจ้งซ่อม ครุภัณฑ์ สถานที่ ผู้แจ้ง…" autocomplete="off">
+        <kbd class="t3-kbd">Ctrl K</kbd>
+      </label>
+      <button type="button" class="t3-iconbtn t3-theme-toggle" data-t3-theme-toggle aria-pressed="false" aria-label="โหมดมืด" title="สลับโหมดสว่าง / มืด">
+        <svg class="t3-ic t3-ic--sun" aria-hidden="true"><use href="#t3-i-sun"></use></svg>
+        <svg class="t3-ic t3-ic--moon" aria-hidden="true"><use href="#t3-i-moon"></use></svg>
+      </button>
+
+      <div class="t3-pop-anchor">
+        <button type="button" class="t3-iconbtn" data-t3-popover="t3-notif" aria-expanded="false" aria-haspopup="true" aria-label="การแจ้งเตือน (ยังไม่อ่าน 3 รายการ)" title="การแจ้งเตือน">
+          <svg class="t3-ic" aria-hidden="true"><use href="#t3-i-bell"></use></svg><span class="t3-iconbtn__dot" aria-hidden="true">3</span>
+        </button>
+        <div class="t3-popover" id="t3-notif" hidden>
+          <div class="t3-popover__head">
+            <h2 class="t3-popover__title">การแจ้งเตือน</h2>
+            <button type="button" class="t3-link" data-t3-demo>อ่านทั้งหมดแล้ว</button>
+          </div>
+          <ul class="t3-feed t3-popover__body">
+            <li><span class="t3-feed__icon t3-feed__icon--danger"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-triangle-alert"></use></svg></span>
+              <span class="t3-feed__body"><a class="t3-feed__text" href="#followup">มีงานค้างเกินกำหนด 9 รายการ</a><span class="t3-feed__time">15/05/2568 09:00</span></span><span class="t3-feed__unread" aria-label="ยังไม่อ่าน"></span></li>
+            <li><span class="t3-feed__icon t3-feed__icon--warning"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-wind"></use></svg></span>
+              <span class="t3-feed__body"><a class="t3-feed__text" href="#" data-t3-demo>SR-202505-0152 เครื่องปรับอากาศ ชั้น 3 รออะไหล่ (คอมเพรสเซอร์)</a><span class="t3-feed__time">15/05/2568 08:42</span></span><span class="t3-feed__unread" aria-label="ยังไม่อ่าน"></span></li>
+            <li><span class="t3-feed__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-inbox"></use></svg></span>
+              <span class="t3-feed__body"><a class="t3-feed__text" href="#" data-t3-demo>มีใบแจ้งซ่อมใหม่ 4 รายการ รอมอบหมายช่าง</a><span class="t3-feed__time">14/05/2568 16:30</span></span><span class="t3-feed__unread" aria-label="ยังไม่อ่าน"></span></li>
+            <li><span class="t3-feed__icon t3-feed__icon--success"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-circle-check"></use></svg></span>
+              <span class="t3-feed__body"><a class="t3-feed__text" href="#" data-t3-demo>ปิดงาน SR-202505-0147 แล้ว รอผู้แจ้งประเมินความพึงพอใจ</a><span class="t3-feed__time">13/05/2568 14:05</span></span></li>
+            <li><span class="t3-feed__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-calendar-days"></use></svg></span>
+              <span class="t3-feed__body"><a class="t3-feed__text" href="#" data-t3-demo>ครุภัณฑ์ 6 รายการถึงรอบบำรุงรักษา (PM) ภายในสัปดาห์นี้</a><span class="t3-feed__time">12/05/2568 10:15</span></span></li>
+          </ul>
+          <div class="t3-popover__foot"><a class="t3-link" href="#" data-t3-demo>ดูการแจ้งเตือนทั้งหมด <svg class="t3-ic" aria-hidden="true"><use href="#t3-i-arrow-right"></use></svg></a></div>
+        </div>
+      </div>
+
+      <span class="t3-topbar__sep" aria-hidden="true"></span>
+
+      <div class="t3-pop-anchor">
+        <button type="button" class="t3-user" data-t3-popover="t3-user-menu" aria-expanded="false" aria-haspopup="menu" aria-label="เมนูผู้ใช้ สมชาย ใจดี">
+          <span class="t3-avatar" aria-hidden="true">ส</span>
+          <span class="t3-user__meta"><span class="t3-user__name">สมชาย ใจดี</span><span class="t3-user__role">ผู้จัดการ (Supervisor)</span></span>
+          <svg class="t3-ic" aria-hidden="true"><use href="#t3-i-chevron-down"></use></svg>
+        </button>
+        <div class="t3-popover t3-menu" id="t3-user-menu" role="menu" aria-label="เมนูผู้ใช้" hidden>
+          <div class="t3-menu__head" role="none"><span class="t3-user__name">สมชาย ใจดี</span><span class="t3-user__role">somchai.j@example.go.th</span></div>
+          <a class="t3-menu__item" role="menuitem" href="#" data-t3-demo><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-user"></use></svg>ข้อมูลส่วนตัว</a>
+          <a class="t3-menu__item" role="menuitem" href="#" data-t3-demo><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-key"></use></svg>เปลี่ยนรหัสผ่าน</a>
+          <hr class="t3-menu__sep">
+          <!-- Real system: logout is a POST form with the CSRF token -->
+          <a class="t3-menu__item t3-menu__item--danger" role="menuitem" href="#" data-t3-demo><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-log-out"></use></svg>ออกจากระบบ</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="t3-content" id="t3-main" tabindex="-1">
+
+      <!-- ===== HERO: greeting + today's summary | date, time, weather ===== -->
+      <section class="t3-hero" aria-label="สรุปวันนี้">
+        <div class="t3-hero__main">
+          <p class="t3-hero__eyebrow">ภาพรวมวันนี้</p>
+          <h2 class="t3-hero__title">สวัสดี คุณสมชาย</h2>
+          <p class="t3-hero__lead">วันนี้มี <span class="t3-nowrap"><b>17 งาน</b>ที่ต้องติดตาม</span> โดย <span class="t3-nowrap"><b>9 งาน</b>เกินกำหนดแล้ว</span> และมี<span class="t3-nowrap">ใบแจ้งซ่อมใหม่ <b>4 รายการ</b></span><span class="t3-nowrap">รอมอบหมายช่าง</span></p>
+          <div class="t3-hero__actions">
+            <button type="button" class="t3-btn t3-btn--white" data-t3-demo><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-plus"></use></svg>แจ้งซ่อมใหม่</button>
+            <a class="t3-btn t3-btn--glass" href="#followup">ดูงานที่ต้องติดตาม<svg class="t3-ic" aria-hidden="true"><use href="#t3-i-arrow-right"></use></svg></a>
+          </div>
+        </div>
+        <div class="t3-glass">
+          <p class="t3-glass__date">วันพฤหัสบดีที่ 15 พฤษภาคม 2568</p>
+          <p class="t3-glass__time"><time data-t3-clock>10:24</time><small>น.</small></p>
+          <div class="t3-glass__weather">
+            <svg class="t3-ic" aria-hidden="true"><use href="#t3-i-cloud-sun"></use></svg>
+            <div><p class="t3-glass__temp">32°C</p><p class="t3-glass__place">กรุงเทพมหานคร · มีเมฆบางส่วน</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== KPI ===== -->
+      <section class="t3-kpis" aria-label="ตัวชี้วัดหลัก">
+        <article class="t3-kpi">
+          <div class="t3-kpi__top">
+            <span class="t3-kpi__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-wrench"></use></svg></span>
+            <span class="t3-delta t3-delta--good"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-trending-up"></use></svg>12%<span class="t3-sr-only"> เพิ่มขึ้น</span></span>
+          </div>
+          <p class="t3-kpi__value">128</p>
+          <p class="t3-kpi__label">คำขอแจ้งซ่อมทั้งหมด</p>
+          <p class="t3-kpi__caption">เทียบกับเดือนที่แล้ว</p>
+          <svg class="t3-spark" data-t3-spark="7,9,8,6,10,9,8,11,9,7,8,10,9,8,9" aria-hidden="true"></svg>
+        </article>
+        <article class="t3-kpi">
+          <div class="t3-kpi__top">
+            <span class="t3-kpi__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-circle-check"></use></svg></span>
+            <span class="t3-delta t3-delta--good"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-trending-up"></use></svg>19%<span class="t3-sr-only"> เพิ่มขึ้น</span></span>
+          </div>
+          <p class="t3-kpi__value">96</p>
+          <p class="t3-kpi__label">ดำเนินการเสร็จสิ้น</p>
+          <p class="t3-kpi__caption">เทียบกับเดือนที่แล้ว</p>
+          <svg class="t3-spark" data-t3-spark="3,5,6,5,7,6,7,8,7,6,8,7,7,8,6" aria-hidden="true"></svg>
+        </article>
+        <article class="t3-kpi">
+          <div class="t3-kpi__top">
+            <span class="t3-kpi__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-timer"></use></svg></span>
+            <span class="t3-delta t3-delta--good"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-trending-down"></use></svg>32%<span class="t3-sr-only"> ลดลง (ดีขึ้น)</span></span>
+          </div>
+          <p class="t3-kpi__value">1.8<span class="t3-kpi__unit">วัน</span></p>
+          <p class="t3-kpi__label">ระยะเวลาซ่อมเฉลี่ย (MTTR)</p>
+          <p class="t3-kpi__caption">เทียบกับเดือนที่แล้ว</p>
+          <svg class="t3-spark" data-t3-spark="2.9,2.8,2.7,2.7,2.5,2.4,2.4,2.2,2.1,2.1,2.0,1.9,1.9,1.8,1.8" aria-hidden="true"></svg>
+        </article>
+        <article class="t3-kpi t3-kpi--warn">
+          <div class="t3-kpi__top">
+            <span class="t3-kpi__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-inbox"></use></svg></span>
+            <span class="t3-delta t3-delta--bad"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-trending-up"></use></svg>+2<span class="t3-sr-only"> เพิ่มขึ้น (แย่ลง)</span></span>
+          </div>
+          <p class="t3-kpi__value">18</p>
+          <p class="t3-kpi__label">รอเริ่มดำเนินการ</p>
+          <p class="t3-kpi__caption">เข้าใหม่วันนี้ 2 รายการ</p>
+          <svg class="t3-spark" data-t3-spark="12,14,13,15,14,16,15,17,16,15,17,16,18,17,18" aria-hidden="true"></svg>
+        </article>
+        <article class="t3-kpi">
+          <div class="t3-kpi__top">
+            <span class="t3-kpi__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-package"></use></svg></span>
+            <span class="t3-delta t3-delta--good"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-trending-up"></use></svg>2%<span class="t3-sr-only"> เพิ่มขึ้น</span></span>
+          </div>
+          <p class="t3-kpi__value">532</p>
+          <p class="t3-kpi__label">ครุภัณฑ์ทั้งหมด</p>
+          <p class="t3-kpi__caption">เทียบกับเดือนที่แล้ว</p>
+          <svg class="t3-spark" data-t3-spark="521,521,522,523,523,524,525,526,527,527,528,529,530,531,532" aria-hidden="true"></svg>
+        </article>
+      </section>
+
+      <!-- ===== ROW A: trend + status ===== -->
+      <div class="t3-grid">
+        <section class="t3-card t3-col-8" aria-labelledby="trend-title">
+          <div class="t3-card__head">
+            <div class="t3-card__titles">
+              <h2 class="t3-card__title" id="trend-title">แนวโน้มงานแจ้งซ่อม</h2>
+              <p class="t3-card__sub">งานที่แจ้งใหม่เทียบกับงานที่ปิดได้ · 1–15 พ.ค. 2568</p>
+            </div>
+            <div class="t3-card__tools">
+              <ul class="t3-legend">
+                <li style="--c:var(--t3-c1)">แจ้งใหม่</li>
+                <li style="--c:var(--t3-c3)">ปิดงาน</li>
+              </ul>
+              <div class="t3-seg" data-t3-pressed-group role="group" aria-label="ช่วงเวลา">
+                <button type="button" class="t3-seg__btn" aria-pressed="false">7 วัน</button>
+                <button type="button" class="t3-seg__btn" aria-pressed="true">15 วัน</button>
+                <button type="button" class="t3-seg__btn" aria-pressed="false">30 วัน</button>
+              </div>
+            </div>
+          </div>
+          <div class="t3-card__body">
+            <div class="t3-chart" data-t3-area role="img"
+                 aria-label="กราฟงานแจ้งซ่อมรายวัน 1 ถึง 15 พฤษภาคม 2568: แจ้งใหม่รวม 128 งาน เฉลี่ย 8.5 งานต่อวัน ปิดงานรวม 96 งาน เฉลี่ย 6.4 งานต่อวัน"
+                 data-unit="งาน" data-label-prefix="วันที่ " data-labels="1|2|3|4|5|6|7|8|9|10|11|12|13|14|15"
+                 data-series='[{"name":"แจ้งใหม่","color":"var(--t3-c1)","values":[7,9,8,6,10,9,8,11,9,7,8,10,9,8,9]},{"name":"ปิดงาน","color":"var(--t3-c3)","values":[3,5,6,5,7,6,7,8,7,6,8,7,7,8,6]}]'></div>
+            <dl class="t3-facts">
+              <div><dt>แจ้งใหม่เฉลี่ย</dt><dd>8.5<small>งาน/วัน</small></dd></div>
+              <div><dt>ปิดงานเฉลี่ย</dt><dd>6.4<small>งาน/วัน</small></dd></div>
+              <div><dt>อัตราปิดงาน</dt><dd>75%<small>96 จาก 128</small></dd></div>
+            </dl>
+          </div>
+        </section>
+
+        <section class="t3-card t3-col-4 t3-col-md-12" aria-labelledby="status-title">
+          <div class="t3-card__head">
+            <div class="t3-card__titles">
+              <h2 class="t3-card__title" id="status-title">สถานะงานแจ้งซ่อม</h2>
+              <p class="t3-card__sub">ทุกใบแจ้งซ่อมในช่วงที่เลือก</p>
+            </div>
+            <div class="t3-card__tools">
+              <select class="t3-select" aria-label="ช่วงเวลา: สถานะงานแจ้งซ่อม"><option>เดือนนี้</option><option>เดือนที่แล้ว</option><option>ปีนี้</option></select>
+            </div>
+          </div>
+          <div class="t3-card__body">
+            <div class="t3-donut t3-donut--md-row" data-t3-donut data-t3-caption="รายการ">
+              <ul class="t3-statlist">
+                <li data-value="18" style="--c:var(--t3-warning)"><span class="t3-statlist__label">รอดำเนินการ</span><span class="t3-statlist__value">18</span><span class="t3-statlist__pct">14.1%</span></li>
+                <li data-value="8" style="--c:var(--t3-c1)"><span class="t3-statlist__label">กำลังดำเนินการ</span><span class="t3-statlist__value">8</span><span class="t3-statlist__pct">6.3%</span></li>
+                <li data-value="96" style="--c:var(--t3-success)"><span class="t3-statlist__label">เสร็จสิ้น</span><span class="t3-statlist__value">96</span><span class="t3-statlist__pct">75.0%</span></li>
+                <li data-value="6" style="--c:var(--t3-neutral)"><span class="t3-statlist__label">ยกเลิก</span><span class="t3-statlist__value">6</span><span class="t3-statlist__pct">4.7%</span></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ===== ROW B: follow-up table + quick actions / alerts ===== -->
+      <div class="t3-grid">
+        <section class="t3-card t3-col-8 t3-col-lg-12" id="followup" aria-labelledby="fu-title">
+          <div class="t3-card__head">
+            <div class="t3-card__titles">
+              <h2 class="t3-card__title" id="fu-title">งานที่ต้องติดตามวันนี้ <span class="t3-badge">17</span></h2>
+              <p class="t3-card__sub">เรียงตามกำหนดเสร็จ งานที่เกินกำหนดอยู่บนสุด</p>
+            </div>
+            <div class="t3-card__tools">
+              <div class="t3-seg" data-t3-pressed-group role="group" aria-label="กรองงานที่ต้องติดตาม">
+                <button type="button" class="t3-seg__btn" aria-pressed="true">ทั้งหมด <span class="t3-seg__count">17</span></button>
+                <button type="button" class="t3-seg__btn" aria-pressed="false">เกินกำหนด <span class="t3-seg__count">9</span></button>
+                <button type="button" class="t3-seg__btn" aria-pressed="false">ครบกำหนดวันนี้ <span class="t3-seg__count">8</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="t3-card__body t3-card__body--flush">
+            <div class="t3-table-wrap" role="region" aria-labelledby="fu-title" tabindex="0">
+              <table class="t3-table">
+                <thead>
+                  <tr><th scope="col">เลขที่</th><th scope="col">เรื่อง / ผู้แจ้ง</th><th scope="col">กำหนดเสร็จ</th><th scope="col">สถานะ</th><th scope="col"><span class="t3-sr-only">เปิดดู</span></th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><a class="t3-id" href="#" data-t3-demo>SR-202505-0098</a></td>
+                    <td><div class="t3-item"><span class="t3-item__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-wind"></use></svg></span><span><span class="t3-item__title">เครื่องปรับอากาศ ชั้น 3 ไม่เย็น</span><span class="t3-item__sub">สุภาวดี สิทธิ์ · สำนักงานกลาง</span></span></div></td>
+                    <td><span class="t3-due t3-due--late"><span class="t3-due__flag">เกินกำหนด 2 วัน</span><span class="t3-due__date">13/05/2568</span></span></td>
+                    <td><span class="t3-pill t3-pill--progress">กำลังดำเนินการ</span></td>
+                    <td><a class="t3-rowbtn" href="#" data-t3-demo aria-label="เปิดดู SR-202505-0098"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-chevron-right"></use></svg></a></td>
+                  </tr>
+                  <tr>
+                    <td><a class="t3-id" href="#" data-t3-demo>SR-202505-0107</a></td>
+                    <td><div class="t3-item"><span class="t3-item__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-printer"></use></svg></span><span><span class="t3-item__title">เครื่องพิมพ์ กระดาษติด</span><span class="t3-item__sub">เอกชัย นามวง · ฝ่ายบัญชี</span></span></div></td>
+                    <td><span class="t3-due t3-due--late"><span class="t3-due__flag">เกินกำหนด 1 วัน</span><span class="t3-due__date">14/05/2568</span></span></td>
+                    <td><span class="t3-pill t3-pill--pending">รอดำเนินการ</span></td>
+                    <td><a class="t3-rowbtn" href="#" data-t3-demo aria-label="เปิดดู SR-202505-0107"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-chevron-right"></use></svg></a></td>
+                  </tr>
+                  <tr>
+                    <td><a class="t3-id" href="#" data-t3-demo>SR-202505-0115</a></td>
+                    <td><div class="t3-item"><span class="t3-item__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-laptop"></use></svg></span><span><span class="t3-item__title">Notebook จอดับ</span><span class="t3-item__sub">ธนพล รุ่งเรือง · ฝ่ายไอที</span></span></div></td>
+                    <td><span class="t3-due t3-due--today"><span class="t3-due__flag">ครบกำหนดวันนี้</span><span class="t3-due__date">15/05/2568</span></span></td>
+                    <td><span class="t3-pill t3-pill--pending">รอดำเนินการ</span></td>
+                    <td><a class="t3-rowbtn" href="#" data-t3-demo aria-label="เปิดดู SR-202505-0115"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-chevron-right"></use></svg></a></td>
+                  </tr>
+                  <tr>
+                    <td><a class="t3-id" href="#" data-t3-demo>SR-202505-0116</a></td>
+                    <td><div class="t3-item"><span class="t3-item__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-monitor"></use></svg></span><span><span class="t3-item__title">คอมพิวเตอร์ เปิดไม่ติด</span><span class="t3-item__sub">วิทยา ทองแก้ว · ฝ่ายบุคคล</span></span></div></td>
+                    <td><span class="t3-due t3-due--today"><span class="t3-due__flag">ครบกำหนดวันนี้</span><span class="t3-due__date">15/05/2568</span></span></td>
+                    <td><span class="t3-pill t3-pill--pending">รอดำเนินการ</span></td>
+                    <td><a class="t3-rowbtn" href="#" data-t3-demo aria-label="เปิดดู SR-202505-0116"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-chevron-right"></use></svg></a></td>
+                  </tr>
+                  <tr>
+                    <td><a class="t3-id" href="#" data-t3-demo>SR-202505-0123</a></td>
+                    <td><div class="t3-item"><span class="t3-item__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-zap"></use></svg></span><span><span class="t3-item__title">ไฟห้องประชุม ไม่ติด</span><span class="t3-item__sub">กัลยา แสงดี · สำนักงานกลาง</span></span></div></td>
+                    <td><span class="t3-due t3-due--today"><span class="t3-due__flag">ครบกำหนดวันนี้</span><span class="t3-due__date">15/05/2568</span></span></td>
+                    <td><span class="t3-pill t3-pill--progress">กำลังดำเนินการ</span></td>
+                    <td><a class="t3-rowbtn" href="#" data-t3-demo aria-label="เปิดดู SR-202505-0123"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-chevron-right"></use></svg></a></td>
+                  </tr>
+                  <tr>
+                    <td><a class="t3-id" href="#" data-t3-demo>SR-202505-0125</a></td>
+                    <td><div class="t3-item"><span class="t3-item__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-armchair"></use></svg></span><span><span class="t3-item__title">เก้าอี้สำนักงาน ล้อชำรุด</span><span class="t3-item__sub">ชนกานต์ มีศรี · ฝ่ายการตลาด</span></span></div></td>
+                    <td><span class="t3-due t3-due--today"><span class="t3-due__flag">ครบกำหนดวันนี้</span><span class="t3-due__date">15/05/2568</span></span></td>
+                    <td><span class="t3-pill t3-pill--pending">รอดำเนินการ</span></td>
+                    <td><a class="t3-rowbtn" href="#" data-t3-demo aria-label="เปิดดู SR-202505-0125"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-chevron-right"></use></svg></a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="t3-card__foot">
+            <span>แสดง 6 จาก 17 รายการ</span>
+            <a class="t3-link" href="#" data-t3-demo>ดูทั้งหมด <svg class="t3-ic" aria-hidden="true"><use href="#t3-i-arrow-right"></use></svg></a>
+          </div>
+        </section>
+
+        <div class="t3-stack t3-stack--lg-row t3-col-4 t3-col-lg-12">
+          <section class="t3-card" aria-labelledby="quick-title">
+            <div class="t3-card__head">
+              <div class="t3-card__titles"><h2 class="t3-card__title" id="quick-title">เมนูด่วน</h2></div>
+            </div>
+            <div class="t3-card__body">
+              <div class="t3-quick">
+                <button type="button" class="t3-quick__item t3-quick__item--primary" data-t3-demo>
+                  <span class="t3-quick__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-plus"></use></svg></span>
+                  <span><span class="t3-quick__title">แจ้งซ่อมใหม่</span><span class="t3-quick__sub">สร้างคำขอแจ้งซ่อม</span></span>
+                </button>
+                <button type="button" class="t3-quick__item" data-t3-demo>
+                  <span class="t3-quick__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-scan-line"></use></svg></span>
+                  <span><span class="t3-quick__title">ค้นหาครุภัณฑ์</span><span class="t3-quick__sub">สแกนหรือค้นหาสินทรัพย์</span></span>
+                </button>
+                <button type="button" class="t3-quick__item" data-t3-demo>
+                  <span class="t3-quick__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-printer"></use></svg></span>
+                  <span><span class="t3-quick__title">พิมพ์ใบแจ้งซ่อม</span><span class="t3-quick__sub">พิมพ์ หรือบันทึก PDF</span></span>
+                </button>
+                <button type="button" class="t3-quick__item" data-t3-demo>
+                  <span class="t3-quick__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-chart-column"></use></svg></span>
+                  <span><span class="t3-quick__title">ดูรายงาน</span><span class="t3-quick__sub">สรุปผลการซ่อมบำรุง</span></span>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="t3-card" aria-labelledby="notes-title">
+            <div class="t3-card__head">
+              <div class="t3-card__titles"><h2 class="t3-card__title" id="notes-title">แจ้งเตือน</h2></div>
+              <div class="t3-card__tools"><a class="t3-link" href="#" data-t3-demo>ดูทั้งหมด <svg class="t3-ic" aria-hidden="true"><use href="#t3-i-arrow-right"></use></svg></a></div>
+            </div>
+            <div class="t3-card__body">
+              <ul class="t3-feed">
+                <li><span class="t3-feed__icon t3-feed__icon--danger"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-triangle-alert"></use></svg></span>
+                  <span class="t3-feed__body"><span class="t3-feed__text">มีงานค้างเกินกำหนด 9 รายการ</span><span class="t3-feed__time">15/05/2568 09:00</span></span></li>
+                <li><span class="t3-feed__icon t3-feed__icon--warning"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-laptop"></use></svg></span>
+                  <span class="t3-feed__body"><span class="t3-feed__text">อุปกรณ์ “คอมพิวเตอร์ / Notebook” มีการแจ้งซ่อมบ่อย (32 ครั้ง)</span><span class="t3-feed__time">14/05/2568 16:30</span></span></li>
+                <li><span class="t3-feed__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-package"></use></svg></span>
+                  <span class="t3-feed__body"><span class="t3-feed__text">มีการอัปเดตข้อมูลครุภัณฑ์ 12 รายการ</span><span class="t3-feed__time">12/05/2568 10:15</span></span></li>
+              </ul>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- ===== ROW C: categories + departments + recent ===== -->
+      <div class="t3-grid">
+        <section class="t3-card t3-col-4" aria-labelledby="cat-title">
+          <div class="t3-card__head">
+            <div class="t3-card__titles">
+              <h2 class="t3-card__title" id="cat-title">ประเภทครุภัณฑ์ที่แจ้งซ่อมสูงสุด</h2>
+              <p class="t3-card__sub">จำนวนใบแจ้งซ่อม และสัดส่วนจากทั้งหมด</p>
+            </div>
+          </div>
+          <div class="t3-card__body">
+            <ul class="t3-rank">
+              <li><span class="t3-rank__label">คอมพิวเตอร์ / Notebook</span><span class="t3-rank__value">32<small>25.0%</small></span><span class="t3-rank__track"><span class="t3-rank__fill" style="--v:100%"></span></span></li>
+              <li><span class="t3-rank__label">เครื่องปรับอากาศ</span><span class="t3-rank__value">24<small>18.8%</small></span><span class="t3-rank__track"><span class="t3-rank__fill" style="--v:75%;--a:.86"></span></span></li>
+              <li><span class="t3-rank__label">เครื่องพิมพ์</span><span class="t3-rank__value">18<small>14.1%</small></span><span class="t3-rank__track"><span class="t3-rank__fill" style="--v:56.25%;--a:.72"></span></span></li>
+              <li><span class="t3-rank__label">เฟอร์นิเจอร์</span><span class="t3-rank__value">15<small>11.7%</small></span><span class="t3-rank__track"><span class="t3-rank__fill" style="--v:46.9%;--a:.6"></span></span></li>
+              <li><span class="t3-rank__label">ระบบไฟฟ้า</span><span class="t3-rank__value">12<small>9.4%</small></span><span class="t3-rank__track"><span class="t3-rank__fill" style="--v:37.5%;--a:.48"></span></span></li>
+              <li><span class="t3-rank__label">อื่น ๆ</span><span class="t3-rank__value">27<small>21.1%</small></span><span class="t3-rank__track"><span class="t3-rank__fill" style="--v:84.4%;--c:var(--t3-neutral)"></span></span></li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="t3-card t3-col-4" aria-labelledby="dept-title">
+          <div class="t3-card__head">
+            <div class="t3-card__titles">
+              <h2 class="t3-card__title" id="dept-title">สัดส่วนงานตามหน่วยงาน</h2>
+              <p class="t3-card__sub">พื้นที่ที่แจ้งซ่อมเข้ามา</p>
+            </div>
+          </div>
+          <div class="t3-card__body">
+            <p class="t3-share__head"><span class="t3-share__big">28%</span><span class="t3-share__note">มาจากสำนักงานกลาง มากที่สุดจาก 6 กลุ่ม</span></p>
+            <div class="t3-stackbar" role="img" aria-label="สำนักงานกลาง 28% ฝ่ายไอที 20% ฝ่ายบัญชี 15% ฝ่ายบุคคล 12% ฝ่ายการตลาด 10% อื่น ๆ 15%">
+              <i style="--v:28;--c:var(--t3-c1)" title="สำนักงานกลาง 28%"></i>
+              <i style="--v:20;--c:var(--t3-c2)" title="ฝ่ายไอที 20%"></i>
+              <i style="--v:15;--c:var(--t3-c3)" title="ฝ่ายบัญชี 15%"></i>
+              <i style="--v:12;--c:var(--t3-c4)" title="ฝ่ายบุคคล 12%"></i>
+              <i style="--v:10;--c:var(--t3-c5)" title="ฝ่ายการตลาด 10%"></i>
+              <i style="--v:15;--c:var(--t3-c6)" title="อื่น ๆ 15%"></i>
+            </div>
+            <ul class="t3-statlist">
+              <li style="--c:var(--t3-c1)"><span class="t3-statlist__label">สำนักงานกลาง</span><span class="t3-statlist__value">36</span><span class="t3-statlist__pct">28%</span></li>
+              <li style="--c:var(--t3-c2)"><span class="t3-statlist__label">ฝ่ายไอที</span><span class="t3-statlist__value">26</span><span class="t3-statlist__pct">20%</span></li>
+              <li style="--c:var(--t3-c3)"><span class="t3-statlist__label">ฝ่ายบัญชี</span><span class="t3-statlist__value">19</span><span class="t3-statlist__pct">15%</span></li>
+              <li style="--c:var(--t3-c4)"><span class="t3-statlist__label">ฝ่ายบุคคล</span><span class="t3-statlist__value">15</span><span class="t3-statlist__pct">12%</span></li>
+              <li style="--c:var(--t3-c5)"><span class="t3-statlist__label">ฝ่ายการตลาด</span><span class="t3-statlist__value">13</span><span class="t3-statlist__pct">10%</span></li>
+              <li style="--c:var(--t3-c6)"><span class="t3-statlist__label">อื่น ๆ</span><span class="t3-statlist__value">19</span><span class="t3-statlist__pct">15%</span></li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="t3-card t3-col-4 t3-col-md-12" aria-labelledby="recent-title">
+          <div class="t3-card__head">
+            <div class="t3-card__titles"><h2 class="t3-card__title" id="recent-title">งานล่าสุด</h2></div>
+            <div class="t3-card__tools"><a class="t3-link" href="#" data-t3-demo>ดูทั้งหมด <svg class="t3-ic" aria-hidden="true"><use href="#t3-i-arrow-right"></use></svg></a></div>
+          </div>
+          <div class="t3-card__body">
+            <ul class="t3-list">
+              <li><span class="t3-item__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-wind"></use></svg></span>
+                <a class="t3-list__title" href="#" data-t3-demo>เครื่องปรับอากาศ ชั้น 3</a>
+                <span class="t3-pill t3-pill--pending">รอดำเนินการ</span>
+                <span class="t3-list__meta">SR-202505-0152 · 15/05/2568</span></li>
+              <li><span class="t3-item__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-monitor"></use></svg></span>
+                <a class="t3-list__title" href="#" data-t3-demo>คอมพิวเตอร์</a>
+                <span class="t3-pill t3-pill--progress">กำลังดำเนินการ</span>
+                <span class="t3-list__meta">SR-202505-0151 · 15/05/2568</span></li>
+              <li><span class="t3-item__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-projector"></use></svg></span>
+                <a class="t3-list__title" href="#" data-t3-demo>เครื่องฉายโปรเจคเตอร์</a>
+                <span class="t3-pill t3-pill--done">เสร็จสิ้น</span>
+                <span class="t3-list__meta">SR-202505-0150 · 15/05/2568</span></li>
+              <li><span class="t3-item__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-monitor"></use></svg></span>
+                <a class="t3-list__title" href="#" data-t3-demo>คอมพิวเตอร์</a>
+                <span class="t3-pill t3-pill--pending">รอดำเนินการ</span>
+                <span class="t3-list__meta">SR-202505-0149 · 15/05/2568</span></li>
+              <li><span class="t3-item__icon"><svg class="t3-ic" aria-hidden="true"><use href="#t3-i-wind"></use></svg></span>
+                <a class="t3-list__title" href="#" data-t3-demo>เครื่องปรับอากาศ</a>
+                <span class="t3-pill t3-pill--pending">รอดำเนินการ</span>
+                <span class="t3-list__meta">SR-202505-0148 · 14/05/2568</span></li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+    </main>
+
+    <footer class="t3-footer">
+      <span>SMMS เวอร์ชัน 1.0.0 (MVP) · Smart Maintenance &amp; Asset Service Management System · ต้นแบบ HTML ข้อมูลทั้งหมดเป็นตัวอย่าง</span>
+      <span>© 2568 บริษัท ตัวอย่าง จำกัด</span>
+    </footer>
+  </div>
+</div>
+</body>
+</html>

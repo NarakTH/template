@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard | Service Hub</title>
+<!-- =========================================================================
+  Template 2 : dashboard.html (APP SHELL + dashboard archetype)
+
+  Layout and look follow the GSD Tools dashboard (gsd.opdc.go.th, Oct 2026).
+  All names, numbers and dates are SAMPLE data - the server renders the real ones.
+
+  APP SHELL (identical on dashboard.html, list.html, form.html; per page change
+  ONLY the <title>, which .t2-appnav__link has aria-current="page", and the
+  content inside main .t2-container). Taken from the post-login pages of the
+  source: full-width (.t2-container--fluid), white header + tab row.
+    a.t2-skip-link
+    div.t2-app
+      header.t2-appbar
+        div.t2-appbar__row      brand | user chip (name + role tag), bell,
+                                theme toggle, logout
+        nav.t2-appnav           horizontal tabs (scroll sideways on phones)
+      main.t2-main#t2-main      page content
+      footer.t2-app-footer
+  Splitting into includes: header.php = DOCTYPE .. opening <main> + container;
+  footer.php = closing container/main .. </html>.
+  Logout: the demo links to login.html. A real system uses a POST form with
+  the framework CSRF token (GET logout can be triggered by other sites).
+
+  DASHBOARD CONTENT
+    page head (chip + h1 + description)
+    form.t2-filters            4 filter cards (selects + search)
+    div.t2-kpis                5 KPI buttons, one pressed (data-t2-pressed-group)
+    3 donut cards              figure[data-t2-donut] draws from legend data-value
+    column chart / bars / summary table
+    recent requests table
+========================================================================== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../assets/t2-ui.css">
+<script src="../assets/t2-ui.js"></script>
+</head>
+<body class="t2-body t2-grid-bg">
+<a class="t2-skip-link" href="#t2-main">ข้ามไปยังเนื้อหาหลัก</a>
+
+<div class="t2-app">
+
+  <!-- ===== APP HEADER (shared layout) ===== -->
+  <header class="t2-appbar">
+    <div class="t2-container t2-container--fluid">
+      <div class="t2-appbar__row">
+        <a class="t2-brand t2-brand--app" href="dashboard.html">
+          <img class="t2-brand__logo" src="../assets/logo.svg" alt="" width="44" height="44">
+          <span class="t2-brand__text">
+            <span class="t2-brand__name">Service Hub</span>
+            <span class="t2-brand__org">ระบบคลังข้อมูลงานบริการ</span>
+          </span>
+        </a>
+        <div class="t2-appbar__actions">
+          <span class="t2-user">
+            <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-shield-check"></use></svg>
+            <span class="t2-user__name">นายสมชาย ใจดี</span>
+            <span class="t2-user__role">ผู้ประสานหลัก (ผู้ดูแลประจำหน่วยงาน)</span>
+          </span>
+          <!-- Notifications: hook this button to the system's notification panel -->
+          <button type="button" class="t2-btn t2-btn--ghost t2-btn--icon t2-btn--md" aria-label="การแจ้งเตือน" title="การแจ้งเตือน">
+            <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-bell"></use></svg>
+          </button>
+          <button type="button" class="t2-btn t2-btn--ghost t2-btn--icon t2-btn--md t2-theme-toggle" data-t2-theme-toggle aria-pressed="false" aria-label="โหมดมืด" title="สลับโหมดสว่าง / มืด">
+            <svg class="t2-ic t2-ic--sun" aria-hidden="true"><use href="#t2-i-sun"></use></svg>
+            <svg class="t2-ic t2-ic--moon" aria-hidden="true"><use href="#t2-i-moon"></use></svg>
+          </button>
+          <a class="t2-btn t2-btn--info t2-btn--md" href="login.html" aria-label="ออกจากระบบ">
+            <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-log-out"></use></svg><span class="t2-hide-mobile">ออกจากระบบ</span></a>
+        </div>
+      </div>
+    </div>
+    <!-- Menu of the agency-coordinator role (as on the source). Other roles add
+         items such as รออนุมัติ, ผู้ใช้และสิทธิ์, ประวัติเวอร์ชัน, API Spec. -->
+    <nav class="t2-appnav" aria-label="เมนูหลัก">
+      <div class="t2-container t2-container--fluid">
+        <ul class="t2-appnav__list">
+          <li><a class="t2-appnav__link" href="dashboard.html" aria-current="page"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-layout-dashboard"></use></svg>Dashboard</a></li>
+          <li><a class="t2-appnav__link" href="#"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-user"></use></svg>ข้อมูลของฉัน</a></li>
+          <li><a class="t2-appnav__link" href="list.html"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-file-text"></use></svg>งานบริการ</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <main class="t2-main" id="t2-main">
+    <div class="t2-container t2-container--fluid t2-stack t2-stack--lg">
+
+      <!-- Page head -->
+      <div class="t2-page-head">
+        <div class="t2-page-head__main">
+          <p class="t2-chip"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-chart-column"></use></svg> Service Workspace</p>
+          <h1 class="t2-page-head__title">Dashboard งานบริการ</h1>
+          <p class="t2-page-head__desc">ภาพรวมสถานะ e-Service และการเชื่อมโยงแพลตฟอร์มกลาง — กรองตามกระทรวง หน่วยงาน หรือแพลตฟอร์มได้</p>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <form class="t2-filters" role="search" aria-label="ตัวกรอง Dashboard" action="dashboard.html" method="get">
+        <div class="t2-filter">
+          <label class="t2-label" for="f-ministry">กระทรวง</label>
+          <select class="t2-select" id="f-ministry" name="ministry">
+            <option value="">ทั้งหมด</option>
+            <option>กระทรวงการคลัง</option>
+            <option>กระทรวงพาณิชย์</option>
+            <option>กระทรวงอุตสาหกรรม</option>
+            <option>กระทรวงคมนาคม</option>
+            <option>กระทรวงสาธารณสุข</option>
+            <option>กระทรวงแรงงาน</option>
+          </select>
+        </div>
+        <div class="t2-filter">
+          <label class="t2-label" for="f-agency">หน่วยงาน</label>
+          <select class="t2-select" id="f-agency" name="agency">
+            <option value="">ทั้งหมด</option>
+            <option>กรมตัวอย่างที่ 1</option>
+            <option>กรมตัวอย่างที่ 2</option>
+            <option>กรมตัวอย่างที่ 3</option>
+          </select>
+        </div>
+        <div class="t2-filter">
+          <label class="t2-label" for="f-platform">แพลตฟอร์มกลางที่เชื่อมโยง</label>
+          <select class="t2-select" id="f-platform" name="platform">
+            <option value="">ทั้งหมด</option>
+            <option>แอปทางรัฐ</option>
+            <option>Biz Portal</option>
+            <option>NSW</option>
+          </select>
+        </div>
+        <div class="t2-filter">
+          <label class="t2-label" for="f-q">ค้นหาชื่องานบริการ</label>
+          <span class="t2-search">
+            <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-search"></use></svg>
+            <input class="t2-input" id="f-q" name="q" type="search" placeholder="ค้นหา">
+          </span>
+        </div>
+      </form>
+
+      <!-- KPI (buttons act as quick filters; one pressed at a time) -->
+      <div class="t2-kpis" data-t2-pressed-group role="group" aria-label="ตัวชี้วัดหลัก">
+        <button type="button" class="t2-kpi t2-tone-primary" aria-pressed="true">
+          <span class="t2-icon-tile t2-icon-tile--lg"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-layout-grid"></use></svg></span>
+          <span class="t2-kpi__body"><span class="t2-kpi__label">งานบริการทั้งหมด</span><span class="t2-kpi__value">412</span></span>
+        </button>
+        <button type="button" class="t2-kpi t2-tone-red" aria-pressed="false">
+          <span class="t2-icon-tile t2-icon-tile--lg"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-ban"></use></svg></span>
+          <span class="t2-kpi__body"><span class="t2-kpi__label">ไม่เข้าข่าย e-Service</span><span class="t2-kpi__value">78</span></span>
+        </button>
+        <button type="button" class="t2-kpi t2-tone-sky" aria-pressed="false">
+          <span class="t2-icon-tile t2-icon-tile--lg"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-sparkles"></use></svg></span>
+          <span class="t2-kpi__body"><span class="t2-kpi__label">พัฒนาเป็น e-Service ได้</span><span class="t2-kpi__value">334</span></span>
+        </button>
+        <button type="button" class="t2-kpi t2-tone-green" aria-pressed="false">
+          <span class="t2-icon-tile t2-icon-tile--lg"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-shield-check"></use></svg></span>
+          <span class="t2-kpi__body"><span class="t2-kpi__label">เป็น e-Service แล้ว</span><span class="t2-kpi__value">251</span></span>
+        </button>
+        <button type="button" class="t2-kpi t2-tone-amber" aria-pressed="false">
+          <span class="t2-icon-tile t2-icon-tile--lg"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-hourglass"></use></svg></span>
+          <span class="t2-kpi__body"><span class="t2-kpi__label">รอพัฒนาเป็น e-Service</span><span class="t2-kpi__value">83</span></span>
+        </button>
+      </div>
+
+      <!-- Donut charts -->
+      <div class="t2-grid t2-grid--3">
+        <section class="t2-card" aria-labelledby="c1-title">
+          <div class="t2-card__head">
+            <span class="t2-icon-tile"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-chart-pie"></use></svg></span>
+            <h2 class="t2-card__title" id="c1-title">งานบริการที่เป็น e-Service แล้ว</h2>
+          </div>
+          <figure class="t2-donut" data-t2-donut data-t2-caption="ผลรวม">
+            <ul class="t2-legend">
+              <li data-value="96" style="--c:var(--t2-chart-1)">เชื่อมโยงแล้ว (96)</li>
+              <li data-value="128" style="--c:var(--t2-chart-2)">รอเชื่อมโยง / มีแผน (128)</li>
+              <li data-value="27" style="--c:var(--t2-chart-3)">ไม่ประสงค์เชื่อมโยง (27)</li>
+            </ul>
+          </figure>
+        </section>
+        <section class="t2-card" aria-labelledby="c2-title">
+          <div class="t2-card__head">
+            <span class="t2-icon-tile"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-link"></use></svg></span>
+            <h2 class="t2-card__title" id="c2-title">เป็น e-Service และเชื่อมแพลตฟอร์มกลางแล้ว</h2>
+          </div>
+          <figure class="t2-donut" data-t2-donut>
+            <ul class="t2-legend">
+              <li data-value="48" style="--c:var(--t2-chart-1)">แอปทางรัฐ (48)</li>
+              <li data-value="31" style="--c:var(--t2-chart-2)">Biz Portal (31)</li>
+              <li data-value="17" style="--c:var(--t2-chart-3)">NSW (17)</li>
+            </ul>
+          </figure>
+        </section>
+        <section class="t2-card" aria-labelledby="c3-title">
+          <div class="t2-card__head">
+            <span class="t2-icon-tile"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-clock"></use></svg></span>
+            <h2 class="t2-card__title" id="c3-title">ยังไม่เป็น e-Service และรอเชื่อมโยง</h2>
+          </div>
+          <figure class="t2-donut" data-t2-donut>
+            <ul class="t2-legend">
+              <li data-value="83" style="--c:var(--t2-chart-1)">มีแผนพัฒนา (83)</li>
+              <li data-value="78" style="--c:var(--t2-chart-2)">ไม่เข้าข่าย (78)</li>
+            </ul>
+          </figure>
+        </section>
+      </div>
+
+      <!-- Column chart / bars / summary table -->
+      <div class="t2-grid t2-grid--3">
+        <section class="t2-card" aria-labelledby="c4-title">
+          <div class="t2-card__head">
+            <span class="t2-icon-tile"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-calendar"></use></svg></span>
+            <h2 class="t2-card__title" id="c4-title">แผนเชื่อมโยงแพลตฟอร์มกลาง รายปีงบประมาณ</h2>
+          </div>
+          <div class="t2-colchart" role="img" aria-label="แผนเชื่อมโยง ปี 2568 รวม 40 งานบริการ ปี 2569 รวม 55 งานบริการ ปี 2570 รวม 33 งานบริการ">
+            <div class="t2-colchart__y" aria-hidden="true"><span>0</span><span>15</span><span>30</span><span>45</span><span>60</span></div>
+            <div class="t2-colchart__plot">
+              <div class="t2-colchart__col">
+                <i style="--v:33.33%;--c:var(--t2-chart-1)" title="2568 · แอปทางรัฐ 20"></i>
+                <i style="--v:21.67%;--c:var(--t2-chart-2)" title="2568 · Biz Portal 13"></i>
+                <i style="--v:11.67%;--c:var(--t2-chart-3)" title="2568 · NSW 7"></i>
+              </div>
+              <div class="t2-colchart__col">
+                <i style="--v:46.67%;--c:var(--t2-chart-1)" title="2569 · แอปทางรัฐ 28"></i>
+                <i style="--v:28.33%;--c:var(--t2-chart-2)" title="2569 · Biz Portal 17"></i>
+                <i style="--v:16.67%;--c:var(--t2-chart-3)" title="2569 · NSW 10"></i>
+              </div>
+              <div class="t2-colchart__col">
+                <i style="--v:28.33%;--c:var(--t2-chart-1)" title="2570 · แอปทางรัฐ 17"></i>
+                <i style="--v:18.33%;--c:var(--t2-chart-2)" title="2570 · Biz Portal 11"></i>
+                <i style="--v:8.33%;--c:var(--t2-chart-3)" title="2570 · NSW 5"></i>
+              </div>
+            </div>
+            <div class="t2-colchart__x" aria-hidden="true"><span>2568</span><span>2569</span><span>2570</span></div>
+          </div>
+          <ul class="t2-legend t2-legend--row">
+            <li style="--c:var(--t2-chart-1)">แอปทางรัฐ</li>
+            <li style="--c:var(--t2-chart-2)">Biz Portal</li>
+            <li style="--c:var(--t2-chart-3)">NSW</li>
+          </ul>
+        </section>
+
+        <section class="t2-card" aria-labelledby="c5-title">
+          <div class="t2-card__head">
+            <span class="t2-icon-tile"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-trending-up"></use></svg></span>
+            <h2 class="t2-card__title" id="c5-title">สัดส่วนที่เป็น e-Service แยกตามกระทรวง</h2>
+          </div>
+          <ul class="t2-bars">
+            <li class="t2-bar" style="--v:88%"><div class="t2-bar__head"><span class="t2-bar__label">กระทรวงการคลัง</span><span class="t2-bar__value">44/50 · 88%</span></div><div class="t2-bar__track"><span class="t2-bar__fill"></span></div></li>
+            <li class="t2-bar" style="--v:76%"><div class="t2-bar__head"><span class="t2-bar__label">กระทรวงพาณิชย์</span><span class="t2-bar__value">38/50 · 76%</span></div><div class="t2-bar__track"><span class="t2-bar__fill"></span></div></li>
+            <li class="t2-bar" style="--v:64%"><div class="t2-bar__head"><span class="t2-bar__label">กระทรวงอุตสาหกรรม</span><span class="t2-bar__value">32/50 · 64%</span></div><div class="t2-bar__track"><span class="t2-bar__fill"></span></div></li>
+            <li class="t2-bar" style="--v:58%"><div class="t2-bar__head"><span class="t2-bar__label">กระทรวงคมนาคม</span><span class="t2-bar__value">29/50 · 58%</span></div><div class="t2-bar__track"><span class="t2-bar__fill"></span></div></li>
+            <li class="t2-bar" style="--v:47%"><div class="t2-bar__head"><span class="t2-bar__label">กระทรวงสาธารณสุข</span><span class="t2-bar__value">28/60 · 47%</span></div><div class="t2-bar__track"><span class="t2-bar__fill"></span></div></li>
+            <li class="t2-bar" style="--v:39%"><div class="t2-bar__head"><span class="t2-bar__label">กระทรวงแรงงาน</span><span class="t2-bar__value">16/41 · 39%</span></div><div class="t2-bar__track"><span class="t2-bar__fill"></span></div></li>
+          </ul>
+        </section>
+
+        <section class="t2-card" aria-labelledby="c6-title">
+          <div class="t2-card__head">
+            <span class="t2-icon-tile"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-layers"></use></svg></span>
+            <h2 class="t2-card__title" id="c6-title">สรุปแผนเชื่อมโยงรายแพลตฟอร์ม</h2>
+          </div>
+          <div class="t2-table-wrap t2-table-wrap--boxed">
+            <table class="t2-table t2-table--compact">
+              <thead>
+                <tr><th scope="col">แพลตฟอร์ม</th><th scope="col" class="t2-num-cell">2568</th><th scope="col" class="t2-num-cell">2569</th><th scope="col" class="t2-num-cell">2570</th><th scope="col" class="t2-num-cell">รวม</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="t2-table__primary">แอปทางรัฐ</td><td class="t2-num-cell">20</td><td class="t2-num-cell">28</td><td class="t2-num-cell">17</td><td class="t2-num-cell">65</td></tr>
+                <tr><td class="t2-table__primary">Biz Portal</td><td class="t2-num-cell">13</td><td class="t2-num-cell">17</td><td class="t2-num-cell">11</td><td class="t2-num-cell">41</td></tr>
+                <tr><td class="t2-table__primary">NSW</td><td class="t2-num-cell">7</td><td class="t2-num-cell">10</td><td class="t2-num-cell">5</td><td class="t2-num-cell">22</td></tr>
+              </tbody>
+              <tfoot>
+                <tr><td>รวม</td><td class="t2-num-cell">40</td><td class="t2-num-cell">55</td><td class="t2-num-cell">33</td><td class="t2-num-cell">128</td></tr>
+              </tfoot>
+            </table>
+          </div>
+          <p class="t2-source">หน่วย: จำนวนงานบริการที่มีแผนเชื่อมโยง</p>
+        </section>
+      </div>
+
+      <!-- Recent requests -->
+      <section class="t2-card t2-card--flush" aria-labelledby="recent-title">
+        <div class="t2-card__head t2-card__head--bar">
+          <span class="t2-icon-tile"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-square-check"></use></svg></span>
+          <h2 class="t2-card__title" id="recent-title">คำขอแก้ไขล่าสุด</h2>
+          <div class="t2-card__actions">
+            <a class="t2-btn t2-btn--outline t2-btn--sm" href="list.html">ดูทั้งหมด <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-arrow-right"></use></svg></a>
+          </div>
+        </div>
+        <div class="t2-table-wrap">
+          <table class="t2-table">
+            <thead>
+              <tr><th scope="col">รหัส</th><th scope="col">งานบริการ</th><th scope="col">ประเภทคำขอ</th><th scope="col">ผู้ส่ง</th><th scope="col">ส่งเมื่อ</th><th scope="col">สถานะ</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="t2-table__code">SV-1002</td>
+                <td><span class="t2-table__primary">ขอรับการส่งเสริมการลงทุน</span><span class="t2-table__sub">สำนักนายกรัฐมนตรี</span></td>
+                <td>แก้ไขชื่อขั้นตอนงาน</td>
+                <td>วิภา ศรีสุข</td>
+                <td class="t2-nowrap">27 ต.ค. 2569 09:12</td>
+                <td><span class="t2-badge t2-badge--warning t2-badge--dot">รออนุมัติ</span></td>
+              </tr>
+              <tr>
+                <td class="t2-table__code">SV-5001</td>
+                <td><span class="t2-table__primary">ขอใบอนุญาตทำงานของคนต่างด้าว</span><span class="t2-table__sub">กระทรวงแรงงาน</span></td>
+                <td>เพิ่มขั้นตอนงาน</td>
+                <td>ธนพล แก้วมณี</td>
+                <td class="t2-nowrap">26 ต.ค. 2569 16:40</td>
+                <td><span class="t2-badge t2-badge--warning t2-badge--dot">รออนุมัติ</span></td>
+              </tr>
+              <tr>
+                <td class="t2-table__code">SV-8001</td>
+                <td><span class="t2-table__primary">ขอใบอนุญาตประกอบกิจการโรงงาน</span><span class="t2-table__sub">กระทรวงอุตสาหกรรม</span></td>
+                <td>ปรับสถานะ e-Service</td>
+                <td>อรวรรณ ทองดี</td>
+                <td class="t2-nowrap">26 ต.ค. 2569 11:05</td>
+                <td><span class="t2-badge t2-badge--warning t2-badge--dot">รออนุมัติ</span></td>
+              </tr>
+              <tr>
+                <td class="t2-table__code">SV-3001</td>
+                <td><span class="t2-table__primary">ขออนุญาตเปิดสถานพยาบาล</span><span class="t2-table__sub">กระทรวงสาธารณสุข</span></td>
+                <td>เพิ่มงานบริการใหม่</td>
+                <td>กิตติ พรหมมา</td>
+                <td class="t2-nowrap">25 ต.ค. 2569 14:22</td>
+                <td><span class="t2-badge t2-badge--info t2-badge--dot">ตรวจทานแล้ว</span></td>
+              </tr>
+              <tr>
+                <td class="t2-table__code">SV-2002</td>
+                <td><span class="t2-table__primary">ขอใบอนุญาตขับรถยนต์</span><span class="t2-table__sub">กระทรวงคมนาคม</span></td>
+                <td>แก้ไขช่องทางเชื่อมโยง</td>
+                <td>สุดารัตน์ บุญมี</td>
+                <td class="t2-nowrap">25 ต.ค. 2569 10:48</td>
+                <td><span class="t2-badge t2-badge--danger t2-badge--dot">ขอแก้ไข</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="t2-app-footer">
+    <div class="t2-container t2-container--fluid t2-app-footer__row">
+      <span>© 2569 สำนักงานตัวอย่าง · Service Hub v1.0</span>
+      <span>ข้อมูล ณ 27 ต.ค. 2569 10:30 น.</span>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

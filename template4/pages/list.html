@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>รายการแจ้งซ่อม | SMMS ระบบแจ้งซ่อม</title>
+<!-- =========================================================================
+  Template 4 : list.html  (รายการแจ้งซ่อม)
+
+  Pattern: page head (breadcrumb + title + actions) · yellow status band ·
+  panel with status pills, search, selects, selection bar, table, empty state, pager.
+  Filtering (t4-ui.js, no page JS): every <tr data-t4-kind="status late type dept">
+    pills  [data-t4-filters="t4-list"] > [data-t4-filter="pending"]
+    search [data-t4-search="t4-list"]   selects [data-t4-match="t4-list"] (value = token)
+    the department select also has data-t4-combo = type to search
+  In a real system the server filters and pages the data; keep the same markup.
+  Phones (<=760px): each row turns into a card; td[data-label] gives the label.
+  .t4-col-opt = column hidden on mid-size screens (761-1200px).
+========================================================================== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/t4-ui.css">
+<script src="../assets/t4-ui.js"></script>
+</head>
+<body class="t4-body">
+<a class="t4-skip" href="#t4-main">ข้ามไปยังเนื้อหา</a>
+
+<!-- ===== HEADER (shared layout: copy as is) ===== -->
+<header class="t4-header">
+  <button type="button" class="t4-icon-btn t4-menu-btn" data-t4-menu aria-controls="t4-side" aria-expanded="false" aria-label="เปิดเมนู"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-menu"></use></svg></button>
+  <a class="t4-brand" href="dashboard.html" aria-label="SMMS ระบบแจ้งซ่อม หน้าแรก">
+    <span class="t4-brand__mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M10.03 4.66L10.78 2.07L13.22 2.07L13.97 4.66A7.6 7.6 0 0 1 15.8 5.42L18.16 4.12L19.88 5.84L18.58 8.2A7.6 7.6 0 0 1 19.34 10.03L21.93 10.78L21.93 13.22L19.34 13.97A7.6 7.6 0 0 1 18.58 15.8L19.88 18.16L18.16 19.88L15.8 18.58A7.6 7.6 0 0 1 13.97 19.34L13.22 21.93L10.78 21.93L10.03 19.34A7.6 7.6 0 0 1 8.2 18.58L5.84 19.88L4.12 18.16L5.42 15.8A7.6 7.6 0 0 1 4.66 13.97L2.07 13.22L2.07 10.78L4.66 10.03A7.6 7.6 0 0 1 5.42 8.2L4.12 5.84L5.84 4.12L8.2 5.42A7.6 7.6 0 0 1 10.03 4.66z"/><circle cx="12" cy="12" r="5.2" fill="var(--t4-accent)"/><path d="M9.5 12.2l1.8 1.8 3.3-3.6" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="t4-brand__name">SMMS<small>ระบบแจ้งซ่อม</small></span>
+  </a>
+  <label class="t4-search">
+    <svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-search"></use></svg>
+    <span class="t4-sr-only">ค้นหา</span>
+    <input type="search" placeholder="ค้นหาเลขที่ใบแจ้ง ครุภัณฑ์ หรือผู้แจ้ง…" autocomplete="off">
+    <kbd class="t4-kbd">Ctrl K</kbd>
+  </label>
+  <div class="t4-header__actions">
+    <button type="button" class="t4-icon-btn t4-search-btn" aria-label="ค้นหา" data-t4-demo="ช่องค้นหาแบบเต็มจอบนมือถือ (ยังไม่รวมในตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-search"></use></svg></button>
+    <a class="t4-btn t4-btn--sm" href="form.html"><svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-plus"></use></svg>แจ้งซ่อมใหม่</a>
+    <button type="button" class="t4-icon-btn" data-t4-theme-toggle aria-label="เปลี่ยนโหมดสี"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-sun"></use></svg></button>
+    <div class="t4-pop-wrap">
+      <button type="button" class="t4-icon-btn" data-t4-pop="t4-pop-notif" aria-controls="t4-pop-notif" aria-expanded="false" aria-label="การแจ้งเตือน ยังไม่อ่าน 3 รายการ"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-bell"></use></svg><span class="t4-icon-btn__dot t4-num" aria-hidden="true">3</span></button>
+      <div class="t4-pop t4-pop--wide" id="t4-pop-notif" hidden>
+        <div class="t4-pop__head">การแจ้งเตือน <small>ยังไม่อ่าน 3 รายการ</small></div>
+        <ul class="t4-notes">
+          <li class="t4-note t4-tile--rose is-unread"><span class="t4-note__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-alert"></use></svg></span><p class="t4-note__t">มีงานค้างเกินกำหนด 9 รายการ<span class="t4-note__time t4-num">15/05/2568 09:00 น.</span></p></li>
+          <li class="t4-note t4-tile--blue is-unread"><span class="t4-note__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-wrench"></use></svg></span><p class="t4-note__t">SR-202505-0098 รออะไหล่ (คอมเพรสเซอร์)<span class="t4-note__time t4-num">15/05/2568 08:42 น.</span></p></li>
+          <li class="t4-note t4-tile--gold is-unread"><span class="t4-note__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-inbox"></use></svg></span><p class="t4-note__t">ใบแจ้งซ่อมใหม่ 4 รายการ รอมอบหมายช่าง<span class="t4-note__time t4-num">14/05/2568 16:30 น.</span></p></li>
+          <li class="t4-note t4-tile--green"><span class="t4-note__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-check"></use></svg></span><p class="t4-note__t">ปิดงาน SR-202505-0147 แล้ว รอผู้แจ้งประเมิน<span class="t4-note__time t4-num">14/05/2568 14:05 น.</span></p></li>
+        </ul>
+        <a class="t4-pop__foot" href="#" data-t4-demo="หน้าการแจ้งเตือนทั้งหมด (ยังไม่รวมในตัวอย่าง)">ดูการแจ้งเตือนทั้งหมด</a>
+      </div>
+    </div>
+    <div class="t4-pop-wrap">
+      <button type="button" class="t4-user" data-t4-pop="t4-pop-user" aria-controls="t4-pop-user" aria-expanded="false" aria-label="เมนูผู้ใช้ สมชาย ใจดี"><span class="t4-avatar" aria-hidden="true">ส</span><span class="t4-user__name">สมชาย ใจดี<small>หัวหน้างานซ่อมบำรุง</small></span></button>
+      <div class="t4-pop" id="t4-pop-user" hidden>
+        <div class="t4-pop__head"><span>สมชาย ใจดี<br><small>somchai.j@example.com</small></span></div>
+        <a class="t4-pop__item" href="#" data-t4-demo="หน้าโปรไฟล์ (ยังไม่รวมในตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-user"></use></svg>โปรไฟล์ของฉัน</a>
+        <a class="t4-pop__item" href="#" data-t4-demo="หน้าตั้งค่าบัญชี (ยังไม่รวมในตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-gear"></use></svg>ตั้งค่าบัญชี</a>
+        <a class="t4-pop__item" href="#" data-t4-demo="คู่มือการใช้งาน (ยังไม่รวมในตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-help"></use></svg>คู่มือการใช้งาน</a>
+        <div class="t4-pop__sep" role="separator"></div>
+        <a class="t4-pop__item t4-pop__item--danger" href="login.html"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-logout"></use></svg>ออกจากระบบ</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="t4-app">
+  <!-- ===== SIDEBAR (shared layout) =====
+       aria-current="page" goes on the item of this page; when it is inside a sub-menu
+       (.t4-nav-sub) t4-ui.js opens that sub-menu by itself. -->
+  <aside class="t4-side" id="t4-side" aria-label="เมนูหลัก">
+    <p class="t4-side__label">งานของฉัน</p>
+    <a class="t4-nav-item t4-tile--rose" href="dashboard.html"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-home"></use></svg></span>แดชบอร์ด</a>
+    <a class="t4-nav-item t4-tile--gold" href="form.html"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-plus"></use></svg></span>แจ้งซ่อมใหม่</a>
+    <a class="t4-nav-item t4-tile--blue" href="list.html" aria-current="page"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-list"></use></svg></span>รายการแจ้งซ่อม<span class="t4-nav-item__count t4-num" aria-label="เกินกำหนด 9 รายการ">9</span></a>
+    <a class="t4-nav-item t4-tile--green" href="#" data-t4-demo="หน้างานของฉัน (ยังไม่รวมในตัวอย่าง)"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-task"></use></svg></span>งานของฉัน</a>
+    <a class="t4-nav-item t4-tile--violet" href="#" data-t4-demo="หน้าปฏิทินงาน (ยังไม่รวมในตัวอย่าง)"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-cal"></use></svg></span>ปฏิทินงาน</a>
+    <p class="t4-side__label">ข้อมูลและรายงาน</p>
+    <div class="t4-nav-group">
+      <button type="button" class="t4-nav-item t4-tile--gold" data-t4-sub aria-expanded="false" aria-controls="t4-sub-asset"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-box"></use></svg></span>ครุภัณฑ์ / สินทรัพย์<svg class="t4-ic t4-nav-item__chev" aria-hidden="true"><use href="#t4-i-chev-down"></use></svg></button>
+      <div class="t4-nav-sub" id="t4-sub-asset" hidden>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าทะเบียนครุภัณฑ์ (ยังไม่รวมในตัวอย่าง)">ทะเบียนครุภัณฑ์</a>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าแผนบำรุงรักษา (PM) (ยังไม่รวมในตัวอย่าง)">แผนบำรุงรักษา (PM)<span class="t4-nav-sub__count t4-num" aria-label="ถึงรอบสัปดาห์นี้ 6 รายการ">6</span></a>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าครุภัณฑ์รอจำหน่าย (ยังไม่รวมในตัวอย่าง)">ครุภัณฑ์รอจำหน่าย</a>
+      </div>
+    </div>
+    <div class="t4-nav-group">
+      <button type="button" class="t4-nav-item t4-tile--blue" data-t4-sub aria-expanded="false" aria-controls="t4-sub-report"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-chart"></use></svg></span>รายงาน<svg class="t4-ic t4-nav-item__chev" aria-hidden="true"><use href="#t4-i-chev-down"></use></svg></button>
+      <div class="t4-nav-sub" id="t4-sub-report" hidden>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าสรุปประจำเดือน (ยังไม่รวมในตัวอย่าง)">สรุปประจำเดือน</a>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าแยกตามหน่วยงาน (ยังไม่รวมในตัวอย่าง)">แยกตามหน่วยงาน</a>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าแยกตามประเภทครุภัณฑ์ (ยังไม่รวมในตัวอย่าง)">แยกตามประเภทครุภัณฑ์</a>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าความพึงพอใจผู้แจ้ง (ยังไม่รวมในตัวอย่าง)">ความพึงพอใจผู้แจ้ง</a>
+      </div>
+    </div>
+    <a class="t4-nav-item t4-tile--grey" href="#" data-t4-demo="หน้าผู้ใช้และสิทธิ์ (ยังไม่รวมในตัวอย่าง)"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-users"></use></svg></span>ผู้ใช้และสิทธิ์</a>
+    <div class="t4-nav-group">
+      <button type="button" class="t4-nav-item t4-tile--grey" data-t4-sub aria-expanded="false" aria-controls="t4-sub-settings"><span class="t4-nav-item__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-gear"></use></svg></span>ตั้งค่า<svg class="t4-ic t4-nav-item__chev" aria-hidden="true"><use href="#t4-i-chev-down"></use></svg></button>
+      <div class="t4-nav-sub" id="t4-sub-settings" hidden>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าหน่วยงานและอาคาร (ยังไม่รวมในตัวอย่าง)">หน่วยงานและอาคาร</a>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าประเภทครุภัณฑ์ (ยังไม่รวมในตัวอย่าง)">ประเภทครุภัณฑ์</a>
+        <a class="t4-nav-sub__item" href="#" data-t4-demo="หน้าระยะเวลาตามความเร่งด่วน (ยังไม่รวมในตัวอย่าง)">ระยะเวลาตามความเร่งด่วน</a>
+      </div>
+    </div>
+    <div class="t4-side__help">
+      <b>ใช้งานครั้งแรก?</b>
+      แจ้งซ่อม ติดตาม และปิดงานได้ใน 4 ขั้นตอน
+      <a href="#" data-t4-demo="คู่มือการใช้งาน (ยังไม่รวมในตัวอย่าง)">อ่านคู่มือ <svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-arrow-right"></use></svg></a>
+    </div>
+  </aside>
+
+  <main class="t4-main" id="t4-main" tabindex="-1">
+    <div class="t4-container">
+      <!-- ===== PAGE HEAD ===== -->
+      <section class="t4-page-head" aria-labelledby="t4-page-title">
+        <div class="t4-page-head__text">
+          <nav aria-label="เส้นทาง"><ol class="t4-crumbs"><li><a href="dashboard.html">หน้าแรก</a></li><li><span aria-current="page">รายการแจ้งซ่อม</span></li></ol></nav>
+          <h1 class="t4-page-title" id="t4-page-title">รายการแจ้งซ่อม <span class="t4-hl">พ.ค. 2568</span></h1>
+          <p class="t4-page-sub">ทั้งหมด <b>128 ใบ</b> · เกินกำหนด <b>9 ใบ</b> ค้นหาหรือกรองตามสถานะ ประเภท และหน่วยงาน แล้วกดชื่อเรื่องเพื่อดูรายละเอียด</p>
+        </div>
+        <div class="t4-page-actions">
+          <button type="button" class="t4-btn t4-btn--ghost" data-t4-demo="ส่งออกเป็น Excel (ตัวอย่าง)"><svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-download"></use></svg>ส่งออก Excel</button>
+          <a class="t4-btn" href="form.html"><svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-plus"></use></svg>แจ้งซ่อมใหม่</a>
+        </div>
+      </section>
+
+      <!-- ===== STATUS SUMMARY (whole month, from the server) ===== -->
+      <section class="t4-stats t4-stats--sm t4-stats--4" aria-label="สรุปสถานะเดือนนี้">
+        <div class="t4-stat"><div class="t4-stat__v t4-num">18</div><div class="t4-stat__l">รอดำเนินการ</div></div>
+        <div class="t4-stat"><div class="t4-stat__v t4-num">8</div><div class="t4-stat__l">กำลังดำเนินการ</div></div>
+        <div class="t4-stat"><div class="t4-stat__v t4-num">96</div><div class="t4-stat__l">เสร็จสิ้น</div></div>
+        <div class="t4-stat"><div class="t4-stat__v t4-num">6</div><div class="t4-stat__l">ยกเลิก</div></div>
+      </section>
+
+      <!-- ===== TABLE PANEL ===== -->
+      <section class="t4-panel" aria-labelledby="t4-list-title">
+        <div class="t4-panel__head">
+          <h2 class="t4-panel__title" id="t4-list-title">ใบแจ้งซ่อม</h2>
+          <div class="t4-pills" role="group" aria-label="กรองตามสถานะ" data-t4-filters="t4-list">
+            <button type="button" class="t4-pill" aria-pressed="true" data-t4-filter="all">ทั้งหมด</button>
+            <button type="button" class="t4-pill" aria-pressed="false" data-t4-filter="late">เกินกำหนด</button>
+            <button type="button" class="t4-pill" aria-pressed="false" data-t4-filter="pending">รอดำเนินการ</button>
+            <button type="button" class="t4-pill" aria-pressed="false" data-t4-filter="progress">กำลังดำเนินการ</button>
+            <button type="button" class="t4-pill" aria-pressed="false" data-t4-filter="done">เสร็จสิ้น</button>
+            <button type="button" class="t4-pill" aria-pressed="false" data-t4-filter="cancel">ยกเลิก</button>
+          </div>
+        </div>
+        <div class="t4-panel__body t4-vstack">
+          <div class="t4-toolbar" role="search">
+            <label class="t4-search">
+              <svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-search"></use></svg>
+              <span class="t4-sr-only">ค้นหาในรายการ</span>
+              <input type="search" placeholder="เลขที่ เรื่อง ผู้แจ้ง หรือสถานที่" autocomplete="off" data-t4-search="t4-list">
+            </label>
+            <label class="t4-sr-only" for="t4-f-type">ประเภท</label>
+            <select class="t4-select" id="t4-f-type" data-t4-match="t4-list">
+              <option value="">ทุกประเภท</option>
+              <option value="it">คอมพิวเตอร์ / Notebook</option>
+              <option value="ac">เครื่องปรับอากาศ</option>
+              <option value="print">เครื่องพิมพ์</option>
+              <option value="furn">เฟอร์นิเจอร์</option>
+              <option value="elec">ระบบไฟฟ้า</option>
+              <option value="other">อื่น ๆ</option>
+            </select>
+            <label class="t4-sr-only" for="t4-f-dept">หน่วยงาน</label>
+            <select class="t4-select" id="t4-f-dept" data-t4-match="t4-list" data-t4-combo>
+              <option value="">ทุกหน่วยงาน</option>
+              <option value="central">สำนักงานกลาง</option>
+              <option value="itd">ฝ่ายไอที</option>
+              <option value="acc">ฝ่ายบัญชี</option>
+              <option value="hr">ฝ่ายบุคคล</option>
+              <option value="mkt">ฝ่ายการตลาด</option>
+            </select>
+            <button type="button" class="t4-btn t4-btn--ghost" data-t4-clear="t4-list"><svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-refresh"></use></svg>ล้างตัวกรอง</button>
+          </div>
+
+          <div class="t4-bulk" data-t4-bulk="t4-list" hidden>
+            <span>เลือก <b class="t4-num" data-t4-bulk-count>0</b> รายการ</span>
+            <div class="t4-bulk__sp">
+              <button type="button" class="t4-btn t4-btn--sm t4-btn--yellow" data-t4-demo="มอบหมายช่าง (ตัวอย่าง)"><svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-users"></use></svg>มอบหมายช่าง</button>
+              <a class="t4-btn t4-btn--sm t4-btn--ghost" href="print.html"><svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-printer"></use></svg>พิมพ์</a>
+              <button type="button" class="t4-btn t4-btn--sm t4-btn--ghost" data-t4-bulk-clear="t4-list">ยกเลิกการเลือก</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="t4-table-wrap">
+          <table class="t4-table" id="t4-list">
+            <caption class="t4-sr-only">ใบแจ้งซ่อม หน้า 1 เรียงจากใหม่ไปเก่า</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="t4-table__check"><label class="t4-check"><input type="checkbox" data-t4-check-all="t4-list" aria-label="เลือกทั้งหมดในหน้านี้"></label></th>
+                <th scope="col">เลขที่</th>
+                <th scope="col">เรื่องที่แจ้ง</th>
+                <th scope="col" class="t4-col-opt">ผู้แจ้ง</th>
+                <th scope="col">กำหนดเสร็จ</th>
+                <th scope="col">สถานะ</th>
+                <th scope="col"><span class="t4-sr-only">ตัวเลือก</span></th>
+              </tr>
+            </thead>
+            <tbody>
+            <tr data-t4-kind="pending it itd">
+              <td class="t4-table__check"><label class="t4-check"><input type="checkbox" data-t4-check aria-label="เลือก SR-202505-0153"></label></td>
+              <td class="t4-table__id" data-label="เลขที่">SR-202505-0153</td>
+              <td class="t4-table__cell-main"><div class="t4-table__main t4-tile--violet"><span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-laptop"></use></svg></span><div><a class="t4-table__title" href="detail.html">Notebook แบตเตอรี่เสื่อม</a><span class="t4-table__sub">แจ้ง 15/05/2568 · อาคาร A ชั้น 4 ห้อง 402</span></div></div></td>
+              <td class="t4-col-opt" data-label="ผู้แจ้ง"><div>ธนพล รุ่งเรือง<span class="t4-table__sub">ฝ่ายไอที</span></div></td>
+              <td class="t4-table__nowrap" data-label="กำหนดเสร็จ"><div><span class="t4-num">20/05/2568</span></div></td>
+              <td data-label="สถานะ"><span class="t4-tag t4-tag--pending">รอดำเนินการ</span></td>
+              <td class="t4-table__actions"><button type="button" class="t4-icon-btn t4-icon-btn--sm" aria-label="ตัวเลือกเพิ่มเติม SR-202505-0153" data-t4-demo="เมนู แก้ไข / พิมพ์ / ยกเลิก ของ SR-202505-0153 (ตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-more"></use></svg></button></td>
+            </tr>
+            <tr data-t4-kind="progress ac central">
+              <td class="t4-table__check"><label class="t4-check"><input type="checkbox" data-t4-check aria-label="เลือก SR-202505-0152"></label></td>
+              <td class="t4-table__id" data-label="เลขที่">SR-202505-0152</td>
+              <td class="t4-table__cell-main"><div class="t4-table__main t4-tile--blue"><span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-snow"></use></svg></span><div><a class="t4-table__title" href="detail.html">เครื่องปรับอากาศ ห้องประชุมใหญ่ มีน้ำหยด</a><span class="t4-table__sub">แจ้ง 15/05/2568 · อาคาร A ชั้น 2</span></div></div></td>
+              <td class="t4-col-opt" data-label="ผู้แจ้ง"><div>กัลยา แสงดี<span class="t4-table__sub">สำนักงานกลาง</span></div></td>
+              <td class="t4-table__nowrap" data-label="กำหนดเสร็จ"><div><span class="t4-num">16/05/2568</span></div></td>
+              <td data-label="สถานะ"><span class="t4-tag t4-tag--progress">กำลังดำเนินการ</span></td>
+              <td class="t4-table__actions"><button type="button" class="t4-icon-btn t4-icon-btn--sm" aria-label="ตัวเลือกเพิ่มเติม SR-202505-0152" data-t4-demo="เมนู แก้ไข / พิมพ์ / ยกเลิก ของ SR-202505-0152 (ตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-more"></use></svg></button></td>
+            </tr>
+            <tr data-t4-kind="cancel print acc">
+              <td class="t4-table__check"><label class="t4-check"><input type="checkbox" data-t4-check aria-label="เลือก SR-202505-0150"></label></td>
+              <td class="t4-table__id" data-label="เลขที่">SR-202505-0150</td>
+              <td class="t4-table__cell-main"><div class="t4-table__main t4-tile--gold"><span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-printer"></use></svg></span><div><a class="t4-table__title" href="detail.html">เครื่องพิมพ์ ชั้น 2 พิมพ์ซีด</a><span class="t4-table__sub">แจ้ง 15/05/2568 · อาคาร B ชั้น 2</span></div></div></td>
+              <td class="t4-col-opt" data-label="ผู้แจ้ง"><div>เอกชัย นามวง<span class="t4-table__sub">ฝ่ายบัญชี</span></div></td>
+              <td class="t4-table__nowrap" data-label="กำหนดเสร็จ"><div><span class="t4-num">—</span><span class="t4-table__sub">ผู้แจ้งขอยกเลิก</span></div></td>
+              <td data-label="สถานะ"><span class="t4-tag t4-tag--cancel">ยกเลิก</span></td>
+              <td class="t4-table__actions"><button type="button" class="t4-icon-btn t4-icon-btn--sm" aria-label="ตัวเลือกเพิ่มเติม SR-202505-0150" data-t4-demo="เมนู แก้ไข / พิมพ์ / ยกเลิก ของ SR-202505-0150 (ตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-more"></use></svg></button></td>
+            </tr>
+            <tr data-t4-kind="done elec hr">
+              <td class="t4-table__check"><label class="t4-check"><input type="checkbox" data-t4-check aria-label="เลือก SR-202505-0147"></label></td>
+              <td class="t4-table__id" data-label="เลขที่">SR-202505-0147</td>
+              <td class="t4-table__cell-main"><div class="t4-table__main t4-tile--gold"><span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-bulb"></use></svg></span><div><a class="t4-table__title" href="detail.html">โคมไฟทางเดิน ชั้น 1 กะพริบ</a><span class="t4-table__sub">แจ้ง 14/05/2568 · อาคาร A ชั้น 1</span></div></div></td>
+              <td class="t4-col-opt" data-label="ผู้แจ้ง"><div>วิทยา ทองแก้ว<span class="t4-table__sub">ฝ่ายบุคคล</span></div></td>
+              <td class="t4-table__nowrap" data-label="กำหนดเสร็จ"><div><span class="t4-num">15/05/2568</span><span class="t4-table__sub">ปิดงาน 14/05/2568</span></div></td>
+              <td data-label="สถานะ"><span class="t4-tag t4-tag--done">เสร็จสิ้น</span></td>
+              <td class="t4-table__actions"><button type="button" class="t4-icon-btn t4-icon-btn--sm" aria-label="ตัวเลือกเพิ่มเติม SR-202505-0147" data-t4-demo="เมนู แก้ไข / พิมพ์ / ยกเลิก ของ SR-202505-0147 (ตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-more"></use></svg></button></td>
+            </tr>
+            <tr data-t4-kind="pending furn mkt">
+              <td class="t4-table__check"><label class="t4-check"><input type="checkbox" data-t4-check aria-label="เลือก SR-202505-0125"></label></td>
+              <td class="t4-table__id" data-label="เลขที่">SR-202505-0125</td>
+              <td class="t4-table__cell-main"><div class="t4-table__main t4-tile--green"><span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-chair"></use></svg></span><div><a class="t4-table__title" href="detail.html">เก้าอี้สำนักงาน ล้อชำรุด</a><span class="t4-table__sub">แจ้ง 14/05/2568 · อาคาร B ชั้น 1</span></div></div></td>
+              <td class="t4-col-opt" data-label="ผู้แจ้ง"><div>ชนกานต์ มีศรี<span class="t4-table__sub">ฝ่ายการตลาด</span></div></td>
+              <td class="t4-table__nowrap" data-label="กำหนดเสร็จ"><div><span class="t4-num">15/05/2568</span><span class="t4-table__sub t4-table__soon">ครบวันนี้</span></div></td>
+              <td data-label="สถานะ"><span class="t4-tag t4-tag--pending">รอดำเนินการ</span></td>
+              <td class="t4-table__actions"><button type="button" class="t4-icon-btn t4-icon-btn--sm" aria-label="ตัวเลือกเพิ่มเติม SR-202505-0125" data-t4-demo="เมนู แก้ไข / พิมพ์ / ยกเลิก ของ SR-202505-0125 (ตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-more"></use></svg></button></td>
+            </tr>
+            <tr data-t4-kind="progress elec central">
+              <td class="t4-table__check"><label class="t4-check"><input type="checkbox" data-t4-check aria-label="เลือก SR-202505-0123"></label></td>
+              <td class="t4-table__id" data-label="เลขที่">SR-202505-0123</td>
+              <td class="t4-table__cell-main"><div class="t4-table__main t4-tile--gold"><span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-bulb"></use></svg></span><div><a class="t4-table__title" href="detail.html">ไฟห้องประชุม ไม่ติด</a><span class="t4-table__sub">แจ้ง 14/05/2568 · อาคาร A ชั้น 3 ห้อง 305</span></div></div></td>
+              <td class="t4-col-opt" data-label="ผู้แจ้ง"><div>กัลยา แสงดี<span class="t4-table__sub">สำนักงานกลาง</span></div></td>
+              <td class="t4-table__nowrap" data-label="กำหนดเสร็จ"><div><span class="t4-num">15/05/2568</span><span class="t4-table__sub t4-table__soon">ครบวันนี้</span></div></td>
+              <td data-label="สถานะ"><span class="t4-tag t4-tag--progress">กำลังดำเนินการ</span></td>
+              <td class="t4-table__actions"><button type="button" class="t4-icon-btn t4-icon-btn--sm" aria-label="ตัวเลือกเพิ่มเติม SR-202505-0123" data-t4-demo="เมนู แก้ไข / พิมพ์ / ยกเลิก ของ SR-202505-0123 (ตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-more"></use></svg></button></td>
+            </tr>
+            <tr data-t4-kind="pending it hr">
+              <td class="t4-table__check"><label class="t4-check"><input type="checkbox" data-t4-check aria-label="เลือก SR-202505-0116"></label></td>
+              <td class="t4-table__id" data-label="เลขที่">SR-202505-0116</td>
+              <td class="t4-table__cell-main"><div class="t4-table__main t4-tile--violet"><span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-monitor"></use></svg></span><div><a class="t4-table__title" href="detail.html">คอมพิวเตอร์ เปิดไม่ติด</a><span class="t4-table__sub">แจ้ง 13/05/2568 · อาคาร A ชั้น 1</span></div></div></td>
+              <td class="t4-col-opt" data-label="ผู้แจ้ง"><div>วิทยา ทองแก้ว<span class="t4-table__sub">ฝ่ายบุคคล</span></div></td>
+              <td class="t4-table__nowrap" data-label="กำหนดเสร็จ"><div><span class="t4-num">15/05/2568</span><span class="t4-table__sub t4-table__soon">ครบวันนี้</span></div></td>
+              <td data-label="สถานะ"><span class="t4-tag t4-tag--pending">รอดำเนินการ</span></td>
+              <td class="t4-table__actions"><button type="button" class="t4-icon-btn t4-icon-btn--sm" aria-label="ตัวเลือกเพิ่มเติม SR-202505-0116" data-t4-demo="เมนู แก้ไข / พิมพ์ / ยกเลิก ของ SR-202505-0116 (ตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-more"></use></svg></button></td>
+            </tr>
+            <tr data-t4-kind="pending it itd">
+              <td class="t4-table__check"><label class="t4-check"><input type="checkbox" data-t4-check aria-label="เลือก SR-202505-0115"></label></td>
+              <td class="t4-table__id" data-label="เลขที่">SR-202505-0115</td>
+              <td class="t4-table__cell-main"><div class="t4-table__main t4-tile--violet"><span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-laptop"></use></svg></span><div><a class="t4-table__title" href="detail.html">Notebook จอดับ</a><span class="t4-table__sub">แจ้ง 13/05/2568 · อาคาร A ชั้น 4</span></div></div></td>
+              <td class="t4-col-opt" data-label="ผู้แจ้ง"><div>ธนพล รุ่งเรือง<span class="t4-table__sub">ฝ่ายไอที</span></div></td>
+              <td class="t4-table__nowrap" data-label="กำหนดเสร็จ"><div><span class="t4-num">15/05/2568</span><span class="t4-table__sub t4-table__soon">ครบวันนี้</span></div></td>
+              <td data-label="สถานะ"><span class="t4-tag t4-tag--pending">รอดำเนินการ</span></td>
+              <td class="t4-table__actions"><button type="button" class="t4-icon-btn t4-icon-btn--sm" aria-label="ตัวเลือกเพิ่มเติม SR-202505-0115" data-t4-demo="เมนู แก้ไข / พิมพ์ / ยกเลิก ของ SR-202505-0115 (ตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-more"></use></svg></button></td>
+            </tr>
+            <tr data-t4-kind="pending late print acc">
+              <td class="t4-table__check"><label class="t4-check"><input type="checkbox" data-t4-check aria-label="เลือก SR-202505-0107"></label></td>
+              <td class="t4-table__id" data-label="เลขที่">SR-202505-0107</td>
+              <td class="t4-table__cell-main"><div class="t4-table__main t4-tile--gold"><span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-printer"></use></svg></span><div><a class="t4-table__title" href="detail.html">เครื่องพิมพ์ กระดาษติด</a><span class="t4-table__sub">แจ้ง 12/05/2568 · อาคาร B ชั้น 2</span></div></div></td>
+              <td class="t4-col-opt" data-label="ผู้แจ้ง"><div>เอกชัย นามวง<span class="t4-table__sub">ฝ่ายบัญชี</span></div></td>
+              <td class="t4-table__nowrap" data-label="กำหนดเสร็จ"><div><span class="t4-num">14/05/2568</span><span class="t4-table__sub t4-table__late">เกิน 1 วัน</span></div></td>
+              <td data-label="สถานะ"><span class="t4-tag t4-tag--pending">รอดำเนินการ</span></td>
+              <td class="t4-table__actions"><button type="button" class="t4-icon-btn t4-icon-btn--sm" aria-label="ตัวเลือกเพิ่มเติม SR-202505-0107" data-t4-demo="เมนู แก้ไข / พิมพ์ / ยกเลิก ของ SR-202505-0107 (ตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-more"></use></svg></button></td>
+            </tr>
+            <tr data-t4-kind="progress late ac central">
+              <td class="t4-table__check"><label class="t4-check"><input type="checkbox" data-t4-check aria-label="เลือก SR-202505-0098"></label></td>
+              <td class="t4-table__id" data-label="เลขที่">SR-202505-0098</td>
+              <td class="t4-table__cell-main"><div class="t4-table__main t4-tile--blue"><span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-snow"></use></svg></span><div><a class="t4-table__title" href="detail.html">เครื่องปรับอากาศ ชั้น 3 ไม่เย็น</a><span class="t4-table__sub">แจ้ง 10/05/2568 · อาคาร A ชั้น 3 ห้อง 301</span></div></div></td>
+              <td class="t4-col-opt" data-label="ผู้แจ้ง"><div>สุภาวดี สิทธิ์<span class="t4-table__sub">สำนักงานกลาง</span></div></td>
+              <td class="t4-table__nowrap" data-label="กำหนดเสร็จ"><div><span class="t4-num">13/05/2568</span><span class="t4-table__sub t4-table__late">เกิน 2 วัน</span></div></td>
+              <td data-label="สถานะ"><span class="t4-tag t4-tag--progress">กำลังดำเนินการ</span></td>
+              <td class="t4-table__actions"><button type="button" class="t4-icon-btn t4-icon-btn--sm" aria-label="ตัวเลือกเพิ่มเติม SR-202505-0098" data-t4-demo="เมนู แก้ไข / พิมพ์ / ยกเลิก ของ SR-202505-0098 (ตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-more"></use></svg></button></td>
+            </tr>
+            <tr data-t4-kind="progress late other itd">
+              <td class="t4-table__check"><label class="t4-check"><input type="checkbox" data-t4-check aria-label="เลือก SR-202505-0094"></label></td>
+              <td class="t4-table__id" data-label="เลขที่">SR-202505-0094</td>
+              <td class="t4-table__cell-main"><div class="t4-table__main t4-tile--violet"><span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-monitor"></use></svg></span><div><a class="t4-table__title" href="detail.html">ระบบเครือข่าย ชั้น 2 ช้า</a><span class="t4-table__sub">แจ้ง 10/05/2568 · อาคาร A ชั้น 2</span></div></div></td>
+              <td class="t4-col-opt" data-label="ผู้แจ้ง"><div>อนุชา พรหมมา<span class="t4-table__sub">ฝ่ายไอที</span></div></td>
+              <td class="t4-table__nowrap" data-label="กำหนดเสร็จ"><div><span class="t4-num">13/05/2568</span><span class="t4-table__sub t4-table__late">เกิน 2 วัน</span></div></td>
+              <td data-label="สถานะ"><span class="t4-tag t4-tag--progress">กำลังดำเนินการ</span></td>
+              <td class="t4-table__actions"><button type="button" class="t4-icon-btn t4-icon-btn--sm" aria-label="ตัวเลือกเพิ่มเติม SR-202505-0094" data-t4-demo="เมนู แก้ไข / พิมพ์ / ยกเลิก ของ SR-202505-0094 (ตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-more"></use></svg></button></td>
+            </tr>
+            <tr data-t4-kind="pending late other hr">
+              <td class="t4-table__check"><label class="t4-check"><input type="checkbox" data-t4-check aria-label="เลือก SR-202505-0089"></label></td>
+              <td class="t4-table__id" data-label="เลขที่">SR-202505-0089</td>
+              <td class="t4-table__cell-main"><div class="t4-table__main t4-tile--grey"><span class="t4-row__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-box"></use></svg></span><div><a class="t4-table__title" href="detail.html">ประตูกระจก บานเลื่อนติด</a><span class="t4-table__sub">แจ้ง 09/05/2568 · อาคาร A ชั้น 1 ทางเข้า</span></div></div></td>
+              <td class="t4-col-opt" data-label="ผู้แจ้ง"><div>ปวีณา ใจงาม<span class="t4-table__sub">ฝ่ายบุคคล</span></div></td>
+              <td class="t4-table__nowrap" data-label="กำหนดเสร็จ"><div><span class="t4-num">12/05/2568</span><span class="t4-table__sub t4-table__late">เกิน 3 วัน</span></div></td>
+              <td data-label="สถานะ"><span class="t4-tag t4-tag--pending">รอดำเนินการ</span></td>
+              <td class="t4-table__actions"><button type="button" class="t4-icon-btn t4-icon-btn--sm" aria-label="ตัวเลือกเพิ่มเติม SR-202505-0089" data-t4-demo="เมนู แก้ไข / พิมพ์ / ยกเลิก ของ SR-202505-0089 (ตัวอย่าง)"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-more"></use></svg></button></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="t4-empty" data-t4-empty="t4-list" hidden>
+          <span class="t4-empty__ic"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-search"></use></svg></span>
+          <b>ไม่พบใบแจ้งซ่อมที่ตรงกับเงื่อนไข</b>
+          <p>ลองเปลี่ยนคำค้น สถานะ ประเภท หรือหน่วยงาน แล้วค้นหาอีกครั้ง</p>
+          <button type="button" class="t4-btn t4-btn--ghost t4-btn--sm" data-t4-clear="t4-list">ล้างตัวกรอง</button>
+        </div>
+
+        <div class="t4-panel__foot">
+          <span>แสดง <b class="t4-num" data-t4-filter-count="t4-list">12</b> รายการในหน้านี้ · ทั้งหมด <span class="t4-num">128</span> รายการ</span>
+          <nav class="t4-pager" aria-label="เลขหน้า">
+            <span aria-disabled="true" aria-label="หน้าก่อนหน้า">‹</span>
+            <span aria-current="page">1</span>
+            <a href="#" data-t4-demo="ไปหน้า 2 (ตัวอย่าง)">2</a>
+            <a href="#" data-t4-demo="ไปหน้า 3 (ตัวอย่าง)">3</a>
+            <span aria-hidden="true">…</span>
+            <a href="#" data-t4-demo="ไปหน้า 11 (ตัวอย่าง)">11</a>
+            <a href="#" data-t4-demo="ไปหน้าถัดไป (ตัวอย่าง)" aria-label="หน้าถัดไป">›</a>
+          </nav>
+        </div>
+      </section>
+    </div>
+
+    <footer class="t4-footer">
+      <span>SMMS ระบบแจ้งซ่อม · เวอร์ชัน 1.0.0</span><span>ต้นแบบ HTML · ข้อมูลทั้งหมดเป็นตัวอย่าง</span>
+      <span class="t4-footer__sp">© 2568 บริษัท ตัวอย่าง จำกัด</span>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

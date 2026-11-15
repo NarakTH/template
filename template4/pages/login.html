@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เข้าสู่ระบบ | SMMS ระบบแจ้งซ่อม</title>
+<!-- =========================================================================
+  Template 4 : login.html  (เข้าสู่ระบบ, no sidebar)
+
+  Pattern: .t4-auth = two halves. The form half comes first in the HTML (it holds
+  the page h1 and is first on phones); the intro half (headline with rotating
+  red highlight, steps, yellow facts) is moved to the left by CSS on wide screens.
+  Validation: data-t4-validate; data-t4-next="dashboard.html" opens the
+  dashboard when both fields are filled (prototype only: no real sign-in).
+========================================================================== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../assets/t4-ui.css">
+<script src="../assets/t4-ui.js"></script>
+</head>
+<body class="t4-body">
+<main class="t4-auth" id="t4-main">
+  <section class="t4-auth__side" aria-labelledby="t4-login-title">
+    <div class="t4-auth__top">
+      <a class="t4-brand" href="dashboard.html" aria-label="SMMS ระบบแจ้งซ่อม หน้าแรก">
+    <span class="t4-brand__mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M10.03 4.66L10.78 2.07L13.22 2.07L13.97 4.66A7.6 7.6 0 0 1 15.8 5.42L18.16 4.12L19.88 5.84L18.58 8.2A7.6 7.6 0 0 1 19.34 10.03L21.93 10.78L21.93 13.22L19.34 13.97A7.6 7.6 0 0 1 18.58 15.8L19.88 18.16L18.16 19.88L15.8 18.58A7.6 7.6 0 0 1 13.97 19.34L13.22 21.93L10.78 21.93L10.03 19.34A7.6 7.6 0 0 1 8.2 18.58L5.84 19.88L4.12 18.16L5.42 15.8A7.6 7.6 0 0 1 4.66 13.97L2.07 13.22L2.07 10.78L4.66 10.03A7.6 7.6 0 0 1 5.42 8.2L4.12 5.84L5.84 4.12L8.2 5.42A7.6 7.6 0 0 1 10.03 4.66z"/><circle cx="12" cy="12" r="5.2" fill="var(--t4-accent)"/><path d="M9.5 12.2l1.8 1.8 3.3-3.6" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="t4-brand__name">SMMS<small>ระบบแจ้งซ่อม</small></span>
+  </a>
+      <button type="button" class="t4-icon-btn" data-t4-theme-toggle aria-label="เปลี่ยนโหมดสี"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-sun"></use></svg></button>
+    </div>
+    <div class="t4-auth__center">
+      <div class="t4-glow t4-auth__card">
+        <form class="t4-form" novalidate data-t4-validate data-t4-ok="เข้าสู่ระบบสำเร็จ (ตัวอย่าง)" data-t4-next="dashboard.html">
+          <div>
+            <h1 class="t4-glow__title" id="t4-login-title">เข้าสู่ระบบ</h1>
+            <p class="t4-hint">ใช้ชื่อผู้ใช้และรหัสผ่านเดียวกับอีเมลองค์กร</p>
+          </div>
+          <div class="t4-alert t4-alert--danger" data-t4-summary hidden></div>
+          <div class="t4-field">
+            <label class="t4-label" for="f-user">ชื่อผู้ใช้</label>
+            <input class="t4-input" id="f-user" name="username" autocomplete="username" required placeholder="เช่น somchai.j">
+          </div>
+          <div class="t4-field">
+            <div class="t4-field__row"><label class="t4-label" for="f-pass">รหัสผ่าน</label><a class="t4-link" href="#" data-t4-demo="หน้าตั้งรหัสผ่านใหม่ (ยังไม่รวมในตัวอย่าง)">ลืมรหัสผ่าน?</a></div>
+            <div class="t4-pass">
+              <input class="t4-input" id="f-pass" name="password" type="password" autocomplete="current-password" required>
+              <button type="button" class="t4-pass__btn" data-t4-reveal="f-pass" aria-pressed="false" aria-label="แสดงรหัสผ่าน"><svg class="t4-ic" aria-hidden="true"><use href="#t4-i-eye"></use></svg></button>
+            </div>
+          </div>
+          <label class="t4-check"><input type="checkbox" checked>จดจำการเข้าสู่ระบบในเครื่องนี้</label>
+          <button type="submit" class="t4-btn t4-btn--block">เข้าสู่ระบบ <svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-arrow-right"></use></svg></button>
+          <div class="t4-divider">หรือ</div>
+          <button type="button" class="t4-btn t4-btn--ghost t4-btn--block" data-t4-demo="เข้าสู่ระบบด้วยบัญชีองค์กร (SSO) — ตัวอย่าง"><svg class="t4-ic t4-ic--sm" aria-hidden="true"><use href="#t4-i-shield"></use></svg>เข้าสู่ระบบด้วยบัญชีองค์กร</button>
+        </form>
+      </div>
+    </div>
+    <p class="t4-auth__foot">ติดปัญหาการใช้งาน โทร 1150 · SMMS เวอร์ชัน 1.0.0 · ข้อมูลทั้งหมดเป็นตัวอย่าง</p>
+  </section>
+
+  <section class="t4-auth__intro" aria-label="เกี่ยวกับระบบ">
+    <a class="t4-brand t4-auth__brand" href="dashboard.html" aria-label="SMMS ระบบแจ้งซ่อม หน้าแรก">
+    <span class="t4-brand__mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M10.03 4.66L10.78 2.07L13.22 2.07L13.97 4.66A7.6 7.6 0 0 1 15.8 5.42L18.16 4.12L19.88 5.84L18.58 8.2A7.6 7.6 0 0 1 19.34 10.03L21.93 10.78L21.93 13.22L19.34 13.97A7.6 7.6 0 0 1 18.58 15.8L19.88 18.16L18.16 19.88L15.8 18.58A7.6 7.6 0 0 1 13.97 19.34L13.22 21.93L10.78 21.93L10.03 19.34A7.6 7.6 0 0 1 8.2 18.58L5.84 19.88L4.12 18.16L5.42 15.8A7.6 7.6 0 0 1 4.66 13.97L2.07 13.22L2.07 10.78L4.66 10.03A7.6 7.6 0 0 1 5.42 8.2L4.12 5.84L5.84 4.12L8.2 5.42A7.6 7.6 0 0 1 10.03 4.66z"/><circle cx="12" cy="12" r="5.2" fill="var(--t4-accent)"/><path d="M9.5 12.2l1.8 1.8 3.3-3.6" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="t4-brand__name">SMMS<small>ระบบแจ้งซ่อม</small></span>
+  </a>
+    <div class="t4-auth__body">
+      <span class="t4-eyebrow"><span class="t4-eyebrow__dot" aria-hidden="true"></span>ระบบภายในสำหรับเจ้าหน้าที่</span>
+      <p class="t4-auth__title">แจ้งซ่อมครั้งเดียว<br><span class="t4-hl" data-t4-rotate='["ติดตามได้ทุกขั้น","รู้ผลเร็วขึ้น","ไม่ต้องโทรตาม"]'><span class="t4-hl__word" aria-hidden="true">ติดตามได้ทุกขั้น</span><span class="t4-sr-only">ติดตามได้ทุกขั้น</span></span></p>
+      <p class="t4-auth__lead">แจ้งปัญหาครุภัณฑ์ ดูว่าช่างคนไหนรับงาน และรู้ทันทีเมื่อซ่อมเสร็จ ใช้ได้ทั้งคอมพิวเตอร์และมือถือ</p>
+      <ol class="t4-flow" aria-label="ขั้นตอนงานซ่อม">
+        <li class="t4-flow__step"><b>1</b>แจ้งซ่อม</li><li aria-hidden="true">→</li>
+        <li class="t4-flow__step"><b>2</b>มอบหมายช่าง</li><li aria-hidden="true">→</li>
+        <li class="t4-flow__step"><b>3</b>ซ่อม</li><li aria-hidden="true">→</li>
+        <li class="t4-flow__step t4-flow__step--done"><b>✓</b>ปิดงาน</li>
+      </ol>
+    </div>
+    <div class="t4-auth__facts" role="group" aria-label="ผลงานเดือนนี้">
+      <div class="t4-stat"><div class="t4-stat__v t4-num">128</div><div class="t4-stat__l">ใบแจ้งเดือนนี้</div></div>
+      <div class="t4-stat"><div class="t4-stat__v t4-num">1.8 <small>วัน</small></div><div class="t4-stat__l">เวลาซ่อมเฉลี่ย</div></div>
+      <div class="t4-stat"><div class="t4-stat__v t4-num">75%</div><div class="t4-stat__l">ปิดงานแล้ว</div></div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

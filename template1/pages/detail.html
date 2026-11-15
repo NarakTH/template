@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SR-202505-0152 รายละเอียดใบแจ้งซ่อม | SMMS แจ้งซ่อม</title>
+<!-- =========================================================================
+  DS UI Kit : starter.html (canonical page shell)
+
+  Every page of the kit, and every page of a system restyled with the kit,
+  copies its shell from this file. Per page, change ONLY:
+    1. the <title>
+    2. which .ds-nav__item carries aria-current="page" (see SIDEBAR below)
+    3. the content inside <main class="ds-content"> (breadcrumb, h2, panels)
+  The shell has no page-specific CSS or JS. All styling lives in
+  ../assets/ds-ui.css, all behaviour in ../assets/ds-ui.js (window.DS).
+
+  Splitting the shell into shared includes (full recipes: AI-UI-GUIDE.md)
+    Plain PHP
+      partials/header.php = from the DOCTYPE down to and including the
+                            opening main tag (head, skip link, sidebar, topbar)
+      partials/footer.php = from the closing main tag to the end (footer,
+                            closing wrappers, body, html)
+      A page sets $pageTitle and $active, includes header.php, prints its
+      own content, then includes footer.php.
+    Laravel Blade
+      resources/views/components/layouts/app.blade.php holds this whole file;
+      the page content is the component slot (it replaces the placeholder
+      page head + panel inside main); the regions marked SIDEBAR, TOPBAR and
+      FOOTER become partials/sidebar.blade.php, partials/header.blade.php and
+      partials/footer.blade.php. The <title> comes from a title prop.
+
+  These comments intentionally contain no PHP tags and no live Blade
+  directives, so the file stays inert when copied into a .php or .blade.php
+  file. The one Blade snippet (logout form, TOPBAR user menu) is wrapped in
+  a Blade comment, so Blade strips it instead of running it.
+  Asset paths: kit pages use ../assets/ ; other systems on this IIS host
+  link the shared copy at /template/assets/ds-ui.css and ds-ui.js.
+========================================================================== -->
+<!-- Kanit web font: the kit standard font (same request as the original).
+     The preconnects only speed it up. No color-scheme meta on purpose:
+     native widgets stay light in both themes, like the original. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap">
+<link rel="stylesheet" href="../assets/ds-ui.css">
+<!-- ds-ui.js stays in <head> WITHOUT defer/async: it applies the saved theme
+     (html[data-theme], localStorage "ds-theme") before first paint, then on
+     DOMContentLoaded injects the icon sprite and wires sidebar, tooltips,
+     dialogs, tabs and the theme toggle. -->
+<script src="../assets/ds-ui.js"></script>
+</head>
+<!-- class="ds-body" is part of the shell: margin 0 + page background
+     (needed by browsers without :has(), e.g. Firefox ESR 115). -->
+<body class="ds-body">
+
+<!-- ===== SKIP LINK (shared layout: start of header.php / app.blade.php) =====
+     First focusable element on every page; jumps past sidebar and topbar to
+     main#ds-main. Visible only while focused. -->
+<a class="ds-skip-link" href="#ds-main">ข้ามไปยังเนื้อหาหลัก</a>
+
+<!-- ===== APP SHELL (shared layout) =====
+     ds-app = 2-column grid (225px sidebar + main column). It opens in
+     header.php and closes in footer.php (Blade: both ends in the layout). -->
+<div class="ds-app">
+
+  <!-- ===== SIDEBAR (shared layout: partials/sidebar) =====
+       Plain PHP: part of header.php (or partials/sidebar.php included by it).
+       Blade: resources/views/partials/sidebar.blade.php.
+       At 900px and below it becomes off-canvas; ds-ui.js toggles .is-open
+       from the topbar menu button (aria-controls="ds-sidebar"), so keep
+       id="ds-sidebar" unchanged. -->
+  <aside class="ds-sidebar" id="ds-sidebar" aria-label="แถบด้านข้าง">
+
+    <!-- Brand: gear + check mark (cleaned: the invisible junk path and the
+         "26.500"-style number artifacts are removed; colours come from
+         tokens). Replace the mark, name and tagline per system. -->
+    <div class="ds-sidebar__brand">
+      <svg class="ds-sidebar__logo" width="50" height="50" viewBox="0 0 48 48" aria-hidden="true">
+        <path style="fill:var(--ds-logo)" d="M20.5 2h7l1.1 5.4 3.2 1.3 4.6-3 5 4.9-3.1 4.6 1.3 3.2L45 19.5v7l-5.4 1.1-1.3 3.2 3.1 4.6-5 5-4.6-3.1-3.2 1.3L27.5 44h-7l-1.1-5.4-3.2-1.3-4.6 3.1-5-5 3.1-4.6-1.3-3.2L3 26.5v-7l5.4-1.1 1.3-3.2-3.1-4.6 5-4.9 4.6 3 3.2-1.3z"/>
+        <circle style="fill:var(--ds-navy-950)" cx="24" cy="23" r="10.5"/>
+        <path style="stroke:var(--ds-on-color)" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M18.5 23.5l4 4 7.5-8.5"/>
+      </svg>
+      <div>
+        <b class="ds-sidebar__name">SMMS</b>
+        <small class="ds-sidebar__tagline">Smart Maintenance &amp;<br>Asset Service Management</small>
+      </div>
+    </div>
+
+    <!-- Main navigation: real links between pages (no JS routing).
+         aria-current="page" goes on exactly ONE item, the one for the page
+         being shown: dashboard.html = แดชบอร์ดภาพรวม, form.html = แจ้งซ่อมใหม่,
+         list.html = รายการแจ้งซ่อม, detail.html = งานของฉัน,
+         components.html = คลังคอมโพเนนต์ (UI Kit).
+         This page: งานของฉัน carries aria-current="page".
+         Example: <a class="ds-nav__item" href="list.html" aria-current="page">
+           Plain PHP: each page sets $active (e.g. 'list') before including
+             header.php; every item prints aria-current="page" only when
+             $active equals its own key.
+           Blade: in partials/sidebar.blade.php print the attribute when
+             request()->routeIs('repairs.*') (the item's route pattern) is true.
+         href="#" = page not built in this kit; point it at the real URL.
+         ds-nav__count = optional server-rendered counter (here: overdue
+         requests); leave the span out when the count is 0.
+         ds-nav__sep = divider between menu groups; ds-nav__label (optional)
+         = small group heading.
+         ds-nav__group = collapsible sub-menu: a button.ds-nav__toggle (it IS
+         a ds-nav__item, so it looks like one; aria-controls = the id of its
+         ds-nav__sub) + div.ds-nav__sub holding ds-nav__item ds-nav__subitem
+         links. Sub items have no icon (they only show in the full sidebar;
+         the 72px icon rail hides them, and a click on the toggle there
+         first expands the sidebar, then opens the group).
+         Current sub page: put aria-current="page" on the SUB item only (never
+         on the toggle). ds-ui.js then opens that group on load and adds
+         class has-current to its toggle. To avoid a closed-then-open flash,
+         the server can render the open state itself on the same condition:
+         aria-expanded="true" + class has-current on the toggle and NO hidden
+         attribute on the ds-nav__sub.
+           Plain PHP: each settings page sets $active (e.g. 'settings.users');
+             the group is open when $active starts with 'settings.'.
+           Blade: open the group when request()->routeIs('settings.*') is
+             true; each sub item gets aria-current="page" when
+             request()->routeIs('settings.users') (its own route) is true.
+         Other groups: copy the block with a new id (ds-nav-reports, ...). -->
+    <nav class="ds-nav" aria-label="เมนูหลัก">
+      <a class="ds-nav__item" href="dashboard.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-home"></use></svg>แดชบอร์ดภาพรวม</a>
+      <a class="ds-nav__item" href="form.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-user"></use></svg>แจ้งซ่อมใหม่</a>
+      <a class="ds-nav__item" href="list.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-doc"></use></svg>รายการแจ้งซ่อม <span class="ds-nav__count ds-num">9<span class="ds-sr-only"> รายการเกินกำหนด</span></span></a>
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-printer"></use></svg>ครุภัณฑ์ / สินทรัพย์</a>
+      <a class="ds-nav__item" href="detail.html" aria-current="page"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-task"></use></svg>งานของฉัน</a>
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-cal"></use></svg>ปฏิทินงาน</a>
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-doc"></use></svg>รายงาน</a>
+      <hr class="ds-nav__sep">
+      <a class="ds-nav__item" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-db"></use></svg>ข้อมูลหลัก</a>
+      <div class="ds-nav__group">
+        <button type="button" class="ds-nav__item ds-nav__toggle" aria-expanded="false" aria-controls="ds-nav-settings"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-gear"></use></svg>ตั้งค่า<svg class="ds-ic ds-ic--sm ds-nav__caret" aria-hidden="true"><use href="#ds-i-chevron-down"></use></svg></button>
+        <div class="ds-nav__sub" id="ds-nav-settings" hidden>
+          <a class="ds-nav__item ds-nav__subitem" href="#">ตั้งค่าบริษัท</a>
+          <a class="ds-nav__item ds-nav__subitem" href="#">ตั้งค่าระบบ</a>
+          <a class="ds-nav__item ds-nav__subitem" href="#">ผู้ใช้งานและสิทธิ์</a>
+          <a class="ds-nav__item ds-nav__subitem" href="#">บันทึกการใช้งาน</a>
+        </div>
+      </div>
+      <a class="ds-nav__item" href="components.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-image"></use></svg>คลังคอมโพเนนต์ (UI Kit)</a>
+    </nav>
+
+    <!-- Sidebar quote: decorative slogan pinned to the bottom of the sidebar.
+         Keep, replace or remove per system. -->
+    <div class="ds-sidebar__quote"><p>“ดูแลทุกสินทรัพย์<br>ให้พร้อมใช้งาน<small>เพื่อองค์กรที่เดินหน้าได้ไกลกว่า”</small></p><em>Maintain Today<br>for a Better Tomorrow</em></div>
+  </aside>
+  <!-- ===== /SIDEBAR ===== -->
+
+  <!-- ===== MAIN COLUMN (shared layout) =====
+       ds-main stacks topbar, content and footer. Opens in header.php and
+       closes in footer.php (Blade: both ends in the layout). -->
+  <div class="ds-main">
+
+    <!-- ===== TOPBAR (shared layout: partials/header) =====
+         Plain PHP: part of header.php (or partials/topbar.php included by it).
+         Blade: resources/views/partials/header.blade.php.
+         Fixed order: menu button (visible only at 900px and below), logo,
+         system title (h1), search, theme toggle, notifications, user.
+         Name / role / initial / counts come from the session and the server. -->
+    <header class="ds-topbar">
+      <!-- Hamburger: ds-ui.js opens/closes the off-canvas sidebar and keeps
+           aria-expanded in sync; Esc and an outside click close it. -->
+      <button type="button" class="ds-icon-btn ds-menu-btn" data-ds-sidebar-toggle aria-controls="ds-sidebar" aria-expanded="false" aria-label="เปิดเมนู"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-menu"></use></svg></button>
+      <span class="ds-topbar__logo"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-gear"></use></svg>SMMS</span>
+      <!-- The page's single h1 = the system name. The page's own title is the
+           h2 in ds-page-head. -->
+      <h1 class="ds-topbar__title">ระบบบริหารจัดการงานแจ้งซ่อมและบำรุงรักษาพัสดุครุภัณฑ์องค์กร</h1>
+      <!-- Search button: shown at 620px and below only (one compact topbar
+           row); ds-ui.js opens the search field as a full-width row under
+           the topbar. Keep it right BEFORE the ds-search. -->
+      <button type="button" class="ds-icon-btn ds-search-btn" data-ds-search-toggle aria-controls="ds-search" aria-expanded="false" aria-label="ค้นหา"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-search"></use></svg></button>
+      <!-- Global search. To submit it, swap the label for
+           form class="ds-search" role="search" action="list.html" (GET);
+           the input already has name="q". -->
+      <label class="ds-search" id="ds-search"><input type="search" name="q" placeholder="ค้นหาใบแจ้งซ่อม, ครุภัณฑ์, สถานที่, ผู้แจ้ง..." aria-label="ค้นหา" autocomplete="off"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-search"></use></svg></label>
+      <!-- Theme toggle: ds-ui.js flips html[data-theme], saves it and swaps
+           the sun/moon icon. No other markup needed. -->
+      <button type="button" class="ds-icon-btn" data-ds-theme-toggle aria-label="สลับโหมดสว่าง/มืด" data-ds-tip="สลับโหมดสว่าง / มืด"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-sun"></use></svg></button>
+      <!-- Notifications popover (ds-dropdown). ds-ui.js opens the element
+           named by aria-controls, keeps aria-expanded in sync and closes it
+           on outside click / Esc / Tab out; only one dropdown is open at a
+           time. Server-rendered: the dot = unread count (leave the span out
+           when 0 and drop the count from aria-label), newest items first,
+           unread items get class is-unread. "อ่านทั้งหมดแล้ว"
+           (data-ds-notif-readall) clears is-unread + the dot in the page and
+           emits 'ds:notif-readall'; production listens for it and POSTs the
+           "mark all read" request. Icon colours: --ds-red = overdue,
+           --ds-orange = warning, --ds-blue = info, --ds-green = done. -->
+      <div class="ds-dropdown">
+        <button type="button" class="ds-icon-btn" data-ds-dropdown aria-controls="ds-notif-panel" aria-expanded="false"
+                aria-haspopup="true" aria-label="การแจ้งเตือน (ยังไม่อ่าน 3 รายการ)">
+          <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-bell"></use></svg><span class="ds-icon-btn__dot ds-num" aria-hidden="true">3</span>
+        </button>
+        <div class="ds-popover" id="ds-notif-panel" hidden>
+          <div class="ds-popover__head">
+            <h2 class="ds-popover__title">การแจ้งเตือน</h2>
+            <button type="button" class="ds-link-btn" data-ds-notif-readall>อ่านทั้งหมดแล้ว</button>
+          </div>
+          <ul class="ds-notes ds-popover__body">
+            <li class="ds-notes__item is-unread">
+              <span class="ds-notes__icon" style="background:var(--ds-red)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-bell"></use></svg></span>
+              <span><a class="ds-notes__link" href="list.html">มีงานค้างเกินกำหนด 9 รายการ</a><small class="ds-notes__time ds-num">15/05/2568 09:00</small></span>
+            </li>
+            <li class="ds-notes__item is-unread">
+              <span class="ds-notes__icon" style="background:var(--ds-orange)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-wrench"></use></svg></span>
+              <span><a class="ds-notes__link" href="detail.html">SR-202505-0152 เครื่องปรับอากาศ ชั้น 3 รออะไหล่ (คอมเพรสเซอร์)</a><small class="ds-notes__time ds-num">15/05/2568 08:42</small></span>
+            </li>
+            <li class="ds-notes__item is-unread">
+              <span class="ds-notes__icon" style="background:var(--ds-blue)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-doc"></use></svg></span>
+              <span><a class="ds-notes__link" href="list.html?status=pending">มีใบแจ้งซ่อมใหม่ 4 รายการ รอมอบหมายช่าง</a><small class="ds-notes__time ds-num">14/05/2568 16:30</small></span>
+            </li>
+            <li class="ds-notes__item">
+              <span class="ds-notes__icon" style="background:var(--ds-green)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-check"></use></svg></span>
+              <span><a class="ds-notes__link" href="list.html?status=done">ปิดงาน SR-202505-0147 แล้ว รอผู้แจ้งประเมินความพึงพอใจ</a><small class="ds-notes__time ds-num">13/05/2568 14:05</small></span>
+            </li>
+            <li class="ds-notes__item">
+              <span class="ds-notes__icon" style="background:var(--ds-blue)"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-cal"></use></svg></span>
+              <span><a class="ds-notes__link" href="dashboard.html">ครุภัณฑ์ 6 รายการถึงรอบบำรุงรักษา (PM) ภายในสัปดาห์นี้</a><small class="ds-notes__time ds-num">12/05/2568 10:15</small></span>
+            </li>
+          </ul>
+          <div class="ds-popover__foot"><a class="ds-link-btn" href="#">ดูการแจ้งเตือนทั้งหมด →</a></div>
+        </div>
+      </div>
+      <!-- User menu (ds-dropdown, role="menu"): avatar initial + name and
+           role from the session; ds-user__meta is visually hidden at 900px
+           and below (still read by screen readers). Arrow keys / Home / End
+           move between menu items; opening with the keyboard focuses the
+           first item.
+           Logout: production MUST be a POST form with a CSRF token (never a
+           GET link). Replace the logout link below with the snippet inside
+           this Blade comment (it is stripped by Blade, so it never runs here):
+           {{-- <form method="POST" action="{{ route('logout') }}" role="none">
+                  @csrf
+                  <button type="submit" class="ds-menu__item ds-menu__item--danger" role="menuitem">
+                    <svg class="ds-ic" aria-hidden="true"><use href="#ds-i-logout"></use></svg>ออกจากระบบ</button>
+                </form> --}}
+           Plain PHP: the same form with action="logout.php" and a hidden
+           input name="_token" holding the session's CSRF token. -->
+      <div class="ds-dropdown">
+        <button type="button" class="ds-user" data-ds-dropdown aria-controls="ds-user-menu" aria-expanded="false" aria-haspopup="menu">
+          <span class="ds-avatar" aria-hidden="true">ส</span>
+          <span class="ds-user__meta"><b>สมชาย ใจดี</b><small>ผู้จัดการ (SUPERVISOR)</small></span>
+          <svg class="ds-ic ds-ic--sm ds-user__caret" aria-hidden="true"><use href="#ds-i-chevron-down"></use></svg>
+        </button>
+        <div class="ds-menu" id="ds-user-menu" role="menu" aria-label="เมนูผู้ใช้" hidden>
+          <div class="ds-menu__header" role="none"><b>สมชาย ใจดี</b><small>somchai.j@example.go.th</small></div>
+          <a class="ds-menu__item" role="menuitem" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-user"></use></svg>ข้อมูลส่วนตัว</a>
+          <a class="ds-menu__item" role="menuitem" href="#"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-lock"></use></svg>เปลี่ยนรหัสผ่าน</a>
+          <hr class="ds-menu__sep">
+          <!-- production: logout must be a POST form with CSRF (Laravel). Template uses a link to login.html -->
+          <a class="ds-menu__item ds-menu__item--danger" role="menuitem" href="login.html"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-logout"></use></svg>ออกจากระบบ</a>
+        </div>
+      </div>
+    </header>
+    <!-- ===== /TOPBAR ===== -->
+
+    <!-- ===== PAGE CONTENT (per page; everything above is the shared header) =====
+         Plain PHP: header.php ends with the opening main tag below; the page
+         prints its content; footer.php starts at the closing main tag.
+         Blade: this main element stays in the layout and the page content is
+         the component slot, which replaces the placeholder page head + panel.
+         id="ds-main" (ds- prefixed, never a bare "main") is the skip-link
+         target; tabindex="-1" lets it take focus. -->
+    <main class="ds-content" id="ds-main" tabindex="-1">
+
+      <!-- ===== PAGE HEAD =====
+           Detail archetype: breadcrumb back to the list, h2 = request id +
+           subject + current status pill (id="srStatus", the page script
+           swaps its ds-pill--* modifier), sub = reporter and reported time.
+           Actions: print (ghost), edit (ghost link to form.html), cancel
+           (danger, DS.confirm), close job (primary, DS.confirm). The whole
+           actions block is hidden in print by ds-ui.css. -->
+      <div class="ds-page-head">
+        <div class="ds-page-head__main">
+          <nav class="ds-breadcrumb" aria-label="เส้นทางนำทาง">
+            <ol>
+              <li><a href="dashboard.html">หน้าหลัก</a></li>
+              <li><a href="list.html">รายการแจ้งซ่อม</a></li>
+              <li aria-current="page">SR-202505-0152</li>
+            </ol>
+          </nav>
+          <h2 class="ds-page-head__title">SR-202505-0152 · เครื่องปรับอากาศ ชั้น 3 (ไม่เย็น) <span class="ds-pill ds-pill--progress" id="srStatus">กำลังดำเนินการ</span></h2>
+          <p class="ds-page-head__sub">แจ้งโดย สุภาวดี สิทธิ์ · <time datetime="2025-05-12T09:14">12/05/2568 09:14 น.</time></p>
+        </div>
+        <div class="ds-page-head__actions">
+          <!-- Official A4 form (print.html = ใบแจ้งซ่อม SMMS-F01; production: the print route for this id) -->
+          <a class="ds-btn ds-btn--ghost" href="print.html?id=SR-202505-0152" id="srPrint"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-printer"></use></svg>พิมพ์ใบแจ้งซ่อม</a>
+          <a class="ds-btn ds-btn--ghost" href="form.html?id=SR-202505-0152"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-edit"></use></svg>แก้ไข</a>
+          <button type="button" class="ds-btn ds-btn--danger" id="srCancel"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-x-circle"></use></svg>ยกเลิกงาน</button>
+          <button type="button" class="ds-btn" id="srClose"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-check-circle"></use></svg>ปิดงาน</button>
+        </div>
+      </div>
+
+      <!-- ===== DETAIL LAYOUT =====
+           ds-grid--aside = main column + 320px aside; one column at 900px
+           and below (the aside then follows the main column). -->
+      <div class="ds-grid ds-grid--aside">
+
+        <!-- ===== MAIN COLUMN (tabs + comments) ===== -->
+        <div class="ds-stack">
+
+          <!-- ===== TABS: รายละเอียด | ประวัติการดำเนินการ | ไฟล์แนบ =====
+               ds-ui.js wires every .ds-tabs[role=tablist] (click, arrow keys,
+               hidden panels). ds-tabs__count = server-rendered counters; the
+               log counter (id="srLogCount") is updated by the page script. -->
+          <section class="ds-panel" aria-label="ข้อมูลใบแจ้งซ่อม SR-202505-0152">
+            <div class="ds-tabs" role="tablist" aria-label="ข้อมูลใบแจ้งซ่อม">
+              <button type="button" class="ds-tabs__tab" role="tab" id="srTabInfo" aria-selected="true" aria-controls="srPanelInfo">รายละเอียด</button>
+              <button type="button" class="ds-tabs__tab" role="tab" id="srTabLog" aria-controls="srPanelLog">ประวัติการดำเนินการ <span class="ds-tabs__count ds-num" id="srLogCount">5</span></button>
+              <button type="button" class="ds-tabs__tab" role="tab" id="srTabFiles" aria-controls="srPanelFiles">ไฟล์แนบ <span class="ds-tabs__count ds-num">3</span></button>
+            </div>
+
+            <!-- ===== TAB 1: DETAILS (due alert + key/value list + problem text) ===== -->
+            <div class="ds-tabs__panel" role="tabpanel" id="srPanelInfo" aria-labelledby="srTabInfo" tabindex="0">
+              <div class="ds-stack">
+                <!-- Due-date alert: rendered only while the job is open and
+                     close to its due date; the page script hides it when
+                     the job is closed or cancelled. -->
+                <div class="ds-alert ds-alert--warning" role="status" id="srDueAlert">
+                  <svg class="ds-ic ds-alert__icon" aria-hidden="true"><use href="#ds-i-alert-triangle"></use></svg>
+                  <div class="ds-alert__body">
+                    <p class="ds-alert__title">เหลือเวลาอีก 1 วันก่อนครบกำหนด</p>
+                    <p>กำหนดเสร็จ 16/05/2568 · สถานะล่าสุด: รออะไหล่ (คาปาซิเตอร์คอมเพรสเซอร์)</p>
+                  </div>
+                </div>
+
+                <!-- Key/value list (ds-dl: label column 110px + value). -->
+                <dl class="ds-dl">
+                  <dt>ประเภท</dt><dd>เครื่องปรับอากาศ</dd>
+                  <dt>หน่วยงาน</dt><dd>ฝ่ายบัญชี</dd>
+                  <dt>สถานที่</dt><dd>อาคาร A ชั้น 3 ห้องประชุม 302</dd>
+                  <dt>ความเร่งด่วน</dt><dd><span class="ds-text-bad">ด่วน</span> (ภายใน 4 วันทำการ)</dd>
+                  <dt>วันที่แจ้ง</dt><dd class="ds-num">12/05/2568 09:14 น.</dd>
+                  <dt>กำหนดเสร็จ</dt><dd class="ds-num">16/05/2568</dd>
+                  <dt>ผู้รับผิดชอบ</dt><dd>วิชัย ช่างเย็น (ช่างเครื่องปรับอากาศ)</dd>
+                </dl>
+
+                <!-- Problem description as typed by the reporter. -->
+                <div>
+                  <h3 class="ds-subhead">รายละเอียดปัญหา</h3>
+                  <div>เครื่องปรับอากาศในห้องประชุม 302 เปิดแล้วมีแต่ลม ไม่เย็น อุณหภูมิห้องสูงกว่า 28 องศา มีน้ำหยดบริเวณคอยล์เย็นด้านซ้าย และหน้าจอแสดงรหัส E7 เป็นระยะ ห้องนี้ใช้ประชุมทุกวัน รบกวนดำเนินการด่วน</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ===== TAB 2: ACTIVITY LOG (ds-timeline, oldest first) =====
+                 Dot color = --ds-accent on the item (token only). The page
+                 script appends ปิดงาน / ยกเลิกงาน items to id="srTimeline". -->
+            <div class="ds-tabs__panel" role="tabpanel" id="srPanelLog" aria-labelledby="srTabLog" tabindex="0" hidden>
+              <ol class="ds-timeline" id="srTimeline">
+                <li class="ds-timeline__item" style="--ds-accent:var(--ds-gray)">
+                  <span class="ds-timeline__dot" aria-hidden="true"></span>
+                  <p class="ds-timeline__title">แจ้งซ่อม</p>
+                  <time class="ds-timeline__time" datetime="2025-05-12T09:14">12/05/2568 09:14 น.</time>
+                  <div class="ds-timeline__body">สุภาวดี สิทธิ์ (ฝ่ายบัญชี) แจ้งผ่านระบบ พร้อมรูปถ่าย 2 ไฟล์</div>
+                </li>
+                <li class="ds-timeline__item">
+                  <span class="ds-timeline__dot" aria-hidden="true"></span>
+                  <p class="ds-timeline__title">รับเรื่อง</p>
+                  <time class="ds-timeline__time" datetime="2025-05-12T09:40">12/05/2568 09:40 น.</time>
+                  <div class="ds-timeline__body">สมชาย ใจดี (ผู้จัดการ) รับเรื่องและจัดระดับความเร่งด่วนเป็น "ด่วน"</div>
+                </li>
+                <li class="ds-timeline__item" style="--ds-accent:var(--ds-purple)">
+                  <span class="ds-timeline__dot" aria-hidden="true"></span>
+                  <p class="ds-timeline__title">มอบหมายช่าง</p>
+                  <time class="ds-timeline__time" datetime="2025-05-12T10:05">12/05/2568 10:05 น.</time>
+                  <div class="ds-timeline__body">มอบหมายให้ วิชัย ช่างเย็น (ช่างเครื่องปรับอากาศ) โดย สมชาย ใจดี</div>
+                </li>
+                <li class="ds-timeline__item" style="--ds-accent:var(--ds-sky)">
+                  <span class="ds-timeline__dot" aria-hidden="true"></span>
+                  <p class="ds-timeline__title">กำลังดำเนินการ</p>
+                  <time class="ds-timeline__time" datetime="2025-05-13T13:30">13/05/2568 13:30 น.</time>
+                  <div class="ds-timeline__body">วิชัย ช่างเย็น ตรวจหน้างาน พบคาปาซิเตอร์คอมเพรสเซอร์เสื่อม และน้ำยาแอร์ต่ำกว่าเกณฑ์</div>
+                </li>
+                <li class="ds-timeline__item" style="--ds-accent:var(--ds-orange)">
+                  <span class="ds-timeline__dot" aria-hidden="true"></span>
+                  <p class="ds-timeline__title">รออะไหล่</p>
+                  <time class="ds-timeline__time" datetime="2025-05-14T11:20">14/05/2568 11:20 น.</time>
+                  <div class="ds-timeline__body">สั่งซื้อคาปาซิเตอร์ 35/5 µF แล้ว คาดว่าได้รับ 15/05/2568 (แนบใบเสนอราคา)</div>
+                </li>
+              </ol>
+            </div>
+
+            <!-- ===== TAB 3: ATTACHMENTS (small ds-table) =====
+                 Download = icon button per row (ds-table__actions is hidden in
+                 print). Real system: use <a class="ds-btn ds-btn--ghost
+                 ds-btn--icon" href="/files/123" download> instead of the demo
+                 button + toast. -->
+            <div class="ds-tabs__panel" role="tabpanel" id="srPanelFiles" aria-labelledby="srTabFiles" tabindex="0" hidden>
+              <div class="ds-table-wrap">
+                <table class="ds-table ds-table--hover ds-table--stack" id="srFiles">
+                  <caption class="ds-sr-only">ไฟล์แนบของใบแจ้งซ่อม SR-202505-0152</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">ชื่อไฟล์</th>
+                      <th scope="col">ขนาด</th>
+                      <th scope="col">อัปโหลดโดย</th>
+                      <th scope="col">วันที่</th>
+                      <th scope="col" class="ds-table__actions"><span class="ds-sr-only">ดาวน์โหลด</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td data-label="ชื่อไฟล์"><svg class="ds-ic ds-ic--sm" aria-hidden="true"><use href="#ds-i-image"></use></svg> ac-302-indoor.jpg</td>
+                      <td class="ds-num ds-nowrap" data-label="ขนาด">1.8 MB</td>
+                      <td data-label="อัปโหลดโดย">สุภาวดี สิทธิ์</td>
+                      <td class="ds-num" data-label="วันที่">12/05/2568</td>
+                      <td class="ds-table__actions"><button type="button" class="ds-btn ds-btn--ghost ds-btn--icon" data-sr-file="ac-302-indoor.jpg" aria-label="ดาวน์โหลด ac-302-indoor.jpg" data-ds-tip="ดาวน์โหลด"><svg class="ds-ic ds-ic--sm" aria-hidden="true"><use href="#ds-i-download"></use></svg></button></td>
+                    </tr>
+                    <tr>
+                      <td data-label="ชื่อไฟล์"><svg class="ds-ic ds-ic--sm" aria-hidden="true"><use href="#ds-i-image"></use></svg> ac-302-error-e7.jpg</td>
+                      <td class="ds-num ds-nowrap" data-label="ขนาด">920 KB</td>
+                      <td data-label="อัปโหลดโดย">สุภาวดี สิทธิ์</td>
+                      <td class="ds-num" data-label="วันที่">12/05/2568</td>
+                      <td class="ds-table__actions"><button type="button" class="ds-btn ds-btn--ghost ds-btn--icon" data-sr-file="ac-302-error-e7.jpg" aria-label="ดาวน์โหลด ac-302-error-e7.jpg" data-ds-tip="ดาวน์โหลด"><svg class="ds-ic ds-ic--sm" aria-hidden="true"><use href="#ds-i-download"></use></svg></button></td>
+                    </tr>
+                    <tr>
+                      <td data-label="ชื่อไฟล์"><svg class="ds-ic ds-ic--sm" aria-hidden="true"><use href="#ds-i-file-text"></use></svg> ใบเสนอราคาอะไหล่.pdf</td>
+                      <td class="ds-num ds-nowrap" data-label="ขนาด">245 KB</td>
+                      <td data-label="อัปโหลดโดย">วิชัย ช่างเย็น</td>
+                      <td class="ds-num" data-label="วันที่">14/05/2568</td>
+                      <td class="ds-table__actions"><button type="button" class="ds-btn ds-btn--ghost ds-btn--icon" data-sr-file="ใบเสนอราคาอะไหล่.pdf" aria-label="ดาวน์โหลด ใบเสนอราคาอะไหล่.pdf" data-ds-tip="ดาวน์โหลด"><svg class="ds-ic ds-ic--sm" aria-hidden="true"><use href="#ds-i-download"></use></svg></button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+          <!-- ===== /TABS ===== -->
+
+          <!-- ===== COMMENTS (ds-notes list + ds-field textarea) =====
+               Each comment = round initial (ds-notes__icon, color via token)
+               + name + text + time. The page script appends the new comment
+               to id="srComments" and bumps the badge id="srCommentCount". -->
+          <section class="ds-panel" aria-labelledby="srCommentsTitle">
+            <div class="ds-panel__head">
+              <h3 class="ds-panel__title" id="srCommentsTitle">ความคิดเห็น</h3>
+              <div class="ds-panel__tools"><span class="ds-badge ds-badge--neutral ds-num" id="srCommentCount">3</span></div>
+            </div>
+            <div class="ds-stack">
+              <ul class="ds-notes" id="srComments">
+                <li class="ds-notes__item">
+                  <span class="ds-notes__icon" style="background:var(--ds-green)" aria-hidden="true">ส</span>
+                  <span><b>สุภาวดี สิทธิ์</b> ห้อง 302 มีประชุมผู้บริหารวันศุกร์ 16/05 ช่วงบ่าย รบกวนให้ทันก่อนนะคะ
+                    <small class="ds-notes__time ds-num">12/05/2568 09:20 น.</small></span>
+                </li>
+                <li class="ds-notes__item">
+                  <span class="ds-notes__icon" style="background:var(--ds-purple)" aria-hidden="true">ว</span>
+                  <span><b>วิชัย ช่างเย็น</b> ตรวจแล้ว ต้องเปลี่ยนคาปาซิเตอร์และเติมน้ำยา ระหว่างนี้เปิดพัดลมเสริมให้ก่อนครับ
+                    <small class="ds-notes__time ds-num">13/05/2568 13:42 น.</small></span>
+                </li>
+                <li class="ds-notes__item">
+                  <span class="ds-notes__icon" aria-hidden="true">ส</span>
+                  <span><b>สมชาย ใจดี</b> อนุมัติสั่งอะไหล่แล้ว ถ้าอะไหล่มาถึง 15/05 ให้เข้าติดตั้งทันที
+                    <small class="ds-notes__time ds-num">14/05/2568 11:35 น.</small></span>
+                </li>
+              </ul>
+
+              <!-- Comment form: POST to the server in a real system; the demo
+                   script validates (aria-invalid + ds-field__error) and
+                   appends the comment locally. -->
+              <form class="ds-stack ds-no-print" id="srCommentForm" action="#" method="post" novalidate>
+                <div class="ds-field">
+                  <label class="ds-field__label" for="srCommentText">เพิ่มความคิดเห็น</label>
+                  <textarea class="ds-textarea" id="srCommentText" name="comment" rows="3" placeholder="พิมพ์ความคิดเห็น หรือแจ้งความคืบหน้า..." aria-describedby="srCommentHint srCommentError"></textarea>
+                  <p class="ds-field__hint" id="srCommentHint">ผู้แจ้งและผู้รับผิดชอบจะได้รับการแจ้งเตือน</p>
+                  <p class="ds-field__error" id="srCommentError" hidden>กรุณาพิมพ์ความคิดเห็นก่อนส่ง</p>
+                </div>
+                <div class="ds-actions ds-actions--end">
+                  <button type="submit" class="ds-btn"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-send"></use></svg>ส่งความคิดเห็น</button>
+                </div>
+              </form>
+            </div>
+          </section>
+          <!-- ===== /COMMENTS ===== -->
+
+        </div>
+        <!-- ===== /MAIN COLUMN ===== -->
+
+        <!-- ===== ASIDE COLUMN (ds-stack of small panels) ===== -->
+        <aside class="ds-stack" aria-label="ข้อมูลประกอบใบแจ้งซ่อม">
+
+          <!-- ===== ASSET INFO (ds-dl) ===== -->
+          <section class="ds-panel" aria-labelledby="srAssetTitle">
+            <div class="ds-panel__head">
+              <h3 class="ds-panel__title" id="srAssetTitle">ข้อมูลครุภัณฑ์</h3>
+            </div>
+            <dl class="ds-dl">
+              <dt>เลขครุภัณฑ์</dt><dd class="ds-num">4120-001-0315</dd>
+              <dt>ยี่ห้อ/รุ่น</dt><dd>Daikin FTKC18TV2S (18,000 BTU)</dd>
+              <dt>ปีที่ซื้อ</dt><dd class="ds-num">2021</dd>
+              <dt>ประกันถึง</dt><dd><span class="ds-text-bad ds-num">31/03/2567</span> (หมดประกันแล้ว)</dd>
+            </dl>
+          </section>
+
+          <!-- ===== SLA (ds-progress; bar color via --ds-accent token,
+               width via --ds-value; keep aria-valuenow in sync) ===== -->
+          <section class="ds-panel" aria-labelledby="srSlaTitle">
+            <div class="ds-panel__head">
+              <h3 class="ds-panel__title" id="srSlaTitle">SLA</h3>
+              <div class="ds-panel__tools"><span class="ds-num">75%</span></div>
+            </div>
+            <div class="ds-stack">
+              <div class="ds-progress" role="progressbar" aria-label="เวลาที่ใช้ไปตาม SLA" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" aria-valuetext="ใช้ไป 3 จาก 4 วัน" style="--ds-accent:var(--ds-orange)"><span class="ds-progress__fill" style="--ds-value:75%"></span></div>
+              <div>ใช้ไป <b class="ds-num">3</b> จาก <span class="ds-num">4</span> วัน <span class="ds-muted">· ครบกำหนด <span class="ds-num">16/05/2568</span></span></div>
+            </div>
+          </section>
+
+          <!-- ===== ASSIGNEE (ds-person: avatar + name/role; contact icon buttons in
+               the panel tools; the phone number also prints as text) ===== -->
+          <section class="ds-panel" aria-labelledby="srOwnerTitle">
+            <div class="ds-panel__head">
+              <h3 class="ds-panel__title" id="srOwnerTitle">ผู้รับผิดชอบ</h3>
+              <div class="ds-panel__tools">
+                <a class="ds-icon-btn" href="tel:021234567,215" aria-label="โทรหา วิชัย ช่างเย็น" data-ds-tip="โทร 02-123-4567 ต่อ 215"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-phone"></use></svg></a>
+                <a class="ds-icon-btn" href="mailto:wichai.c@example.com?subject=SR-202505-0152" aria-label="ส่งอีเมลถึง วิชัย ช่างเย็น" data-ds-tip="wichai.c@example.com"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-mail"></use></svg></a>
+              </div>
+            </div>
+            <div class="ds-person">
+              <span class="ds-avatar" aria-hidden="true">ว</span>
+              <span class="ds-person__body"><b class="ds-person__name">วิชัย ช่างเย็น</b><small class="ds-person__meta">ช่างเครื่องปรับอากาศ (TECHNICIAN)</small><small class="ds-person__meta ds-num">โทร 02-123-4567 ต่อ 215</small></span>
+            </div>
+          </section>
+
+          <!-- ===== ASSET REPAIR HISTORY (ds-recent, reflows to 2 lines in
+               the narrow aside via ds-recent--reflow) ===== -->
+          <section class="ds-panel" aria-labelledby="srHistTitle">
+            <div class="ds-panel__head">
+              <h3 class="ds-panel__title" id="srHistTitle">ประวัติซ่อมครุภัณฑ์นี้</h3>
+              <div class="ds-panel__tools"><a class="ds-link-btn" href="list.html?asset=4120-001-0315">ดูทั้งหมด</a></div>
+            </div>
+            <ul class="ds-recent ds-recent--reflow">
+              <li class="ds-recent__item">
+                <a class="ds-id-link ds-num" href="detail.html?id=SR-202503-0087">SR-202503-0087</a>
+                <span class="ds-recent__name" title="ล้างทำความสะอาดประจำปี">ล้างทำความสะอาดประจำปี</span>
+                <time class="ds-recent__time ds-num" datetime="2025-03-18">18/03/2568</time>
+                <span class="ds-pill ds-pill--done">เสร็จสิ้น</span>
+              </li>
+              <li class="ds-recent__item">
+                <a class="ds-id-link ds-num" href="detail.html?id=SR-202411-0142">SR-202411-0142</a>
+                <span class="ds-recent__name" title="รีโมตสั่งงานไม่ได้ เปลี่ยนแผงรับสัญญาณ">รีโมตสั่งงานไม่ได้ เปลี่ยนแผงรับสัญญาณ</span>
+                <time class="ds-recent__time ds-num" datetime="2024-11-05">05/11/2567</time>
+                <span class="ds-pill ds-pill--done">เสร็จสิ้น</span>
+              </li>
+              <li class="ds-recent__item">
+                <a class="ds-id-link ds-num" href="detail.html?id=SR-202407-0033">SR-202407-0033</a>
+                <span class="ds-recent__name" title="น้ำหยดจากคอยล์เย็น (แจ้งซ้ำ)">น้ำหยดจากคอยล์เย็น (แจ้งซ้ำ)</span>
+                <time class="ds-recent__time ds-num" datetime="2024-07-22">22/07/2567</time>
+                <span class="ds-pill ds-pill--cancel">ยกเลิก</span>
+              </li>
+            </ul>
+          </section>
+
+        </aside>
+        <!-- ===== /ASIDE COLUMN ===== -->
+
+      </div>
+      <!-- ===== /DETAIL LAYOUT ===== -->
+
+    </main>
+    <!-- ===== /PAGE CONTENT (everything below is the shared footer) ===== -->
+
+    <!-- ===== FOOTER (shared layout: partials/footer) =====
+         Plain PHP: footer.php, from the closing main tag to the end of the file.
+         Blade: resources/views/partials/footer.blade.php.
+         Version, system name and copyright are per system;
+         ds-footer__spacer pushes the copyright to the right edge. -->
+    <footer class="ds-footer">
+      <span class="ds-footer__brand"><svg class="ds-ic" aria-hidden="true"><use href="#ds-i-gear"></use></svg>SMMS</span><span>Version 1.0.0 (MVP)</span><span aria-hidden="true">|</span><span>Smart Maintenance &amp; Asset Service Management System</span><span aria-hidden="true">|</span><span>ต้นแบบ HTML · ข้อมูลทั้งหมดเป็นตัวอย่าง</span>
+      <span class="ds-footer__spacer">© 2025 บริษัท ตัวอย่าง จำกัด | All rights reserved.</span>
+    </footer>
+    <!-- ===== /FOOTER ===== -->
+
+  </div>
+  <!-- ===== /MAIN COLUMN ===== -->
+
+</div>
+<!-- ===== /APP SHELL =====
+     No scripts in the shell: ds-ui.js (in head) wires everything. A page
+     that needs its own script adds it at the end of the page body, never in
+     the shared includes. -->
+
+<!-- ===== PAGE SCRIPT ===== -->
+<script>
+/* PAGE SCRIPT (ตัวอย่าง) — แทนที่ด้วยข้อมูลจากเซิร์ฟเวอร์
+   Demo behaviour of detail.html, built only on the DS API:
+   - พิมพ์ใบแจ้งซ่อม: a plain link to print.html (A4 form); Ctrl+P on this page
+     still prints it with the kit print CSS (chrome and buttons hidden)
+   - ยกเลิกงาน / ปิดงาน: DS.confirm -> status pill + timeline item + toast
+   - ไฟล์แนบ: download buttons show a toast (real system: <a href download>)
+   - ความคิดเห็น: validate, append to the list, toast
+   In a real system every action POSTs to the server, which returns the new
+   status / timeline item / comment (or the page reloads). */
+(function () {
+  'use strict';
+  var DS = window.DS;
+  if (!DS) return;
+
+  /* Demo clock pinned to the sample data (15/05/2568 10:24). */
+  DS.now = function () { return new Date(2025, 4, 15, 10, 24); };
+
+  var SR_ID = 'SR-202505-0152';
+  var ME = { name: 'สมชาย ใจดี', role: 'ผู้จัดการ', initial: 'ส' };
+  var STATUS = { pending: 'รอดำเนินการ', progress: 'กำลังดำเนินการ', done: 'เสร็จสิ้น', cancel: 'ยกเลิก' };
+
+  function $(id) { return document.getElementById(id); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function stamp() {
+    var d = DS.now();
+    return {
+      iso: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + DS.fmtTime(d),
+      text: DS.fmtDate(d) + ' ' + DS.fmtTime(d) + ' น.'
+    };
+  }
+
+  /* status pill in the page head */
+  function setStatus(key) {
+    var pill = $('srStatus');
+    pill.className = 'ds-pill ds-pill--' + key;
+    pill.textContent = STATUS[key];
+  }
+
+  /* append one ds-timeline__item (color = palette token name) */
+  function addTimeline(title, body, colorToken) {
+    var t = stamp();
+    var list = $('srTimeline');
+    var li = document.createElement('li');
+    li.className = 'ds-timeline__item';
+    li.style.setProperty('--ds-accent', 'var(' + colorToken + ')');
+    li.innerHTML =
+      '<span class="ds-timeline__dot" aria-hidden="true"></span>' +
+      '<p class="ds-timeline__title">' + DS.esc(title) + '</p>' +
+      '<time class="ds-timeline__time" datetime="' + t.iso + '">' + DS.esc(t.text) + '</time>' +
+      '<div class="ds-timeline__body">' + DS.esc(body) + '</div>';
+    list.appendChild(li);
+    $('srLogCount').textContent = String(list.children.length);
+  }
+
+  /* closed / cancelled job: no more state changes, no due alert */
+  function lockJob() {
+    $('srClose').disabled = true;
+    $('srCancel').disabled = true;
+    $('srDueAlert').hidden = true;
+  }
+
+  $('srCancel').addEventListener('click', function () {
+    DS.confirm({
+      title: 'ยกเลิกงาน ' + SR_ID + ' ?',
+      text: 'งานจะถูกปิดด้วยสถานะ "ยกเลิก" และแจ้งผู้แจ้งซ่อมทราบ',
+      okText: 'ยกเลิกงาน', cancelText: 'ไม่ใช่', danger: true
+    }).then(function (ok) {
+      if (!ok) return;
+      setStatus('cancel');
+      addTimeline('ยกเลิกงาน', 'ยกเลิกโดย ' + ME.name + ' (' + ME.role + ')', '--ds-red');
+      lockJob();
+      DS.toast('ยกเลิกงาน ' + SR_ID + ' แล้ว', { type: 'danger' });
+    });
+  });
+
+  $('srClose').addEventListener('click', function () {
+    DS.confirm({
+      title: 'ปิดงาน ' + SR_ID + ' ?',
+      text: 'ยืนยันว่าซ่อมเสร็จและตรวจรับงานเรียบร้อยแล้ว',
+      okText: 'ปิดงาน', cancelText: 'ยังไม่ปิด'
+    }).then(function (ok) {
+      if (!ok) return;
+      setStatus('done');
+      addTimeline('ปิดงาน', 'ซ่อมเสร็จ ตรวจรับงานโดย ' + ME.name + ' (' + ME.role + ')', '--ds-green');
+      lockJob();
+      DS.toast('ปิดงาน ' + SR_ID + ' เรียบร้อยแล้ว', { type: 'success' });
+    });
+  });
+
+  /* attachments: demo download */
+  $('srFiles').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-sr-file]');
+    if (btn) DS.toast('เริ่มดาวน์โหลด ' + btn.getAttribute('data-sr-file'));
+  });
+
+  /* comments */
+  var form = $('srCommentForm');
+  var input = $('srCommentText');
+  var error = $('srCommentError');
+  function setInvalid(on) {
+    if (on) input.setAttribute('aria-invalid', 'true'); else input.removeAttribute('aria-invalid');
+    error.hidden = !on;
+  }
+  input.addEventListener('input', function () { if (input.value.trim()) setInvalid(false); });
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var msg = input.value.trim();
+    if (!msg) { setInvalid(true); input.focus(); return; }
+    setInvalid(false);
+    var t = stamp();
+    var list = $('srComments');
+    var li = document.createElement('li');
+    li.className = 'ds-notes__item';
+    li.innerHTML =
+      '<span class="ds-notes__icon" aria-hidden="true">' + DS.esc(ME.initial) + '</span>' +
+      '<span><b>' + DS.esc(ME.name) + '</b> ' + DS.esc(msg) +
+      ' <small class="ds-notes__time ds-num">' + DS.esc(t.text) + '</small></span>';
+    list.appendChild(li);
+    $('srCommentCount').textContent = String(list.children.length);
+    form.reset();
+    DS.toast('ส่งความคิดเห็นแล้ว', { type: 'success' });
+  });
+})();
+</script>
+</body>
+</html>

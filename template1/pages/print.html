@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ใบแจ้งซ่อม SR-202505-0152 | SMMS แจ้งซ่อม</title>
+<!-- =========================================================================
+  DS UI Kit : print.html (A4 print document archetype: NO sidebar, NO topbar)
+
+  "ใบแจ้งซ่อม" (form SMMS-F01) for SR-202505-0152, the same request as
+  detail.html. Opened from the detail page ("พิมพ์ใบแจ้งซ่อม"); the user
+  prints it or saves it as PDF from the browser print dialog.
+    div.ds-print-toolbar   screen only: back link + print button
+                           (data-ds-print = window.print(), generic in ds-ui.js)
+    article.ds-doc         ONE A4 sheet (210 x 297 mm). For more pages repeat
+                           article.ds-doc; each sheet breaks to a new page.
+  The sheet is always black on white paper, in light AND dark theme, and
+  uses the document font --ds-font-doc (Sarabun, the Thai official-document
+  font; Kanit as fallback). Sizes are tuned so this sheet prints on exactly
+  one A4 page with margins "Default/None" and scale 100 %.
+  Values in a real system come from the server (Blade: {{ }} echo of the
+  request model); keep every date in dd/mm/พ.ศ. and never leave a value
+  cell empty: print "-" when there is no data.
+  These comments intentionally contain no PHP tags and no Blade directives,
+  so the file stays inert when copied into a .php or .blade.php file.
+========================================================================== -->
+<!-- Kanit (kit UI font) + Sarabun 300/400/600 (document font), one request -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Sarabun:wght@300;400;600&display=swap">
+<link rel="stylesheet" href="../assets/ds-ui.css">
+<!-- ds-ui.js in <head> WITHOUT defer/async: theme before first paint, icon
+     sprite, and the generic data-ds-print button. -->
+<script src="../assets/ds-ui.js"></script>
+</head>
+<body class="ds-body ds-print-body">
+
+<!-- ===== TOOLBAR (screen only, hidden when printing) ===== -->
+<div class="ds-print-toolbar">
+  <a class="ds-btn ds-btn--ghost" href="detail.html">← กลับ</a>
+  <button class="ds-btn" type="button" data-ds-print>พิมพ์ / บันทึก PDF</button>
+</div>
+
+<!-- ===== SHEET 1 / 1 ===== -->
+<article class="ds-doc" aria-label="ใบแจ้งซ่อม เลขที่ SR-202505-0152">
+
+  <!-- Head: logo + organisation, form title, number / date box -->
+  <header class="ds-doc__head">
+    <svg class="ds-doc__logo" width="56" height="56" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="none" style="stroke:var(--ds-doc-ink)" stroke-width="1.6" stroke-linejoin="round" d="M20.5 2h7l1.1 5.4 3.2 1.3 4.6-3 5 4.9-3.1 4.6 1.3 3.2L45 19.5v7l-5.4 1.1-1.3 3.2 3.1 4.6-5 5-4.6-3.1-3.2 1.3L27.5 44h-7l-1.1-5.4-3.2-1.3-4.6 3.1-5-5 3.1-4.6-1.3-3.2L3 26.5v-7l5.4-1.1 1.3-3.2-3.1-4.6 5-4.9 4.6 3 3.2-1.3z"/>
+      <circle fill="none" style="stroke:var(--ds-doc-ink)" stroke-width="1.6" cx="24" cy="23" r="10.5"/>
+      <path fill="none" style="stroke:var(--ds-doc-ink)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M18.5 23.5l4 4 7.5-8.5"/>
+    </svg>
+    <div class="ds-doc__org">
+      <b>บริษัท ตัวอย่าง จำกัด</b>
+      <span>งานอาคารสถานที่และซ่อมบำรุง</span>
+      <span>99/9 ถนนตัวอย่าง แขวงลาดยาว เขตจตุจักร กรุงเทพมหานคร 10900</span>
+      <span>โทร 02-123-4567 ต่อ 200 · อีเมล maintenance@example.co.th</span>
+    </div>
+    <h1 class="ds-doc__title">ใบแจ้งซ่อม</h1>
+    <table class="ds-doc__meta">
+      <tr><th scope="row">เลขที่</th><td>SR-202505-0152</td></tr>
+      <tr><th scope="row">วันที่</th><td>12/05/2568</td></tr>
+    </table>
+  </header>
+
+  <!-- 1. Reporter -->
+  <section class="ds-doc__section">
+    <h2 class="ds-doc__heading">1. ข้อมูลผู้แจ้ง</h2>
+    <table class="ds-doc__table">
+      <tr><th scope="row">ชื่อ-สกุล</th><td>นางสาวสุภาวดี สิทธิ์</td><th scope="row">ตำแหน่ง</th><td>นักวิชาการบัญชี</td></tr>
+      <tr><th scope="row">หน่วยงาน</th><td>ฝ่ายบัญชี</td><th scope="row">โทรศัพท์</th><td>02-123-4567 ต่อ 312</td></tr>
+      <tr><th scope="row">วันที่แจ้ง</th><td>12/05/2568 เวลา 09:14 น.</td><th scope="row">ช่องทาง</th><td>ระบบ SMMS (ออนไลน์)</td></tr>
+    </table>
+  </section>
+
+  <!-- 2. Asset -->
+  <section class="ds-doc__section">
+    <h2 class="ds-doc__heading">2. ข้อมูลครุภัณฑ์</h2>
+    <table class="ds-doc__table">
+      <tr><th scope="row">ประเภท</th><td>เครื่องปรับอากาศ</td><th scope="row">เลขครุภัณฑ์</th><td>4120-001-0315</td></tr>
+      <tr><th scope="row">ยี่ห้อ / รุ่น</th><td>Daikin FTKC18TV2S (18,000 BTU)</td><th scope="row">ปีที่ซื้อ</th><td>2564</td></tr>
+      <tr><th scope="row">สถานที่ติดตั้ง</th><td>อาคาร A ชั้น 3 ห้องประชุม 302</td><th scope="row">ประกันถึง</th><td>31/03/2567 (หมดประกันแล้ว)</td></tr>
+    </table>
+  </section>
+
+  <!-- 3. Problem (as typed by the reporter) + blank ruled lines -->
+  <section class="ds-doc__section">
+    <h2 class="ds-doc__heading">3. รายละเอียดปัญหา</h2>
+    <table class="ds-doc__table">
+      <tr><th scope="row">เรื่อง / อาการ</th><td colspan="3">เครื่องปรับอากาศ ชั้น 3 (ไม่เย็น)</td></tr>
+      <tr><th scope="row">รายละเอียด</th><td colspan="3">เครื่องปรับอากาศในห้องประชุม 302 เปิดแล้วมีแต่ลม ไม่เย็น อุณหภูมิห้องสูงกว่า 28 องศา มีน้ำหยดบริเวณคอยล์เย็นด้านซ้าย และหน้าจอแสดงรหัส E7 เป็นระยะ ห้องนี้ใช้ประชุมทุกวัน รบกวนดำเนินการด่วน</td></tr>
+      <tr><th scope="row">ความเร่งด่วน</th><td>ด่วน (ภายใน 4 วันทำการ)</td><th scope="row">กำหนดเสร็จ</th><td>16/05/2568</td></tr>
+    </table>
+    <p>หมายเหตุเพิ่มเติม</p>
+    <div class="ds-doc__lines" style="--ds-doc-lines:1" aria-hidden="true"></div>
+  </section>
+
+  <!-- 4. Technician (filled in by hand on the printed sheet) -->
+  <section class="ds-doc__section">
+    <h2 class="ds-doc__heading">4. การดำเนินการของช่าง</h2>
+    <table class="ds-doc__table">
+      <tr><th scope="row">ผู้รับผิดชอบ</th><td>นายวิชัย ช่างเย็น (ช่างเครื่องปรับอากาศ)</td><th scope="row">วันที่รับงาน</th><td>12/05/2568</td></tr>
+      <tr><th scope="row">ผลการตรวจสอบ</th><td colspan="3">
+        <span class="ds-doc__check">☐ ซ่อมได้ทันที</span>
+        <span class="ds-doc__check">☐ ต้องเปลี่ยนอะไหล่</span>
+        <span class="ds-doc__check">☐ ส่งซ่อมภายนอก</span>
+        <span class="ds-doc__check">☐ ไม่คุ้มค่าซ่อม เสนอจำหน่าย</span>
+      </td></tr>
+      <tr><th scope="row">ค่าใช้จ่าย</th><td>.................................... บาท</td><th scope="row">วันที่ซ่อมเสร็จ</th><td>......../......../............</td></tr>
+    </table>
+    <p>สาเหตุ / รายการอะไหล่ที่ใช้ / รายละเอียดการซ่อม</p>
+    <div class="ds-doc__lines" style="--ds-doc-lines:3" aria-hidden="true"></div>
+  </section>
+
+  <!-- Signatures: reporter / technician / supervisor -->
+  <div class="ds-doc__signs">
+    <div class="ds-doc__sign">ลงชื่อ ................................ ผู้แจ้ง<br>( นางสาวสุภาวดี สิทธิ์ )<br>ตำแหน่ง นักวิชาการบัญชี<br>วันที่ ......../......../............</div>
+    <div class="ds-doc__sign">ลงชื่อ ................................ ช่างผู้ซ่อม<br>( นายวิชัย ช่างเย็น )<br>ตำแหน่ง ช่างเครื่องปรับอากาศ<br>วันที่ ......../......../............</div>
+    <div class="ds-doc__sign">ลงชื่อ ................................ หัวหน้างาน<br>( นายสมชาย ใจดี )<br>ตำแหน่ง ผู้จัดการ<br>วันที่ ......../......../............</div>
+  </div>
+
+  <footer class="ds-doc__foot">แบบฟอร์ม SMMS-F01 · พิมพ์เมื่อ 15/05/2568 10:24 น. · หน้า 1/1</footer>
+</article>
+<!-- ===== /SHEET ===== -->
+
+</body>
+</html>

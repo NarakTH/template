@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เข้าสู่ระบบ | Service Hub</title>
+<!-- =========================================================================
+  Template 2 : login.html (auth shell: NO header, NO tabs, NO footer)
+
+  Layout and look follow https://gsd.opdc.go.th/login (Oct 2026).
+  VISUAL TEMPLATE ONLY. The form carries data-t2-validate (required fields)
+  and data-t2-demo-redirect="dashboard.html": when both fields are filled the
+  demo only disables the button and opens dashboard.html. It never reads,
+  stores or sends the username/password. In a real system:
+    - remove data-t2-demo-redirect; the form POSTs to the server route
+      (method="post" action="/login") over HTTPS with the framework CSRF
+      token as a hidden field;
+    - the server checks the credentials, rate-limits failed attempts and
+      renders this page again with #login-error shown (remove [hidden]);
+      never echo the password back.
+
+    main.t2-auth.t2-grid-bg       centred page with the grid background
+      section.t2-auth__card       2 columns from 1024px, stacked below
+        div.t2-auth__brand        primary panel: logo, title, text, note
+        form.t2-auth__form        kicker, heading, fields, submit
+========================================================================== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../assets/t2-ui.css">
+<script src="../assets/t2-ui.js"></script>
+</head>
+<body class="t2-body">
+<main class="t2-auth t2-grid-bg" id="t2-main">
+  <section class="t2-auth__card" aria-labelledby="login-title">
+
+    <div class="t2-auth__brand">
+      <div>
+        <img class="t2-auth__logo" src="../assets/logo.svg" alt="ตราสัญลักษณ์ Service Hub" width="64" height="64">
+        <p class="t2-auth__title">Service Data Hub</p>
+        <p class="t2-auth__text">เข้าสู่ระบบเพื่อบันทึกข้อมูลงานบริการ ตรวจทานตามสิทธิ์ของบทบาท และติดตามสถานะการอนุมัติ</p>
+      </div>
+      <div class="t2-auth__note">
+        <svg class="t2-ic t2-ic--md" aria-hidden="true"><use href="#t2-i-shield-check"></use></svg>
+        <span>ใช้บัญชีที่ได้รับจากผู้ดูแลระบบของหน่วยงาน ข้อมูลที่เห็นถูกจำกัดตามบทบาทและหน่วยงานของผู้ใช้</span>
+      </div>
+    </div>
+
+    <form class="t2-auth__form" action="dashboard.html" method="post" novalidate data-t2-validate data-t2-demo-redirect="dashboard.html">
+      <div>
+        <p class="t2-auth__kicker">Secure sign in</p>
+        <h1 class="t2-auth__heading" id="login-title">เข้าสู่ระบบ</h1>
+        <p class="t2-auth__sub">กรอกชื่อผู้ใช้และรหัสผ่านที่ได้รับจากผู้ดูแลระบบของหน่วยงาน</p>
+      </div>
+
+      <!-- Server-side error (wrong username/password, locked account): remove [hidden] -->
+      <div class="t2-alert t2-tone-red" id="login-error" role="alert" hidden>
+        <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-circle-alert"></use></svg>
+        <div class="t2-alert__body">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</div>
+      </div>
+
+      <div class="t2-field">
+        <label class="t2-label" for="login-username">ชื่อผู้ใช้ (Username)</label>
+        <span class="t2-input-group">
+          <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-mail"></use></svg>
+          <input id="login-username" name="username" type="text" placeholder="username" autocomplete="username" autocapitalize="none" spellcheck="false" required aria-describedby="login-username-err">
+        </span>
+        <p class="t2-error" id="login-username-err" hidden>
+          <svg class="t2-ic t2-ic--sm" aria-hidden="true"><use href="#t2-i-circle-alert"></use></svg> กรุณากรอกชื่อผู้ใช้</p>
+      </div>
+
+      <div class="t2-field">
+        <label class="t2-label" for="login-password">รหัสผ่าน (Password)</label>
+        <span class="t2-input-group">
+          <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-lock"></use></svg>
+          <input id="login-password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required aria-describedby="login-password-err">
+          <button type="button" class="t2-input-group__btn" data-t2-password-toggle aria-pressed="false" aria-label="แสดงรหัสผ่าน" title="แสดงรหัสผ่าน">
+            <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-eye"></use></svg>
+          </button>
+        </span>
+        <p class="t2-error" id="login-password-err" hidden>
+          <svg class="t2-ic t2-ic--sm" aria-hidden="true"><use href="#t2-i-circle-alert"></use></svg> กรุณากรอกรหัสผ่าน</p>
+      </div>
+
+      <div class="t2-auth__row">
+        <label class="t2-check"><input type="checkbox" name="remember"> จดจำการเข้าสู่ระบบ</label>
+        <a class="t2-link" href="#">ลืมรหัสผ่าน?</a>
+      </div>
+
+      <button class="t2-btn t2-btn--primary t2-btn--lg t2-btn--block" type="submit" data-busy-label="กำลังเข้าสู่ระบบ…">เข้าสู่ระบบ</button>
+
+      <p class="t2-auth__foot"><a class="t2-link" href="index.html">กลับหน้าแรก</a> · มีปัญหาการใช้งาน ติดต่อผู้ดูแลระบบ โทร 0 2000 0000</p>
+    </form>
+
+  </section>
+</main>
+</body>
+</html>

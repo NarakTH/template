@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Service Hub | ระบบคลังข้อมูลงานบริการ</title>
+<meta name="description" content="หน้าแรกสาธารณะของระบบ (ต้นแบบ Template 2)">
+<!-- =========================================================================
+  Template 2 : index.html (public landing page: floating header, NO app tabs)
+
+  Layout and look follow https://gsd.opdc.go.th/ (home page, Oct 2026).
+  Brand, logo and all texts/numbers are SAMPLE content - replace per system.
+  The hero image is a live, scaled copy of dashboard.html (iframe inside
+  .t2-shot__viewport[data-t2-shot]); swap it for an <img> if preferred.
+
+  Sections (top to bottom)
+    header.t2-site-header   logo + system name + Dashboard / login buttons
+    section.t2-hero         chip, display heading, lead, 2 buttons, note, screenshot
+    section (tiers)         4-level pyramid (.t2-tiers) + 3 example cards (.t2-example)
+    section#topics          searchable accordion ([data-t2-accordion])
+    section (features)      2x2 feature cards
+    section.t2-band         4 steps on the primary background
+    section (roles)         4 role cards
+    footer.t2-site-footer
+
+  Assets: ../assets/t2-ui.css + ../assets/t2-ui.js (window.T2). No page CSS/JS.
+========================================================================== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../assets/t2-ui.css">
+<script src="../assets/t2-ui.js"></script>
+</head>
+<body class="t2-body">
+<a class="t2-skip-link" href="#t2-main">ข้ามไปยังเนื้อหาหลัก</a>
+
+<div class="t2-page t2-grid-bg">
+  <div class="t2-container t2-page__inner">
+
+    <!-- ===== HEADER ===== -->
+    <header class="t2-site-header">
+      <a class="t2-brand" href="index.html">
+        <img class="t2-brand__logo" src="../assets/logo.svg" alt="ตราสัญลักษณ์ Service Hub" width="44" height="44">
+        <span class="t2-brand__text">
+          <span class="t2-brand__name">Service Hub<span class="t2-hide-mobile"> · ระบบคลังข้อมูลงานบริการ</span></span>
+          <span class="t2-brand__org"><span class="t2-only-mobile">สำนักงานตัวอย่าง</span><span class="t2-hide-mobile">สำนักงานตัวอย่าง กระทรวงตัวอย่าง</span></span>
+        </span>
+      </a>
+      <div class="t2-site-header__actions">
+        <button type="button" class="t2-btn t2-btn--ghost t2-btn--icon t2-btn--sm t2-theme-toggle" data-t2-theme-toggle aria-pressed="false" aria-label="โหมดมืด" title="สลับโหมดสว่าง / มืด">
+          <svg class="t2-ic t2-ic--sun" aria-hidden="true"><use href="#t2-i-sun"></use></svg>
+          <svg class="t2-ic t2-ic--moon" aria-hidden="true"><use href="#t2-i-moon"></use></svg>
+        </button>
+        <a class="t2-btn t2-btn--info t2-btn--sm t2-hide-mobile" href="dashboard.html">
+          <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-chart-column"></use></svg> Dashboard</a>
+        <a class="t2-btn t2-btn--primary t2-btn--sm" href="login.html">
+          <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-log-in"></use></svg> เข้าสู่ระบบ</a>
+      </div>
+    </header>
+
+    <main id="t2-main">
+
+      <!-- ===== HERO ===== -->
+      <section class="t2-hero">
+        <div class="t2-hero__content">
+          <p class="t2-chip">
+            <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-shield-check"></use></svg> ศูนย์กลางข้อมูลงานบริการของหน่วยงาน</p>
+          <h1 class="t2-display">
+            <span class="t2-nowrap">รวบรวม ตรวจทาน</span><br>
+            <span class="t2-nowrap">และเผยแพร่</span><wbr>
+            <span class="t2-nowrap t2-text-primary">ข้อมูลงานบริการ</span>
+          </h1>
+          <p class="t2-lead">ระบบสำหรับหน่วยงานใช้บันทึก ตรวจทาน และยืนยันข้อมูลงานบริการในรูปแบบเดียวกัน มีขั้นตอนอนุมัติ เก็บประวัติทุกเวอร์ชัน และมี Dashboard สรุปสถานะให้ผู้บริหารติดตามได้ทันที</p>
+          <div class="t2-hero__actions">
+            <a class="t2-btn t2-btn--primary t2-btn--lg" href="login.html">
+              <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-log-in"></use></svg> เข้าสู่ระบบเพื่อบันทึกข้อมูล</a>
+            <a class="t2-btn t2-btn--outline t2-btn--lg" href="dashboard.html">
+              <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-chart-column"></use></svg> ดู Dashboard ภาพรวม</a>
+          </div>
+          <p class="t2-note">เข้าสู่ระบบด้วยบัญชีที่หน่วยงานออกให้ · สิทธิ์การเห็นข้อมูลขึ้นกับบทบาทและหน่วยงานของผู้ใช้</p>
+        </div>
+        <div class="t2-hero__media">
+          <div class="t2-shot t2-float" role="img" aria-label="ตัวอย่างหน้า Dashboard ของระบบ">
+            <div class="t2-shot__viewport" data-t2-shot inert>
+              <iframe src="dashboard.html" title="ตัวอย่างหน้า Dashboard" tabindex="-1" scrolling="no"></iframe>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== DATA STRUCTURE: tiers + examples ===== -->
+      <section class="t2-section" aria-labelledby="tiers-title">
+        <div class="t2-section-head">
+          <p class="t2-eyebrow">โครงสร้างข้อมูล</p>
+          <h2 class="t2-title" id="tiers-title">จัดหมวดงานบริการเป็น 4 ระดับ</h2>
+          <p class="t2-desc">เรียงจากภาพกว้างไปหาขั้นตอนย่อย เพื่อให้ทุกหน่วยงานบันทึกข้อมูลด้วยโครงสร้างเดียวกัน และนำมาเปรียบเทียบกันได้</p>
+        </div>
+
+        <ol class="t2-tiers">
+          <li class="t2-tier t2-tone-sky" style="--t2-tier-w:55%">
+            <div class="t2-tier__row">
+              <div class="t2-tier__main">
+                <span class="t2-num">1</span>
+                <div>
+                  <h3 class="t2-tier__title">ระดับที่ 1 หมวดหลัก (Topic)</h3>
+                  <p class="t2-tier__text">กลุ่มใหญ่ของงานบริการ แบ่งตามเรื่องที่ประชาชนหรือผู้ประกอบการมาติดต่อ เช่น การลงทุน การขนส่ง สุขภาพ</p>
+                </div>
+              </div>
+              <div class="t2-tier__stat">
+                <p class="t2-stat__value">8</p>
+                <p class="t2-stat__unit">หมวดหลัก</p>
+              </div>
+            </div>
+          </li>
+          <li class="t2-tier t2-tone-amber" style="--t2-tier-w:70%">
+            <div class="t2-tier__row">
+              <div class="t2-tier__main">
+                <span class="t2-num">2</span>
+                <div>
+                  <h3 class="t2-tier__title">ระดับที่ 2 หมวดย่อย (Sub-Topic)</h3>
+                  <p class="t2-tier__text">แยกหมวดหลักออกเป็นเรื่องที่เจาะจงขึ้น ให้เห็นขอบเขตงานของแต่ละหน่วยงานได้ชัดเจน</p>
+                </div>
+              </div>
+              <div class="t2-tier__stat">
+                <p class="t2-stat__value">46</p>
+                <p class="t2-stat__unit">หมวดย่อย</p>
+              </div>
+            </div>
+          </li>
+          <li class="t2-tier t2-tone-rose" style="--t2-tier-w:85%">
+            <div class="t2-tier__row">
+              <div class="t2-tier__main">
+                <span class="t2-num">3</span>
+                <div>
+                  <h3 class="t2-tier__title">ระดับที่ 3 งานบริการ (Service)</h3>
+                  <p class="t2-tier__text">บริการที่หน่วยงานให้กับผู้รับบริการ อ้างอิงตามกฎหมาย ระเบียบ หรือภารกิจของหน่วยงาน</p>
+                </div>
+              </div>
+              <div class="t2-tier__stat">
+                <p class="t2-stat__value">412</p>
+                <p class="t2-stat__unit">งานบริการ</p>
+              </div>
+            </div>
+          </li>
+          <li class="t2-tier t2-tone-blue" style="--t2-tier-w:100%">
+            <div class="t2-tier__row">
+              <div class="t2-tier__main">
+                <span class="t2-num">4</span>
+                <div>
+                  <h3 class="t2-tier__title">ระดับที่ 4 ขั้นตอนงาน (Task)</h3>
+                  <p class="t2-tier__text">งานย่อยที่ผู้รับบริการต้องดำเนินการ มีวิธีการ ระยะเวลา และผู้รับผิดชอบที่ชัดเจน</p>
+                </div>
+              </div>
+              <div class="t2-tier__stat">
+                <p class="t2-stat__value">1,968</p>
+                <p class="t2-stat__unit">ขั้นตอนงาน</p>
+              </div>
+            </div>
+          </li>
+        </ol>
+        <p class="t2-source">ตัวเลขทั้งหมดเป็นข้อมูลตัวอย่างของเทมเพลต</p>
+
+        <div class="t2-block">
+          <h3 class="t2-subtitle">ตัวอย่างการจัดหมวด Topic → Sub-Topic → Service → Task</h3>
+          <div class="t2-grid t2-grid--3">
+            <article class="t2-card t2-example t2-tone-sky">
+              <p class="t2-card__kicker">TOPIC 1. การลงทุนและการประกอบธุรกิจ</p>
+              <p class="t2-tag">ให้บริการแบบ e-Service ได้ครบทุกขั้นตอน</p>
+              <dl class="t2-defs">
+                <div class="t2-def t2-tone-amber"><dt>Sub-Topic หมวดย่อย</dt><dd>การส่งเสริมการลงทุน (1 ใน 8 หมวดย่อย)</dd></div>
+                <div class="t2-def t2-tone-rose"><dt>Service งานบริการ</dt><dd>ขอรับการส่งเสริมการลงทุน (1 ใน 6 งานบริการ)</dd></div>
+                <div class="t2-def t2-tone-blue"><dt>Task ขั้นตอนงาน</dt><dd>
+                  <ul>
+                    <li>ยื่นคำขอรับการส่งเสริม</li>
+                    <li>ขอแก้ไขโครงการที่ได้รับการส่งเสริม</li>
+                    <li>ขอเปิดดำเนินการ</li>
+                    <li>… รวม 14 ขั้นตอนงาน</li>
+                  </ul></dd></div>
+              </dl>
+            </article>
+            <article class="t2-card t2-example t2-tone-sky">
+              <p class="t2-card__kicker">TOPIC 2. ยานพาหนะและการขนส่ง</p>
+              <p class="t2-tag">ให้บริการแบบ e-Service ได้บางขั้นตอน</p>
+              <dl class="t2-defs">
+                <div class="t2-def t2-tone-amber"><dt>Sub-Topic หมวดย่อย</dt><dd>ทะเบียนและภาษีรถ (1 ใน 7 หมวดย่อย)</dd></div>
+                <div class="t2-def t2-tone-rose"><dt>Service งานบริการ</dt><dd>ชำระภาษีรถประจำปี (1 ใน 5 งานบริการ)</dd></div>
+                <div class="t2-def t2-tone-blue"><dt>Task ขั้นตอนงาน</dt><dd>
+                  <ul>
+                    <li>ตรวจสภาพรถก่อนชำระภาษี</li>
+                    <li>ชำระภาษีผ่านช่องทางออนไลน์</li>
+                    <li>ขอรับเครื่องหมายการเสียภาษีทางไปรษณีย์</li>
+                    <li>… รวม 7 ขั้นตอนงาน</li>
+                  </ul></dd></div>
+              </dl>
+            </article>
+            <article class="t2-card t2-example t2-tone-sky">
+              <p class="t2-card__kicker">TOPIC 7. ที่ดินและสิ่งปลูกสร้าง</p>
+              <p class="t2-tag">ยังให้บริการแบบ e-Service ไม่ได้</p>
+              <dl class="t2-defs">
+                <div class="t2-def t2-tone-amber"><dt>Sub-Topic หมวดย่อย</dt><dd>การก่อสร้างอาคาร (1 ใน 5 หมวดย่อย)</dd></div>
+                <div class="t2-def t2-tone-rose"><dt>Service งานบริการ</dt><dd>ขออนุญาตก่อสร้างอาคาร (1 ใน 6 งานบริการ)</dd></div>
+                <div class="t2-def t2-tone-blue"><dt>Task ขั้นตอนงาน</dt><dd>
+                  <ul>
+                    <li>ยื่นแบบแปลนประกอบคำขอ</li>
+                    <li>ขอแก้ไขแบบแปลนที่ได้รับอนุญาต</li>
+                    <li>แจ้งขอตรวจอาคารก่อนใช้งาน</li>
+                    <li>… รวม 8 ขั้นตอนงาน</li>
+                  </ul></dd></div>
+              </dl>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== TOPICS: searchable accordion ===== -->
+      <section class="t2-section t2-section--flush-top" id="topics" aria-labelledby="topics-title">
+        <div class="t2-section-head t2-section-head--sm">
+          <p class="t2-eyebrow">ระดับที่ 1–2</p>
+          <h2 class="t2-title" id="topics-title">หมวดหลักและหมวดย่อยทั้งหมด</h2>
+          <p class="t2-desc">พิมพ์คำค้นเพื่อดูว่างานบริการที่สนใจอยู่ในหมวดใด หรือกดที่หมวดหลักเพื่อเปิดดูหมวดย่อย</p>
+        </div>
+
+        <div class="t2-card t2-card--flush" data-t2-accordion>
+          <div class="t2-acc__toolbar">
+            <label class="t2-search">
+              <span class="t2-sr-only">ค้นหาหมวดหลักหรือหมวดย่อย</span>
+              <svg class="t2-ic" aria-hidden="true"><use href="#t2-i-search"></use></svg>
+              <input class="t2-input" type="search" placeholder="ค้นหาหมวด เช่น ภาษี, ใบอนุญาต, การลงทุน" data-t2-accordion-search>
+            </label>
+            <div class="t2-acc__meta">
+              <span data-t2-accordion-count aria-live="polite">8 หมวดหลัก · 46 หมวดย่อย</span>
+              <button type="button" class="t2-link-btn" data-t2-accordion-all data-label-open="เปิดทั้งหมด" data-label-close="ปิดทั้งหมด">เปิดทั้งหมด</button>
+            </div>
+          </div>
+
+          <ol class="t2-acc__list t2-tone-sky">
+            <li class="t2-acc__item">
+              <button type="button" class="t2-acc__trigger" aria-expanded="false" aria-controls="topic-1">
+                <span class="t2-num t2-num--sm">1</span>
+                <span class="t2-acc__label">
+                  <span class="t2-acc__title">การลงทุนและการประกอบธุรกิจ</span>
+                  <span class="t2-acc__sub">8 หมวดย่อย · 96 งานบริการ · 452 ขั้นตอนงาน · 14 หน่วยงาน</span>
+                </span>
+                <svg class="t2-ic t2-acc__chev" aria-hidden="true"><use href="#t2-i-chevron-down"></use></svg>
+              </button>
+              <ol class="t2-acc__panel t2-tone-amber" id="topic-1" hidden>
+                <li><span class="t2-acc__item-label">การจดทะเบียนธุรกิจ</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">12 / 58</span></li>
+                <li><span class="t2-acc__item-label">การส่งเสริมการลงทุน</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">6 / 41</span></li>
+                <li><span class="t2-acc__item-label">ใบอนุญาตประกอบกิจการ</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">18 / 77</span></li>
+                <li><span class="t2-acc__item-label">การนำเข้าและส่งออก</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">21 / 96</span></li>
+                <li><span class="t2-acc__item-label">มาตรฐานสินค้าและบริการ</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">11 / 52</span></li>
+                <li><span class="t2-acc__item-label">ทรัพย์สินทางปัญญา</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">9 / 44</span></li>
+                <li><span class="t2-acc__item-label">การค้าออนไลน์</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">7 / 31</span></li>
+                <li><span class="t2-acc__item-label">วิสาหกิจขนาดกลางและขนาดย่อม</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">12 / 53</span></li>
+              </ol>
+            </li>
+            <li class="t2-acc__item">
+              <button type="button" class="t2-acc__trigger" aria-expanded="false" aria-controls="topic-2">
+                <span class="t2-num t2-num--sm">2</span>
+                <span class="t2-acc__label">
+                  <span class="t2-acc__title">ยานพาหนะและการขนส่ง</span>
+                  <span class="t2-acc__sub">7 หมวดย่อย · 54 งานบริการ · 238 ขั้นตอนงาน · 6 หน่วยงาน</span>
+                </span>
+                <svg class="t2-ic t2-acc__chev" aria-hidden="true"><use href="#t2-i-chevron-down"></use></svg>
+              </button>
+              <ol class="t2-acc__panel t2-tone-amber" id="topic-2" hidden>
+                <li><span class="t2-acc__item-label">ใบอนุญาตขับรถ</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">4 / 19</span></li>
+                <li><span class="t2-acc__item-label">ทะเบียนและภาษีรถ</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">5 / 22</span></li>
+                <li><span class="t2-acc__item-label">การขนส่งสาธารณะ</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">9 / 41</span></li>
+                <li><span class="t2-acc__item-label">การขนส่งสินค้า</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">11 / 48</span></li>
+                <li><span class="t2-acc__item-label">เรือและการเดินเรือ</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">10 / 45</span></li>
+                <li><span class="t2-acc__item-label">การบิน</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">8 / 37</span></li>
+                <li><span class="t2-acc__item-label">ความปลอดภัยทางถนน</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">7 / 26</span></li>
+              </ol>
+            </li>
+            <li class="t2-acc__item">
+              <button type="button" class="t2-acc__trigger" aria-expanded="false" aria-controls="topic-3">
+                <span class="t2-num t2-num--sm">3</span>
+                <span class="t2-acc__label">
+                  <span class="t2-acc__title">สุขภาพและการรักษาพยาบาล</span>
+                  <span class="t2-acc__sub">6 หมวดย่อย · 58 งานบริการ · 274 ขั้นตอนงาน · 7 หน่วยงาน</span>
+                </span>
+                <svg class="t2-ic t2-acc__chev" aria-hidden="true"><use href="#t2-i-chevron-down"></use></svg>
+              </button>
+              <ol class="t2-acc__panel t2-tone-amber" id="topic-3" hidden>
+                <li><span class="t2-acc__item-label">สถานพยาบาล</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">13 / 66</span></li>
+                <li><span class="t2-acc__item-label">ยาและเวชภัณฑ์</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">12 / 58</span></li>
+                <li><span class="t2-acc__item-label">อาหารและเครื่องสำอาง</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">14 / 63</span></li>
+                <li><span class="t2-acc__item-label">สิทธิการรักษาพยาบาล</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">6 / 27</span></li>
+                <li><span class="t2-acc__item-label">ผู้ประกอบวิชาชีพด้านสุขภาพ</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">8 / 39</span></li>
+                <li><span class="t2-acc__item-label">การควบคุมโรค</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">5 / 21</span></li>
+              </ol>
+            </li>
+            <li class="t2-acc__item">
+              <button type="button" class="t2-acc__trigger" aria-expanded="false" aria-controls="topic-4">
+                <span class="t2-num t2-num--sm">4</span>
+                <span class="t2-acc__label">
+                  <span class="t2-acc__title">การศึกษาและการเรียนรู้</span>
+                  <span class="t2-acc__sub">5 หมวดย่อย · 37 งานบริการ · 152 ขั้นตอนงาน · 5 หน่วยงาน</span>
+                </span>
+                <svg class="t2-ic t2-acc__chev" aria-hidden="true"><use href="#t2-i-chevron-down"></use></svg>
+              </button>
+              <ol class="t2-acc__panel t2-tone-amber" id="topic-4" hidden>
+                <li><span class="t2-acc__item-label">การรับเข้าศึกษา</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">6 / 24</span></li>
+                <li><span class="t2-acc__item-label">ทุนการศึกษา</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">8 / 31</span></li>
+                <li><span class="t2-acc__item-label">การเทียบโอนวุฒิการศึกษา</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">5 / 22</span></li>
+                <li><span class="t2-acc__item-label">โรงเรียนเอกชน</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">10 / 43</span></li>
+                <li><span class="t2-acc__item-label">การศึกษาตลอดชีวิต</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">8 / 32</span></li>
+              </ol>
+            </li>
+            <li class="t2-acc__item">
+              <button type="button" class="t2-acc__trigger" aria-expanded="false" aria-controls="topic-5">
+                <span class="t2-num t2-num--sm">5</span>
+                <span class="t2-acc__label">
+                  <span class="t2-acc__title">แรงงานและการจ้างงาน</span>
+                  <span class="t2-acc__sub">5 หมวดย่อย · 41 งานบริการ · 196 ขั้นตอนงาน · 4 หน่วยงาน</span>
+                </span>
+                <svg class="t2-ic t2-acc__chev" aria-hidden="true"><use href="#t2-i-chevron-down"></use></svg>
+              </button>
+              <ol class="t2-acc__panel t2-tone-amber" id="topic-5" hidden>
+                <li><span class="t2-acc__item-label">การหางาน</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">7 / 29</span></li>
+                <li><span class="t2-acc__item-label">แรงงานต่างด้าว</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">11 / 62</span></li>
+                <li><span class="t2-acc__item-label">ประกันสังคม</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">9 / 41</span></li>
+                <li><span class="t2-acc__item-label">ความปลอดภัยในการทำงาน</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">8 / 36</span></li>
+                <li><span class="t2-acc__item-label">การพัฒนาฝีมือแรงงาน</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">6 / 28</span></li>
+              </ol>
+            </li>
+            <li class="t2-acc__item">
+              <button type="button" class="t2-acc__trigger" aria-expanded="false" aria-controls="topic-6">
+                <span class="t2-num t2-num--sm">6</span>
+                <span class="t2-acc__label">
+                  <span class="t2-acc__title">ภาษีและการเงิน</span>
+                  <span class="t2-acc__sub">5 หมวดย่อย · 49 งานบริการ · 233 ขั้นตอนงาน · 5 หน่วยงาน</span>
+                </span>
+                <svg class="t2-ic t2-acc__chev" aria-hidden="true"><use href="#t2-i-chevron-down"></use></svg>
+              </button>
+              <ol class="t2-acc__panel t2-tone-amber" id="topic-6" hidden>
+                <li><span class="t2-acc__item-label">ภาษีเงินได้</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">9 / 47</span></li>
+                <li><span class="t2-acc__item-label">ภาษีมูลค่าเพิ่ม</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">8 / 39</span></li>
+                <li><span class="t2-acc__item-label">ภาษีธุรกิจเฉพาะ</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">6 / 27</span></li>
+                <li><span class="t2-acc__item-label">อากรศุลกากร</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">14 / 72</span></li>
+                <li><span class="t2-acc__item-label">การเงินและการประกันภัย</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">12 / 48</span></li>
+              </ol>
+            </li>
+            <li class="t2-acc__item">
+              <button type="button" class="t2-acc__trigger" aria-expanded="false" aria-controls="topic-7">
+                <span class="t2-num t2-num--sm">7</span>
+                <span class="t2-acc__label">
+                  <span class="t2-acc__title">ที่ดินและสิ่งปลูกสร้าง</span>
+                  <span class="t2-acc__sub">5 หมวดย่อย · 36 งานบริการ · 158 ขั้นตอนงาน · 4 หน่วยงาน</span>
+                </span>
+                <svg class="t2-ic t2-acc__chev" aria-hidden="true"><use href="#t2-i-chevron-down"></use></svg>
+              </button>
+              <ol class="t2-acc__panel t2-tone-amber" id="topic-7" hidden>
+                <li><span class="t2-acc__item-label">การออกโฉนดที่ดิน</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">9 / 42</span></li>
+                <li><span class="t2-acc__item-label">การจดทะเบียนสิทธิและนิติกรรม</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">8 / 37</span></li>
+                <li><span class="t2-acc__item-label">การก่อสร้างอาคาร</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">6 / 31</span></li>
+                <li><span class="t2-acc__item-label">การผังเมือง</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">5 / 19</span></li>
+                <li><span class="t2-acc__item-label">ที่อยู่อาศัย</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">8 / 29</span></li>
+              </ol>
+            </li>
+            <li class="t2-acc__item">
+              <button type="button" class="t2-acc__trigger" aria-expanded="false" aria-controls="topic-8">
+                <span class="t2-num t2-num--sm">8</span>
+                <span class="t2-acc__label">
+                  <span class="t2-acc__title">สิ่งแวดล้อมและพลังงาน</span>
+                  <span class="t2-acc__sub">5 หมวดย่อย · 41 งานบริการ · 265 ขั้นตอนงาน · 6 หน่วยงาน</span>
+                </span>
+                <svg class="t2-ic t2-acc__chev" aria-hidden="true"><use href="#t2-i-chevron-down"></use></svg>
+              </button>
+              <ol class="t2-acc__panel t2-tone-amber" id="topic-8" hidden>
+                <li><span class="t2-acc__item-label">ใบอนุญาตโรงงาน</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">10 / 71</span></li>
+                <li><span class="t2-acc__item-label">การจัดการของเสีย</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">7 / 45</span></li>
+                <li><span class="t2-acc__item-label">ทรัพยากรน้ำ</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">8 / 52</span></li>
+                <li><span class="t2-acc__item-label">พลังงานทดแทน</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">9 / 58</span></li>
+                <li><span class="t2-acc__item-label">การประเมินผลกระทบสิ่งแวดล้อม</span><span class="t2-acc__count" title="งานบริการ / ขั้นตอนงาน">7 / 39</span></li>
+              </ol>
+            </li>
+          </ol>
+          <p class="t2-acc__empty" data-t2-accordion-empty hidden>ไม่พบหมวดที่ตรงกับคำค้น ลองใช้คำที่สั้นลงหรือคำอื่น</p>
+          <p class="t2-card__foot">ตัวเลขในหมวดย่อย = จำนวนงานบริการ / จำนวนขั้นตอนงาน · ข้อมูลตัวอย่าง ณ ต.ค. 2569</p>
+        </div>
+      </section>
+
+      <!-- ===== FEATURES ===== -->
+      <section class="t2-section" aria-labelledby="features-title">
+        <div class="t2-section-head t2-section-head--narrow">
+          <p class="t2-eyebrow">ความสามารถหลัก</p>
+          <h2 class="t2-title" id="features-title">ข้อมูลครบ ถูกต้อง และตรวจสอบย้อนหลังได้</h2>
+        </div>
+        <div class="t2-grid t2-grid--2">
+          <article class="t2-card t2-feature">
+            <span class="t2-icon-tile t2-icon-tile--md t2-icon-tile--solid"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-layers"></use></svg></span>
+            <h3 class="t2-feature__title">โครงสร้างข้อมูลเดียวกันทุกหน่วยงาน</h3>
+            <p class="t2-feature__text">จัดงานบริการตามลำดับ หมวดหลัก → หมวดย่อย → งานบริการ → ขั้นตอนงาน ทำให้นำข้อมูลของหลายหน่วยงานมาเทียบและวิเคราะห์ร่วมกันได้</p>
+          </article>
+          <article class="t2-card t2-feature">
+            <span class="t2-icon-tile t2-icon-tile--md t2-icon-tile--solid"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-clipboard-check"></use></svg></span>
+            <h3 class="t2-feature__title">หน่วยงานตรวจทานและยืนยันเอง</h3>
+            <p class="t2-feature__text">เห็นข้อมูลเดิม ข้อมูลที่เสนอแก้ และเหตุผลประกอบในหน้าเดียว ระบบตรวจช่องที่ต้องกรอกให้ครบก่อนส่งคำขอ</p>
+          </article>
+          <article class="t2-card t2-feature">
+            <span class="t2-icon-tile t2-icon-tile--md t2-icon-tile--solid"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-history"></use></svg></span>
+            <h3 class="t2-feature__title">อนุมัติเป็นขั้นและเก็บทุกเวอร์ชัน</h3>
+            <p class="t2-feature__text">ทุกการแก้ไขต้องผ่านผู้อนุมัติก่อนเผยแพร่ ระบบบันทึกผู้แก้ไขและเวลาไว้ทุกครั้ง ย้อนดูได้ตลอด</p>
+          </article>
+          <article class="t2-card t2-feature">
+            <span class="t2-icon-tile t2-icon-tile--md t2-icon-tile--solid"><svg class="t2-ic" aria-hidden="true"><use href="#t2-i-chart-column"></use></svg></span>
+            <h3 class="t2-feature__title">Dashboard สำหรับผู้บริหาร</h3>
+            <p class="t2-feature__text">สรุปสถานะ e-Service การเชื่อมโยงแพลตฟอร์มกลาง และแผนงาน แยกตามกระทรวงและหน่วยงานในหน้าเดียว</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ===== STEPS BAND ===== -->
+      <section class="t2-band" aria-labelledby="steps-title">
+        <div class="t2-band__head">
+          <p class="t2-band__eyebrow">ขั้นตอนการทำงาน</p>
+          <h2 class="t2-title" id="steps-title">จากการจัดหมวดสู่ข้อมูลที่เผยแพร่ใน 4 ขั้นตอน</h2>
+        </div>
+        <ol class="t2-steps">
+          <li class="t2-step">
+            <span class="t2-num">1</span>
+            <h3 class="t2-step__title">ผู้ดูแลระบบจัดหมวดกลาง</h3>
+            <p class="t2-step__text">กำหนดหมวดหลัก หมวดย่อย และงานบริการตามมาตรฐานเดียวกัน</p>
+          </li>
+          <li class="t2-step">
+            <span class="t2-num">2</span>
+            <h3 class="t2-step__title">หน่วยงานตรวจทาน</h3>
+            <p class="t2-step__text">ยืนยันหรือเสนอแก้ไขชื่อขั้นตอนงานของหน่วยงานตนเอง</p>
+          </li>
+          <li class="t2-step">
+            <span class="t2-num">3</span>
+            <h3 class="t2-step__title">เติมรายละเอียดให้ครบ</h3>
+            <p class="t2-step__text">สถานะ e-Service ช่องทางเชื่อมโยง ผู้ประสานงาน และข้อมูลทางเทคนิค</p>
+          </li>
+          <li class="t2-step">
+            <span class="t2-num">4</span>
+            <h3 class="t2-step__title">อนุมัติและเผยแพร่</h3>
+            <p class="t2-step__text">ผู้อนุมัติตรวจสอบ แล้วเผยแพร่เป็นเวอร์ชันใหม่</p>
+          </li>
+        </ol>
+      </section>
+
+      <!-- ===== ROLES ===== -->
+      <section class="t2-section" aria-labelledby="roles-title">
+        <div class="t2-section-head t2-section-head--split">
+          <div class="t2-measure">
+            <p class="t2-eyebrow">ผู้ใช้งาน</p>
+            <h2 class="t2-title" id="roles-title">สิทธิ์แยกตามบทบาทและหน่วยงาน</h2>
+          </div>
+          <svg class="t2-ic t2-section-head__mark" aria-hidden="true"><use href="#t2-i-users"></use></svg>
+        </div>
+        <div class="t2-grid t2-grid--4">
+          <div class="t2-card t2-feature t2-feature--compact">
+            <svg class="t2-ic t2-feature__mark" aria-hidden="true"><use href="#t2-i-circle-check"></use></svg>
+            <h3 class="t2-feature__title">ผู้ดูแลระบบ</h3>
+            <p class="t2-feature__text">ดูแลข้อมูลทุกหน่วยงาน อนุมัติคำขอ และจัดการบัญชีผู้ใช้กับสิทธิ์</p>
+          </div>
+          <div class="t2-card t2-feature t2-feature--compact">
+            <svg class="t2-ic t2-feature__mark" aria-hidden="true"><use href="#t2-i-circle-check"></use></svg>
+            <h3 class="t2-feature__title">ผู้ประสานหลักของหน่วยงาน</h3>
+            <p class="t2-feature__text">รับผิดชอบงานบริการของหน่วยงาน ยืนยันข้อมูล และมอบหมายผู้บันทึก</p>
+          </div>
+          <div class="t2-card t2-feature t2-feature--compact">
+            <svg class="t2-ic t2-feature__mark" aria-hidden="true"><use href="#t2-i-circle-check"></use></svg>
+            <h3 class="t2-feature__title">ผู้บันทึกข้อมูล</h3>
+            <p class="t2-feature__text">บันทึกและปรับปรุงรายละเอียดงานบริการที่ได้รับมอบหมาย</p>
+          </div>
+          <div class="t2-card t2-feature t2-feature--compact">
+            <svg class="t2-ic t2-feature__mark" aria-hidden="true"><use href="#t2-i-circle-check"></use></svg>
+            <h3 class="t2-feature__title">ผู้บริหาร</h3>
+            <p class="t2-feature__text">ติดตามภาพรวมผ่าน Dashboard เพื่อใช้ประกอบการตัดสินใจ</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="t2-site-footer">
+      <div class="t2-site-footer__brand">
+        <img src="../assets/logo.svg" alt="" width="28" height="28">
+        <span>สำนักงานตัวอย่าง · Service Hub</span>
+      </div>
+      <div class="t2-site-footer__links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="login.html">เข้าสู่ระบบ</a>
+        <span>© 2569 สำนักงานตัวอย่าง</span>
+      </div>
+    </footer>
+
+  </div>
+</div>
+</body>
+</html>
