@@ -18,7 +18,9 @@
 
 ### Template 1 — DS UI Kit
 
-![Template 1 dashboard](docs/screenshots/template1-dashboard.png)
+| โหมดสว่าง | โหมดมืด |
+|---|---|
+| ![Template 1 โหมดสว่าง](docs/screenshots/template1-light.png) | ![Template 1 โหมดมืด](docs/screenshots/template1-dark.png) |
 
 - หน้า: `dashboard` `list` `form` `detail` `login` `error` `print` `starter` `components` + [`examples/intranet.html`](template1/examples/intranet.html)
 - คู่มือสำหรับ AI: [`AI-UI-GUIDE.md`](AI-UI-GUIDE.md) (กฎ คลาส JS API checklist) และ [`PROMPTS.md`](PROMPTS.md) (prompt สำเร็จรูป) อยู่ที่ root ของ repo แต่อ้างไฟล์ใน `template1/`
@@ -26,21 +28,27 @@
 
 ### Template 2 — Service Hub
 
-![Template 2 dashboard](docs/screenshots/template2-dashboard.png)
+| โหมดสว่าง | โหมดมืด |
+|---|---|
+| ![Template 2 โหมดสว่าง](docs/screenshots/template2-light.png) | ![Template 2 โหมดมืด](docs/screenshots/template2-dark.png) |
 
 - หน้า: `index` (หน้าแรกก่อน login) `login` `dashboard` `list` `form`
 - คู่มือ + prompt สำเร็จรูป: [`template2/README.md`](template2/README.md) (หัวข้อ 10)
 
 ### Template 3 — SMMS แบบใหม่ (ตัวอย่าง)
 
-![Template 3 dashboard](docs/screenshots/template3-dashboard.png)
+| โหมดสว่าง | โหมดมืด |
+|---|---|
+| ![Template 3 โหมดสว่าง](docs/screenshots/template3-light.png) | ![Template 3 โหมดมืด](docs/screenshots/template3-dark.png) |
 
 - ตอนนี้มีเฉพาะ `dashboard` ไว้ดูหน้าตาก่อนตัดสินใจทำหน้าที่เหลือ
 - ยังไม่มีคู่มือ จึงยังไม่เหมาะให้ AI ใช้สร้างระบบจริง
 
 ### Template 4 — สตูดิโอ
 
-![Template 4 dashboard](docs/screenshots/template4-dashboard.png)
+| โหมดสว่าง | โหมดมืด |
+|---|---|
+| ![Template 4 โหมดสว่าง](docs/screenshots/template4-light.png) | ![Template 4 โหมดมืด](docs/screenshots/template4-dark.png) |
 
 - หน้า: `dashboard` `list` `form` `detail` `login` `error` `print` (เอกสาร A4) `starter`
 - มีเมนูย่อย, select แบบพิมพ์ค้นหา, ปฏิทินไทย (พ.ศ.), ตรวจช่องบังคับในฟอร์ม, หน้าต่างยืนยัน
