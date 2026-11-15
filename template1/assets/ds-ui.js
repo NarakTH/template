@@ -4,8 +4,8 @@
  *
  * ---------------------------------------------------------------------------------------------------------
  * INCLUDE - in <head>, NOT defer/async (the saved theme is applied before first paint):
- *   <link rel="stylesheet" href="/template/assets/ds-ui.css?v=1.0.2">
- *   <script src="/template/assets/ds-ui.js?v=1.0.2"></script>
+ *   <link rel="stylesheet" href="/template/template1/assets/ds-ui.css?v=1.0.2">
+ *   <script src="/template/template1/assets/ds-ui.js?v=1.0.2"></script>
  * - Included twice (layout + page)? The second copy is ignored (guard on window.DS.version).
  * - Included at the end of <body>? Everything still works, but a saved dark theme may flash. Then add this
  *   one-liner to <head>:

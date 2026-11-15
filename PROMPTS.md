@@ -1,4 +1,4 @@
-# Prompt สำเร็จรูป — ปรับ UI ระบบให้เป็นแบบ DS UI Kit
+# Prompt สำเร็จรูป — ปรับ UI ระบบให้เป็นแบบ DS UI Kit (Template 1)
 
 ไฟล์นี้รวม prompt ที่คัดลอกไปวางได้ทันที สำหรับสั่ง AI (Claude Code หรือ chat AI) ให้ปรับหน้าจอระบบเดิมให้เป็นแบบ template นี้
 แทนค่าในวงเล็บปีกกา `{...}` ก่อนส่ง ทุก prompt อ้างไฟล์หลักคือ `C:\inetpub\wwwroot\template\AI-UI-GUIDE.md` (คู่มือกฎทั้งหมด)
@@ -6,12 +6,12 @@
 | ไฟล์ใน kit | ใช้ทำอะไร |
 |---|---|
 | `AI-UI-GUIDE.md` | กฎ, class, JS API, ตาราง mapping, checklist (ต้องให้ AI อ่านทุกครั้ง) |
-| `assets/ds-ui.css`, `assets/ds-ui.js` | ไฟล์จริงที่ระบบโหลดผ่าน `/template/assets/...` |
-| `pages/starter.html` | โครง layout (sidebar + กลุ่มเมนูย่อย + topbar พร้อมแผงแจ้งเตือนและเมนูผู้ใช้ + content + footer) |
-| `pages/dashboard.html` `list.html` `form.html` `detail.html` `login.html` | ต้นแบบหน้าแต่ละประเภท |
-| `pages/error.html` | หน้า error 403/404/419/500/503 (ไม่มี sidebar; ดูแต่ละแบบด้วย `?code=`) |
-| `pages/print.html` | เอกสาร A4 สำหรับพิมพ์/บันทึก PDF (ใบฟอร์มทางการ, ฟอนต์ Sarabun) |
-| `pages/components.html` | ตัวอย่างคอมโพเนนต์ทุกชิ้น (รวม dropdown, combobox แทน Select2) |
+| `template1/assets/ds-ui.css`, `template1/assets/ds-ui.js` | ไฟล์จริงที่ระบบโหลดผ่าน `/template/template1/assets/...` |
+| `template1/pages/starter.html` | โครง layout (sidebar + กลุ่มเมนูย่อย + topbar พร้อมแผงแจ้งเตือนและเมนูผู้ใช้ + content + footer) |
+| `template1/pages/dashboard.html` `list.html` `form.html` `detail.html` `login.html` | ต้นแบบหน้าแต่ละประเภท |
+| `template1/pages/error.html` | หน้า error 403/404/419/500/503 (ไม่มี sidebar; ดูแต่ละแบบด้วย `?code=`) |
+| `template1/pages/print.html` | เอกสาร A4 สำหรับพิมพ์/บันทึก PDF (ใบฟอร์มทางการ, ฟอนต์ Sarabun) |
+| `template1/pages/components.html` | ตัวอย่างคอมโพเนนต์ทุกชิ้น (รวม dropdown, combobox แทน Select2) |
 
 เคล็ดลับ: ให้ทำทีละขั้น (วางแผน → layout → ทีละหน้า) และสั่ง commit/สำรองไฟล์ก่อนเริ่มเสมอ
 
@@ -23,15 +23,15 @@
 
 ```text
 พัฒนาระบบ "{system_name}" ({คำอธิบายสั้น ๆ ว่าระบบทำอะไร ใครใช้})
-UI ทั้งหมดต้องใช้ DS UI Kit ที่ C:\inetpub\wwwroot\template\ เท่านั้น
+UI ทั้งหมดต้องใช้ DS UI Kit (Template 1) ที่ C:\inetpub\wwwroot\template\template1\ เท่านั้น
 
 ก่อนเริ่ม อ่านให้ครบ:
 - C:\inetpub\wwwroot\template\AI-UI-GUIDE.md (ทั้งฉบับ — เป็นกฎที่ต้องทำตาม)
-- C:\inetpub\wwwroot\template\pages\starter.html (layout: sidebar + topbar + footer)
-- หน้าต้นแบบใน C:\inetpub\wwwroot\template\pages\ : dashboard, list, form, detail, login, error, print, components
+- C:\inetpub\wwwroot\template\template1\pages\starter.html (layout: sidebar + topbar + footer)
+- หน้าต้นแบบใน C:\inetpub\wwwroot\template\template1\pages\ : dashboard, list, form, detail, login, error, print, components
 
 ข้อกำหนด UI:
-- โหลด /template/assets/ds-ui.css และ /template/assets/ds-ui.js ตาม §2 (หรือคัดลอกเข้าโปรเจกต์ถ้าฉันสั่ง)
+- โหลด /template/template1/assets/ds-ui.css และ /template/template1/assets/ds-ui.js ตาม §2 (หรือคัดลอกเข้าโปรเจกต์ถ้าฉันสั่ง)
 - ทำ layout กลางจาก starter.html ครั้งเดียว (§7a PHP include หรือ §7b Blade layout) ทุกหน้าใช้ layout นี้
 - ทุกหน้าเลือก archetype ที่ตรงที่สุด (§6) แล้วลอกโครง markup จากหน้าต้นแบบ — ห้ามออกแบบ UI เอง
 - ใช้เฉพาะ class/API ในคู่มือ, สีจาก token --ds-* เท่านั้น, ไม่เขียน CSS ใหม่ถ้าไม่จำเป็น
@@ -62,14 +62,14 @@ UI ทั้งหมดต้องใช้ DS UI Kit ที่ C:\inetpub\www
 
 ก่อนเริ่ม อ่านให้ครบ:
 - C:\inetpub\wwwroot\template\AI-UI-GUIDE.md (ทั้งฉบับ — เป็นกฎที่ต้องทำตาม)
-- C:\inetpub\wwwroot\template\pages\starter.html (layout shell)
+- C:\inetpub\wwwroot\template\template1\pages\starter.html (layout shell)
 - หน้า kit ที่ตรงกับแต่ละ archetype: dashboard.html, list.html, form.html, detail.html, login.html,
-  error.html (หน้า error), print.html (เอกสารพิมพ์ A4), components.html ในโฟลเดอร์ C:\inetpub\wwwroot\template\pages\
+  error.html (หน้า error), print.html (เอกสารพิมพ์ A4), components.html ในโฟลเดอร์ C:\inetpub\wwwroot\template\template1\pages\
 
 ขั้นตอน:
 1. สำรวจระบบ (ยังไม่แก้ไฟล์): layout/master, ทุกหน้า + archetype, CSS/JS ที่โหลดอยู่,
    script ที่อ้าง class/id ใน DOM แล้วเสนอแผนเป็นรายการไฟล์ตามลำดับ รอฉันยืนยันก่อน
-2. ใส่ assets: /template/assets/ds-ui.css และ /template/assets/ds-ui.js ใน <head> ตาม §13 ขั้น 2
+2. ใส่ assets: /template/template1/assets/ds-ui.css และ /template/template1/assets/ds-ui.js ใน <head> ตาม §13 ขั้น 2
 3. เปลี่ยน layout shell ให้ตรง starter.html (เมนูเดิมครบ, route เดิม, เงื่อนไขสิทธิ์เดิม; เมนูย่อยเดิม → ds-nav__group §5.3a;
    dropdown ผู้ใช้/แจ้งเตือนเดิม → ds-dropdown §5.3b โดยคงวิธีออกจากระบบเดิม)
 4. แปลงทีละหน้าตาม archetype และตาราง mapping ใน §13 — จบแต่ละหน้าให้สรุปสิ่งที่เปลี่ยน
@@ -95,7 +95,7 @@ UI ทั้งหมดต้องใช้ DS UI Kit ที่ C:\inetpub\www
 ปรับหน้า {path/to/page.blade.php หรือ page.php} ให้เป็นแบบ DS UI Kit
 
 อ่าน C:\inetpub\wwwroot\template\AI-UI-GUIDE.md (§8 คอมโพเนนต์, §11 ภาษา, §13 mapping, §14 กฎเหล็ก)
-และหน้าต้นแบบ C:\inetpub\wwwroot\template\pages\{list|form|detail|dashboard|error|print}.html ก่อนแก้
+และหน้าต้นแบบ C:\inetpub\wwwroot\template\template1\pages\{list|form|detail|dashboard|error|print}.html ก่อนแก้
 
 - layout ของระบบ{ใช้ DS shell แล้ว / ยังไม่ใช้ — ถ้ายังไม่ใช้ ให้แปลงเฉพาะเนื้อหาในหน้า และห่อด้วย <div class="ds-scope">}
 - คง behaviour เดิมทั้งหมด: route, form action/method, name/id, CSRF, validation, JS hook, ลำดับคอลัมน์
@@ -107,7 +107,7 @@ UI ทั้งหมดต้องใช้ DS UI Kit ที่ C:\inetpub\www
 ```text
 สร้างหน้าใหม่ "{page_title}" ในระบบนี้ โดยใช้ archetype {dashboard | list | form | detail | error | print}
 (error = หน้า 403/404/419/500/503 ไม่มี sidebar ตาม §6.6; print = เอกสาร A4 สำหรับพิมพ์/ลงนาม ตาม §6.7)
-ต้นแบบ: C:\inetpub\wwwroot\template\pages\{archetype}.html และกฎใน C:\inetpub\wwwroot\template\AI-UI-GUIDE.md
+ต้นแบบ: C:\inetpub\wwwroot\template\template1\pages\{archetype}.html และกฎใน C:\inetpub\wwwroot\template\AI-UI-GUIDE.md
 
 รายละเอียด:
 - route/URL: {route_or_url}   ไฟล์: {view_path}
@@ -139,7 +139,7 @@ UI ทั้งหมดต้องใช้ DS UI Kit ที่ C:\inetpub\www
 
 แนบไฟล์เหล่านี้ในแชต:
 1. `C:\inetpub\wwwroot\template\AI-UI-GUIDE.md`
-2. `C:\inetpub\wwwroot\template\assets\ds-ui.css`
+2. `C:\inetpub\wwwroot\template\template1\assets\ds-ui.css`
 3. หน้า kit ที่ใกล้ที่สุด 1 ไฟล์ (`pages\list.html` / `form.html` / `detail.html` / `dashboard.html` / `login.html` / `error.html` / `print.html`) — ถ้าแปลง layout ให้แนบ `pages\starter.html` ด้วย
 4. ไฟล์ของระบบที่จะแปลง (view/หน้า PHP) และ layout ถ้าเกี่ยวข้อง
 
@@ -152,7 +152,7 @@ UI ทั้งหมดต้องใช้ DS UI Kit ที่ C:\inetpub\www
 ปรับ UI ของ {ชื่อไฟล์ระบบ} ให้เป็นแบบ template นี้ ตาม AI-UI-GUIDE.md อย่างเคร่งครัด:
 - ใช้เฉพาะ class ที่มีใน ds-ui.css และ API ที่มีในคู่มือ §10
 - คง route, action, method, name/id, CSRF (@csrf / token), validation, PHP/Blade logic และ JS hook เดิมทุกตัว
-- ไฟล์ CSS/JS โหลดจาก /template/assets/ds-ui.css และ /template/assets/ds-ui.js
+- ไฟล์ CSS/JS โหลดจาก /template/template1/assets/ds-ui.css และ /template/template1/assets/ds-ui.js
 - ส่งกลับเป็นไฟล์เต็มที่พร้อมวางทับ พร้อมรายการสิ่งที่เปลี่ยน และสิ่งที่ฉันต้องทดสอบเอง (§15)
 ```
 
@@ -163,8 +163,8 @@ UI ทั้งหมดต้องใช้ DS UI Kit ที่ C:\inetpub\www
 ```markdown
 ## UI standard: DS UI Kit (บังคับ)
 - ทุกการแก้หน้าจอ ต้องอ่านและทำตาม C:\inetpub\wwwroot\template\AI-UI-GUIDE.md ก่อนเสมอ
-  (ต้นแบบหน้า: C:\inetpub\wwwroot\template\pages\ — starter, dashboard, list, form, detail, login, error, print, components)
-- โหลด /template/assets/ds-ui.css และ /template/assets/ds-ui.js ใน <head> ของ layout (JS ห้าม defer)
+  (ต้นแบบหน้า: C:\inetpub\wwwroot\template\template1\pages\ — starter, dashboard, list, form, detail, login, error, print, components)
+- โหลด /template/template1/assets/ds-ui.css และ /template/template1/assets/ds-ui.js ใน <head> ของ layout (JS ห้าม defer)
 - ใช้เฉพาะ class `ds-*` และ `window.DS` ที่มีในคู่มือ; สีมาจาก token `--ds-*` เท่านั้น
   (ห้าม hex, bg-white, text-gray-*, dark:*); ไอคอนใช้ `<svg class="ds-ic"><use href="#ds-i-NAME">`
 - หน้าใหม่: เลือก archetype (dashboard/list/form/detail/error/print) แล้วคัดลอกโครงจากหน้า kit

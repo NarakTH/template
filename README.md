@@ -21,13 +21,8 @@
 ![Template 1 dashboard](docs/screenshots/template1-dashboard.png)
 
 - หน้า: `dashboard` `list` `form` `detail` `login` `error` `print` `starter` `components` + [`examples/intranet.html`](template1/examples/intranet.html)
-- คู่มือสำหรับ AI: [`AI-UI-GUIDE.md`](AI-UI-GUIDE.md) (กฎ คลาส JS API checklist) และ [`PROMPTS.md`](PROMPTS.md) (prompt สำเร็จรูป) อยู่ที่ root ของ repo
-- คู่มือ 2 ไฟล์นี้เขียนไว้ก่อนย้ายไฟล์เข้าโฟลเดอร์ `template1/` จึงยังอ้าง path แบบเก่า เวลาใช้ให้อ่านเป็นแบบใหม่:
-
-  | ในคู่มือเขียนว่า | ที่อยู่จริง |
-  |---|---|
-  | `template\pages\` | `template\template1\pages\` |
-  | `/template/assets/ds-ui.css` | `/template/template1/assets/ds-ui.css` |
+- คู่มือสำหรับ AI: [`AI-UI-GUIDE.md`](AI-UI-GUIDE.md) (กฎ คลาส JS API checklist) และ [`PROMPTS.md`](PROMPTS.md) (prompt สำเร็จรูป) อยู่ที่ root ของ repo แต่อ้างไฟล์ใน `template1/`
+- ระบบที่ใช้ไฟล์กลางบนเซิร์ฟเวอร์โหลดจาก `/template/template1/assets/ds-ui.css` และ `ds-ui.js`
 
 ### Template 2 — Service Hub
 

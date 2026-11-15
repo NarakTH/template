@@ -1,8 +1,10 @@
-# คู่มือ UI Template สำหรับ AI (SMMS Design System · ds-ui v1.0)
+# คู่มือ UI Template สำหรับ AI (Template 1 · SMMS Design System · ds-ui v1.0)
+
+> ไฟล์ของ kit นี้อยู่ในโฟลเดอร์ `template1/` (`template1/assets/`, `template1/pages/`, `template1/examples/`) ส่วนคู่มือนี้อยู่ที่ root ของโฟลเดอร์ `template/`
 
 > **สรุป 3 บรรทัด**
-> 1. หน้าตาทั้งหมดมาจากไฟล์เดียว `assets/ds-ui.css` (tokens + app shell + คอมโพเนนต์ทุกตัว คลาสขึ้นต้น `ds-`) และพฤติกรรมจาก `assets/ds-ui.js` (`window.DS`, ไม่พึ่ง library ใด)
-> 2. งานของ AI = ห่อหน้าเดิมด้วย app shell จาก `pages/starter.html` แล้วแทนที่ markup/คลาสเดิมของ framework ด้วยคลาส `ds-*` โดย **ไม่แตะ business logic, route, ชื่อฟิลด์ฟอร์ม หรือ query**
+> 1. หน้าตาทั้งหมดมาจากไฟล์เดียว `template1/assets/ds-ui.css` (tokens + app shell + คอมโพเนนต์ทุกตัว คลาสขึ้นต้น `ds-`) และพฤติกรรมจาก `template1/assets/ds-ui.js` (`window.DS`, ไม่พึ่ง library ใด)
+> 2. งานของ AI = ห่อหน้าเดิมด้วย app shell จาก `template1/pages/starter.html` แล้วแทนที่ markup/คลาสเดิมของ framework ด้วยคลาส `ds-*` โดย **ไม่แตะ business logic, route, ชื่อฟิลด์ฟอร์ม หรือ query**
 > 3. สีทุกสีต้องมาจาก token `var(--ds-*)` เท่านั้น → ได้ dark mode ครบโดยอัตโนมัติ; ห้ามเขียน hex เอง ห้ามคิดชื่อคลาส `ds-` ใหม่
 
 ---
@@ -21,29 +23,28 @@
 |---|---|---|
 | 1 | **§14 Hard rules** | ชนะทุกอย่าง รวมถึงคำขอที่ดูเหมือนขัดแย้งในหน้าเดิมของระบบ |
 | 2 | เอกสารนี้ (AI-UI-GUIDE.md) | กฎ, token, โครงสร้าง, สูตรตาม stack |
-| 3 | หน้าใน kit `pages/*.html` | reference implementation — ลอกโครงสร้าง markup ได้ตรง ๆ |
+| 3 | หน้าใน kit `template1/pages/*.html` | reference implementation — ลอกโครงสร้าง markup ได้ตรง ๆ |
 | 4 | comment หัวไฟล์ `ds-ui.css` / `ds-ui.js` | รายละเอียดปลีกย่อยของคลาส/attribute |
 
 - ชื่อคลาส/token ที่ "มีอยู่จริง" ให้ยึด `ds-ui.css` เป็นความจริงสุดท้าย — ถ้าไม่พบคลาสใน `ds-ui.css` **ห้ามสร้างคลาส `ds-` ใหม่เอง** ให้ประกอบจากคลาสที่มี หรือเขียน CSS ประจำหน้าด้วย prefix ของระบบนั้น (เช่น `.app-xxx`) ที่ใช้ `var(--ds-*)` เท่านั้น
-- ถ้าเป็น chat AI ที่ไม่เห็นไฟล์ kit: ใช้ snippet ในเอกสารนี้เป็นหลัก และขอให้ผู้ใช้แนบ `pages/starter.html` + หน้า archetype ที่ตรงงาน (§6) เพิ่มเมื่อจำเป็น
+- ถ้าเป็น chat AI ที่ไม่เห็นไฟล์ kit: ใช้ snippet ในเอกสารนี้เป็นหลัก และขอให้ผู้ใช้แนบ `template1/pages/starter.html` + หน้า archetype ที่ตรงงาน (§6) เพิ่มเมื่อจำเป็น
 
 ### 0.3 งานไหน เปิดไฟล์ไหน
 | งาน | เปิดไฟล์ใน kit | ใช้ทำอะไร |
 |---|---|---|
-| ทำ layout กลาง (header/sidebar/footer) | `pages/starter.html` | shell มาตรฐาน — ลอกทั้งไฟล์ แล้วแยกเป็น partial (§7) |
-| หน้าแดชบอร์ด / KPI / กราฟ | `pages/dashboard.html` | hero, date card, KPI, donut/pie/bars, ตารางล่าสุด |
-| หน้ารายการ + ค้นหา + ตาราง + แบ่งหน้า | `pages/list.html` | `ds-filters`, `ds-table`, `ds-pill`, `ds-pager` |
-| หน้าสร้าง/แก้ไขข้อมูล | `pages/form.html` | `ds-form-section`, `ds-form`, `ds-field`, `ds-form-actions` |
-| หน้ารายละเอียด | `pages/detail.html` | `ds-tabs`, `ds-dl`, `ds-timeline`, `ds-grid--aside` |
-| หน้าเข้าสู่ระบบ | `pages/login.html` | `ds-auth` (ไม่มี sidebar) |
-| หน้า error 403/404/419/500/503 | `pages/error.html` | `ds-error` (ไม่มี sidebar) — เลือกแบบด้วย `?code=` |
-| เอกสารพิมพ์ / ใบฟอร์มราชการ A4 | `pages/print.html` | `ds-doc` (แผ่น A4 ขาว-ดำ, ฟอนต์ Sarabun) + `data-ds-print` |
-| เมนูผู้ใช้, การแจ้งเตือน, กลุ่มเมนูย่อย | `pages/starter.html` | `ds-dropdown` + `ds-menu` / `ds-popover`, `ds-nav__group` (§5.1, §8.23–8.25) |
-| ช่องเลือกแบบพิมพ์ค้นหา (แทน Select2) | `pages/form.html`, `pages/components.html` | `select[data-ds-combobox]` (§8.26) |
-| หา snippet ของคอมโพเนนต์ใด ๆ | `pages/components.html` | gallery ทุกคอมโพเนนต์ + HTML ที่คัดลอกได้ + swatch ของ token |
-| เช็กชื่อคลาส / ค่า token | `assets/ds-ui.css` | source of truth (อย่าแก้ไฟล์นี้ในระบบเป้าหมาย) |
-| เช็ก data attribute / `DS.*` | `assets/ds-ui.js` (comment หัวไฟล์) | API ทั้งหมด |
-| ดูต้นฉบับหน้าตา | `smms-dashboard_2.html` | reference เท่านั้น — **ห้ามแก้ ห้ามลอก CSS จากไฟล์นี้** (ใช้ `ds-ui.css` แทน) |
+| ทำ layout กลาง (header/sidebar/footer) | `template1/pages/starter.html` | shell มาตรฐาน — ลอกทั้งไฟล์ แล้วแยกเป็น partial (§7) |
+| หน้าแดชบอร์ด / KPI / กราฟ | `template1/pages/dashboard.html` | hero, date card, KPI, donut/pie/bars, ตารางล่าสุด |
+| หน้ารายการ + ค้นหา + ตาราง + แบ่งหน้า | `template1/pages/list.html` | `ds-filters`, `ds-table`, `ds-pill`, `ds-pager` |
+| หน้าสร้าง/แก้ไขข้อมูล | `template1/pages/form.html` | `ds-form-section`, `ds-form`, `ds-field`, `ds-form-actions` |
+| หน้ารายละเอียด | `template1/pages/detail.html` | `ds-tabs`, `ds-dl`, `ds-timeline`, `ds-grid--aside` |
+| หน้าเข้าสู่ระบบ | `template1/pages/login.html` | `ds-auth` (ไม่มี sidebar) |
+| หน้า error 403/404/419/500/503 | `template1/pages/error.html` | `ds-error` (ไม่มี sidebar) — เลือกแบบด้วย `?code=` |
+| เอกสารพิมพ์ / ใบฟอร์มราชการ A4 | `template1/pages/print.html` | `ds-doc` (แผ่น A4 ขาว-ดำ, ฟอนต์ Sarabun) + `data-ds-print` |
+| เมนูผู้ใช้, การแจ้งเตือน, กลุ่มเมนูย่อย | `template1/pages/starter.html` | `ds-dropdown` + `ds-menu` / `ds-popover`, `ds-nav__group` (§5.1, §8.23–8.25) |
+| ช่องเลือกแบบพิมพ์ค้นหา (แทน Select2) | `template1/pages/form.html`, `template1/pages/components.html` | `select[data-ds-combobox]` (§8.26) |
+| หา snippet ของคอมโพเนนต์ใด ๆ | `template1/pages/components.html` | gallery ทุกคอมโพเนนต์ + HTML ที่คัดลอกได้ + swatch ของ token |
+| เช็กชื่อคลาส / ค่า token | `template1/assets/ds-ui.css` | source of truth (อย่าแก้ไฟล์นี้ในระบบเป้าหมาย) |
+| เช็ก data attribute / `DS.*` | `template1/assets/ds-ui.js` (comment หัวไฟล์) | API ทั้งหมด |
 
 ### 0.4 Definition of done (ตรวจทุกข้อก่อนบอกว่าเสร็จ)
 - [ ] ทุกหน้าใช้ shell เดียวกันจาก partial/layout กลาง (ไม่มี shell ซ้ำในแต่ละหน้า)
@@ -91,19 +92,22 @@
 ### 2.1 แผนผังไฟล์
 ```
 /template/
-  smms-dashboard_2.html   ต้นฉบับหน้าตา (reference, ห้ามแก้)
   AI-UI-GUIDE.md          เอกสารนี้
-  assets/
-    ds-ui.css             tokens + base + app shell + ทุกคอมโพเนนต์  ← source of truth
-    ds-ui.js              ธีม, icon sprite, sidebar, dialog, toast, tooltip, tabs, confirm, charts,
+  PROMPTS.md              prompt สำเร็จรูป
+  template1/              ← kit นี้ (template2/ template3/ template4/ เป็นชุดอื่น ห้ามผสม)
+    assets/
+      ds-ui.css           tokens + base + app shell + ทุกคอมโพเนนต์  ← source of truth
+      ds-ui.js            ธีม, icon sprite, sidebar, dialog, toast, tooltip, tabs, confirm, charts,
                           ปฏิทินไทย, dropdown/เมนู, combobox, ปุ่มย้อนกลับ/พิมพ์ (window.DS)
-  pages/
-    starter.html          shell มาตรฐาน (ทุกหน้าเริ่มจากไฟล์นี้)
-    dashboard.html  list.html  form.html  detail.html  login.html  components.html
-    error.html            หน้า error 403/404/419/500/503 (ไม่มี shell; ?code=404)
-    print.html            เอกสาร A4 สำหรับพิมพ์/บันทึก PDF (ใบแจ้งซ่อม)
+    pages/
+      starter.html        shell มาตรฐาน (ทุกหน้าเริ่มจากไฟล์นี้)
+      dashboard.html  list.html  form.html  detail.html  login.html  components.html
+      error.html          หน้า error 403/404/419/500/503 (ไม่มี shell; ?code=404)
+      print.html          เอกสาร A4 สำหรับพิมพ์/บันทึก PDF (ใบแจ้งซ่อม)
+    examples/
+      intranet.html       ตัวอย่างหน้า intranet ที่ประกอบจากคอมโพเนนต์ของ kit
 ```
-ทั้งหมดเปิดดูได้ที่ `http://<host>/template/pages/<name>.html` · ไม่มี build step, ไม่มี npm, ไม่มี dependency
+ทั้งหมดเปิดดูได้ที่ `http://<host>/template/template1/pages/<name>.html` · ไม่มี build step, ไม่มี npm, ไม่มี dependency
 
 ### 2.2 ลำดับการโหลดใน `<head>` (สำคัญ)
 ```html
@@ -117,9 +121,9 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap">
   <!-- 2) CSS ของ framework เดิม (Bootstrap / Vite bundle / DataTables / Select2 …) -->
   <!-- 3) ds-ui.css "หลัง" framework เสมอ เพื่อให้คลาส ds- ชนะเมื่อ specificity เท่ากัน -->
-  <link rel="stylesheet" href="/template/assets/ds-ui.css?v=1.0.2">
+  <link rel="stylesheet" href="/template/template1/assets/ds-ui.css?v=1.0.2">
   <!-- 4) ds-ui.js ใน <head> ห้าม defer/async: ตั้งธีมที่บันทึกไว้ก่อน paint (กันจอกระพริบขาว→ดำ) -->
-  <script src="/template/assets/ds-ui.js?v=1.0.2"></script>
+  <script src="/template/template1/assets/ds-ui.js?v=1.0.2"></script>
 </head>
 <body class="ds-body">
 ```
@@ -136,7 +140,7 @@
 ### 2.3 ใช้ path กลาง หรือคัดลอกเข้าโปรเจกต์
 | วิธี | ข้อดี | ข้อเสีย | ใช้เมื่อ |
 |---|---|---|---|
-| **path กลาง** `/template/assets/…` | แก้ที่เดียวทุกระบบเปลี่ยนตาม, ไม่ต้องคัดลอก | kit เปลี่ยน = 100 ระบบเปลี่ยนพร้อมกัน (เสี่ยงพังทั้งเซิร์ฟเวอร์), ระบบที่ย้ายเครื่อง/ย้าย host จะหาไฟล์ไม่เจอ, ปักเวอร์ชันไม่ได้ | ต้นแบบ, dev, ระบบภายในที่ยอมรับการอัปเดตอัตโนมัติ |
+| **path กลาง** `/template/template1/assets/…` | แก้ที่เดียวทุกระบบเปลี่ยนตาม, ไม่ต้องคัดลอก | kit เปลี่ยน = 100 ระบบเปลี่ยนพร้อมกัน (เสี่ยงพังทั้งเซิร์ฟเวอร์), ระบบที่ย้ายเครื่อง/ย้าย host จะหาไฟล์ไม่เจอ, ปักเวอร์ชันไม่ได้ | ต้นแบบ, dev, ระบบภายในที่ยอมรับการอัปเดตอัตโนมัติ |
 | **คัดลอกโฟลเดอร์มีเลขเวอร์ชัน** เข้าโปรเจกต์ | ปักเวอร์ชันได้, deploy พร้อมโค้ด, ไม่ขึ้นกับโฟลเดอร์ template | อัปเดตต้องคัดลอกใหม่ทีละระบบ | **แนะนำสำหรับ production** |
 
 แนะนำ: คัดลอก `ds-ui.css` + `ds-ui.js` ไปไว้ใต้โฟลเดอร์ที่มีเลขเวอร์ชัน แล้วอ้าง path นั้น
@@ -379,7 +383,7 @@ token ทั้งหมดประกาศใน `ds-ui.css` บน `:root` (
 - ห้าม: ใส่ animation/transition ของตัวเองที่ยาวเกิน .3s สำหรับการโต้ตอบ, animation วนไม่รู้จบ (ยกเว้น `ds-spinner`/`ds-skeleton`), หรือใช้ไลบรารี animation เพิ่ม — ถ้าต้องการ ให้ใช้ token `--ds-dur-fast` / `--ds-dur` / `--ds-dur-slide` และ `--ds-ease-out`
 ## 5. โครงหน้า (App shell)
 
-### 5.1 Skeleton (ย่อจาก `pages/starter.html` — ลำดับและชื่อคลาสต้องตรงตามนี้)
+### 5.1 Skeleton (ย่อจาก `template1/pages/starter.html` — ลำดับและชื่อคลาสต้องตรงตามนี้)
 ```html
 <!DOCTYPE html>
 <html lang="th">
@@ -603,7 +607,7 @@ token ทั้งหมดประกาศใน `ds-ui.css` บน `:root` (
 
 ทุกหน้า (ยกเว้น login §6.5, error §6.6, เอกสารพิมพ์ §6.7 ซึ่งไม่มี shell) = shell §5 + เนื้อหาใน `ds-content` ตามโครงด้านล่าง เปิดหน้าใน kit ที่ระบุแล้ว **ลอกโครง markup** แทนการเขียนใหม่
 
-### 6.1 Dashboard — ลอกจาก `pages/dashboard.html`
+### 6.1 Dashboard — ลอกจาก `template1/pages/dashboard.html`
 ใช้เมื่อ: หน้าแรกหลัง login, หน้าสรุปผู้บริหาร, ภาพรวมตัวเลข
 ```
 ds-content
@@ -616,7 +620,7 @@ ds-content
 ```
 กราฟวาดด้วย `DS.charts.donut/pie/bars` ใน script ท้ายหน้า ข้อมูลจาก server (JSON) — ไม่ต้องใช้ Chart.js
 
-### 6.2 List (รายการ/ค้นหา) — ลอกจาก `pages/list.html`
+### 6.2 List (รายการ/ค้นหา) — ลอกจาก `template1/pages/list.html`
 ใช้เมื่อ: หน้ารายการข้อมูลทุกชนิด (ใบคำขอ, ผู้ใช้, ครุภัณฑ์) ที่มีค้นหา/กรอง/แบ่งหน้า
 ```
 ds-content
@@ -631,7 +635,7 @@ ds-content
     └─ ds-pager                     __info "แสดง 1–10 จาก 128 รายการ" · __list > __btn (aria-current) · __size
 ```
 
-### 6.3 Form (สร้าง/แก้ไข) — ลอกจาก `pages/form.html`
+### 6.3 Form (สร้าง/แก้ไข) — ลอกจาก `template1/pages/form.html`
 ใช้เมื่อ: บันทึก/แก้ไขข้อมูลยาว ๆ; ฟอร์มสั้น 1–4 ช่อง ใช้ `ds-dialog` แทน
 ```
 ds-content
@@ -645,7 +649,7 @@ ds-content
     └─ ds-form-actions             sticky ล่าง: __info "* จำเป็นต้องกรอก" · [ยกเลิก ghost lg] [บันทึก lg]
 ```
 
-### 6.4 Detail (รายละเอียด) — ลอกจาก `pages/detail.html`
+### 6.4 Detail (รายละเอียด) — ลอกจาก `template1/pages/detail.html`
 ใช้เมื่อ: ดูข้อมูลหนึ่งรายการ พร้อมประวัติ/ไฟล์แนบ/การดำเนินการ
 ```
 ds-content
@@ -659,7 +663,7 @@ ds-content
 ```
 การยืนยันที่ย้อนกลับไม่ได้ (ยกเลิกงาน/ลบ) ใช้ `data-ds-confirm` หรือ `DS.confirm()`; ฟอร์มสั้น (มอบหมายงาน, เปลี่ยนสถานะ) ใช้ `ds-dialog`; ปุ่ม "พิมพ์" = `<a class="ds-btn ds-btn--ghost" href="(หน้าเอกสาร §6.7)">` เมื่อต้องพิมพ์เป็นแบบฟอร์ม, หรือ `<button type="button" class="ds-btn ds-btn--ghost" data-ds-print>` เมื่อพิมพ์หน้าปัจจุบันตรง ๆ
 
-### 6.5 Login (ไม่มี sidebar) — ลอกจาก `pages/login.html`
+### 6.5 Login (ไม่มี sidebar) — ลอกจาก `template1/pages/login.html`
 ใช้เมื่อ: เข้าสู่ระบบ, ลืมรหัสผ่าน, ตั้งรหัสใหม่ (หน้า error ใช้ §6.6)
 ```
 body.ds-body > div.ds-auth         2 คอลัมน์ (≤900 ซ้อน: แบรนด์เป็นแบนเนอร์ด้านบน)
@@ -670,7 +674,7 @@ body.ds-body > div.ds-auth         2 คอลัมน์ (≤900 ซ้อน:
 ```
 หน้า login ไม่มี topbar จึงใช้ h1 เป็นหัวการ์ด; ชื่อฟิลด์/`action`/CSRF/captcha เดิมของระบบต้องคงไว้ครบ
 
-### 6.6 Error page (ไม่มี sidebar) — ลอกจาก `pages/error.html`
+### 6.6 Error page (ไม่มี sidebar) — ลอกจาก `template1/pages/error.html`
 ใช้เมื่อ: หน้า error ที่ผู้ใช้เห็น — 403 ไม่มีสิทธิ์, 404 ไม่พบหน้า, 419 เซสชันหมดอายุ (Laravel CSRF/session), 500 ระบบขัดข้อง, 503 ปิดปรับปรุง; ไม่ใช้กับ error ของฟิลด์ฟอร์ม (§8.10) หรือผลการบันทึก (toast/alert)
 ```
 body.ds-body > main.ds-error#ds-main      เต็มจอ จัดกลาง บนพื้น --ds-bg (ไม่มี shell, ไม่มี topbar)
@@ -691,13 +695,13 @@ body.ds-body > main.ds-error#ds-main      เต็มจอ จัดกลา�
 | 419 | `clock` | เซสชันหมดอายุ | เข้าสู่ระบบอีกครั้ง (ลิงก์หน้า login) |
 | 500 | `alert-triangle` | ระบบขัดข้อง | ลองใหม่อีกครั้ง / กลับหน้าหลัก |
 | 503 | `gear` | ปิดปรับปรุงระบบ | (บอกเวลาที่คาดว่าจะกลับมา; ไม่ต้องมีปุ่มย้อนกลับ) |
-- `pages/error.html` เลือกแบบจาก `?code=` ด้วย script ในหน้า (ไว้ดูตัวอย่าง) — **ระบบจริงให้ server render แบบที่ถูกต้องตรง ๆ** ไม่ต้องใช้ query string: Laravel = `resources/views/errors/403.blade.php`, `404.blade.php`, `419.blade.php`, `500.blade.php`, `503.blade.php` (ไฟล์ละ code หรือ `@include` partial เดียวแล้วส่ง code/ข้อความ) · PHP ธรรมดา = `error.php?code=404` + `http_response_code(404)` · IIS = `<httpErrors>` ใน web.config ชี้ไปหน้า error
+- `template1/pages/error.html` เลือกแบบจาก `?code=` ด้วย script ในหน้า (ไว้ดูตัวอย่าง) — **ระบบจริงให้ server render แบบที่ถูกต้องตรง ๆ** ไม่ต้องใช้ query string: Laravel = `resources/views/errors/403.blade.php`, `404.blade.php`, `419.blade.php`, `500.blade.php`, `503.blade.php` (ไฟล์ละ code หรือ `@include` partial เดียวแล้วส่ง code/ข้อความ) · PHP ธรรมดา = `error.php?code=404` + `http_response_code(404)` · IIS = `<httpErrors>` ใน web.config ชี้ไปหน้า error
 - HTTP status ต้องเป็น code จริง (ไม่ใช่ 200); หน้า error ห้ามพึ่ง session/DB (500/503 อาจเกิดเพราะ DB ล่ม) — ชื่อผู้ใช้/เมนูไม่ต้องแสดง
 - `ds-error__meta` แสดงเฉพาะรหัสอ้างอิงและเวลา — **ห้าม** แสดง exception, stack trace, SQL, path ไฟล์ (§11)
 - `data-ds-back` = `history.back()` และถ้าไม่มีหน้าก่อนหน้าจะไปที่ค่าของ attribute แทน — ระบบจริงใส่ URL หน้าหลักของระบบเสมอ (`data-ds-back="{{ url('/') }}"` / `data-ds-back="index.php"`) เพราะค่าสำรองของ kit คือ `dashboard.html`
 - ลิงก์ "กลับหน้าหลัก" / "เข้าสู่ระบบอีกครั้ง" ใช้ URL จริงของระบบ (`route('dashboard')`, `route('login')`) ไม่ใช่ `dashboard.html`
 
-### 6.7 เอกสารพิมพ์ A4 (ใบฟอร์มทางการ) — ลอกจาก `pages/print.html`
+### 6.7 เอกสารพิมพ์ A4 (ใบฟอร์มทางการ) — ลอกจาก `template1/pages/print.html`
 ใช้เมื่อ: ต้องพิมพ์/บันทึก PDF เป็นแบบฟอร์มที่ส่งต่อหรือลงนาม (ใบแจ้งซ่อม, ใบขออนุมัติ, ใบส่งมอบ, ใบเบิก) — **ไม่ใช่** การพิมพ์หน้ารายการ/รายละเอียดทั่วไป (หน้านั้นใช้ `ds-no-print` ซ่อนส่วนที่ไม่ต้องพิมพ์ แล้ว `data-ds-print` ได้เลย)
 ```
 body.ds-body.ds-print-body                  ไม่มี shell; <head> โหลด Kanit + Sarabun 300/400/600 + ds-ui.css/js
@@ -730,7 +734,7 @@ body.ds-body.ds-print-body                  ไม่มี shell; <head> โห
 <?php /* partials/header.php : DOCTYPE -> <main> (head, skip link, sidebar, topbar) */
 $pageTitle  = isset($pageTitle)  ? $pageTitle  : 'หน้าหลัก';
 $activeMenu = isset($activeMenu) ? $activeMenu : '';
-$dsBase     = '/template/assets';            // production: 'assets/vendor/ds-ui/1.0.2' (§2.3)
+$dsBase     = '/template/template1/assets';            // production: 'assets/vendor/ds-ui/1.0.2' (§2.3)
 if (!function_exists('h')) { function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); } }
 ?><!DOCTYPE html>
 <html lang="th">
@@ -1112,7 +1116,7 @@ require __DIR__ . '/partials/header.php';
 
 กติกาของส่วนนี้: ทุก snippet คัดลอกไปใช้ได้ทันที ชื่อ class ต้องตรงตัวอักษร (มี prefix `ds-` เสมอ, BEM `block__element--modifier`)
 สีที่ขึ้นกับข้อมูลส่งผ่าน token เท่านั้น เช่น `style="--ds-accent:var(--ds-green)"` หรือ `style="background:var(--ds-green)"`
-ตัวอย่างเต็มของทุกชิ้นดูใน `pages/components.html` และการจัดวางจริงดูใน `dashboard.html` / `list.html` / `form.html` / `detail.html` / `login.html` / `error.html` / `print.html` (dropdown, แผงแจ้งเตือน, กลุ่มเมนูย่อย อยู่ใน shell ของทุกหน้า — ต้นแบบคือ `starter.html`)
+ตัวอย่างเต็มของทุกชิ้นดูใน `template1/pages/components.html` และการจัดวางจริงดูใน `dashboard.html` / `list.html` / `form.html` / `detail.html` / `login.html` / `error.html` / `print.html` (dropdown, แผงแจ้งเตือน, กลุ่มเมนูย่อย อยู่ใน shell ของทุกหน้า — ต้นแบบคือ `starter.html`)
 
 ### 8.1 Panel (การ์ดเนื้อหา)
 ใช้ห่อเนื้อหาทุกกลุ่มบนหน้า (แทน `card`, `box`, `bg-white rounded shadow`)
@@ -1823,7 +1827,7 @@ markup และวิธีตั้งสถานะจาก server อย�
 </svg>
 <svg class="ds-ic" aria-hidden="true"><use href="#app-i-truck"></use></svg>
 ```
-- ไอคอนที่หลายระบบต้องใช้ → แจ้งผู้ดูแล kit ให้เพิ่มใน `ICONS` ของ `assets/ds-ui.js` (ไอคอนใหม่จะมาเป็น `ds-i-NAME`)
+- ไอคอนที่หลายระบบต้องใช้ → แจ้งผู้ดูแล kit ให้เพิ่มใน `ICONS` ของ `template1/assets/ds-ui.js` (ไอคอนใหม่จะมาเป็น `ds-i-NAME`)
 - ห้าม: โหลด Font Awesome / icon font เพิ่มในหน้าที่แปลงแล้ว, ห้ามใช้ `<i class="fa …">` ปนกับ `ds-ic`, ห้ามใช้ emoji เป็นไอคอน
 
 ## 10. JavaScript API (`window.DS`)
@@ -1999,7 +2003,7 @@ $(document).on('ds:themechange', function (e) { redraw(e.originalEvent.detail.th
 
 ## 13. ขั้นตอนแปลงระบบเดิม (Migration playbook for AI)
 
-**ขั้น 0 — อ่านก่อน**: อ่านไฟล์นี้ทั้งฉบับ + `pages/starter.html` + หน้า kit ที่ใกล้ที่สุด (dashboard / list / form / detail / login / error / print / components) ห้ามเดา class
+**ขั้น 0 — อ่านก่อน**: อ่านไฟล์นี้ทั้งฉบับ + `template1/pages/starter.html` + หน้า kit ที่ใกล้ที่สุด (dashboard / list / form / detail / login / error / print / components) ห้ามเดา class
 
 **ขั้น 1 — สำรวจ (ยังไม่แก้โค้ด)** สร้างรายการ:
 - layout/master ทั้งหมด (`resources/views/layouts/*`, `components/layouts/*`, `header.php`/`footer.php`/`menu.php`, `include/*`)
@@ -2013,8 +2017,8 @@ $(document).on('ds:themechange', function (e) { redraw(e.originalEvent.detail.th
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap">
-<link rel="stylesheet" href="/template/assets/ds-ui.css?v=1.0.2">
-<script src="/template/assets/ds-ui.js?v=1.0.2"></script>
+<link rel="stylesheet" href="/template/template1/assets/ds-ui.css?v=1.0.2">
+<script src="/template/template1/assets/ds-ui.js?v=1.0.2"></script>
 ```
 ลบการโหลดฟอนต์เดิม (Sarabun/Prompt) และ `font-family` ที่ตั้งบน `body` ของ layout ที่แปลงแล้ว (kit ใช้ `--ds-font`)
 
@@ -2097,8 +2101,8 @@ $(document).on('ds:themechange', function (e) { redraw(e.originalEvent.detail.th
 ## 14. กฎเหล็ก (Hard rules: DO / DON'T)
 
 **DO**
-1. ใช้ `/template/assets/ds-ui.css` + `/template/assets/ds-ui.js` ชุดเดียว (หรือสำเนาเวอร์ชันเดียวกัน) โหลดใน `<head>`, JS ไม่ `defer`
-2. คัดลอก shell จาก `pages/starter.html` ทุกครั้ง แก้เฉพาะ `<title>`, เมนูที่มี `aria-current="page"`, และเนื้อหาใน `<main class="ds-content">`
+1. ใช้ `/template/template1/assets/ds-ui.css` + `/template/template1/assets/ds-ui.js` ชุดเดียว (หรือสำเนาเวอร์ชันเดียวกัน) โหลดใน `<head>`, JS ไม่ `defer`
+2. คัดลอก shell จาก `template1/pages/starter.html` ทุกครั้ง แก้เฉพาะ `<title>`, เมนูที่มี `aria-current="page"`, และเนื้อหาใน `<main class="ds-content">`
 3. ใช้เฉพาะ class ที่มีใน §8 (prefix `ds-`); ถ้าไม่แน่ใจ ให้ `grep` ใน `ds-ui.css` ก่อนใช้
 4. เลือกโครงหน้าจาก archetype (dashboard / list / form / detail / login / error / print) ก่อนเขียน markup
 5. สีทุกจุดมาจาก token `var(--ds-*)`; สีตามข้อมูลส่งผ่าน `--ds-accent` / `--ds-btn-bg` / `background:var(--ds-…)` เท่านั้น
